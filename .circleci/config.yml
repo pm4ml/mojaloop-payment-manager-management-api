@@ -1,0 +1,265 @@
+# CircleCI v2.1 Config
+version: 2.1
+
+##
+# orbs
+#
+# Orbs used in this pipeline
+###
+orbs:
+  docker: circleci/docker@1.5.0
+  slack: circleci/slack@3.4.2
+
+##
+# defaults
+#
+# YAML defaults templates, in alphabetical order
+##
+defaults_Dependencies: &defaults_Dependencies |
+  apk --update --no-cache add \
+    git \
+    ca-certificates \
+    curl \
+    openssh-client \
+    -t build-dependencies make gcc g++ python3 libtool autoconf automake
+  npm config set unsafe-perm true
+  npm install -g node-gyp
+
+defaults_license_scanner: &defaults_license_scanner
+  name: Install and set up license-scanner
+  command: |
+    git clone https://github.com/mojaloop/license-scanner /tmp/license-scanner
+    cd /tmp/license-scanner && make build default-files set-up
+
+##
+# Executors
+#
+# CircleCI Executors
+##
+executors:
+  default-docker:
+    working_directory: /home/circleci/project/git
+    docker:
+      - image: node:12.19.0-alpine
+
+  default-machine:
+    working_directory: /home/circleci/project/git
+    machine:
+      image: ubuntu-1604:201903-01
+
+##
+# Jobs
+#
+# A map of CircleCI jobs
+##
+jobs:
+  setup:
+    executor: default-docker
+    steps:
+      - checkout
+      - run:
+          name: Install general dependencies
+          command: *defaults_Dependencies
+      - run:
+          name: Update NPM install (using `npm ci`)
+          command: cd src && npm ci
+      - run:
+          name: Delete build dependencies
+          command: apk del build-dependencies
+      - save_cache:
+          key: dependency-cache-v1-{{ checksum "src/package-lock.json" }}
+          paths:
+            - src/node_modules
+
+  test-unit:
+    executor: default-docker
+    steps:
+      - checkout
+      - run:
+          name: Install general dependencies
+          command: *defaults_Dependencies
+      - restore_cache:
+          keys:
+          - dependency-cache-v1-{{ checksum "src/package-lock.json" }}
+          paths:
+            - src/node_modules
+      - run:
+          name: Execute unit tests
+          command: cd src && npm test
+      - store_test_results:
+          path: /home/circleci/project/git/src/
+      - store_artifacts:
+          path: /home/circleci/project/git/src/junit.xml
+
+  test-integration:
+    executor: default-machine
+    steps:
+      - checkout
+      - run:
+          name: Install Docker Compose
+          command: |
+            curl -L https://github.com/docker/compose/releases/download/1.25.0/docker-compose-`uname -s`-`uname -m` > ~/docker-compose
+            chmod +x ~/docker-compose
+            sudo mv ~/docker-compose /usr/local/bin/docker-compose
+      - run:
+          name: Start docker-compose
+          command: docker-compose -f docker-compose.yml -f docker-compose.integration.yml up -d
+      - run:
+          name: Execute integration tests
+          command: docker exec -it scheme-adapter-int sh -c 'npm run test:int'
+      - run:
+          name: Copy results from docker
+          command: docker cp scheme-adapter-int:/src/junit.xml .
+      - store_test_results:
+          path: /home/circleci/project/git
+      - store_artifacts:
+          path: /home/circleci/project/git/junit.xml
+
+  lint:
+    executor: default-docker
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+          - dependency-cache-v1-{{ checksum "src/package-lock.json" }}
+      - run:
+          name: Execute linting
+          command: cd src && npm run lint
+
+  audit-licenses:
+    executor: default-docker
+    steps:
+      - run:
+          name: Install general dependencies
+          command: *defaults_Dependencies
+      - run:
+          <<: *defaults_license_scanner
+      - checkout
+      - restore_cache:
+          key: dependency-cache-v1-{{ checksum "src/package-lock.json" }}
+      - run:
+          name: Run the license-scanner
+          command: cd /tmp/license-scanner && pathToRepo=$CIRCLE_WORKING_DIRECTORY make run
+      - store_artifacts:
+          path: /tmp/license-scanner/results
+          prefix: licenses
+
+  build:
+    executor: default-machine
+    steps:
+      - checkout
+      - run:
+          name: Build Docker local image
+          command: |
+            echo "Building Docker image: local"
+            docker build --build-arg NPM_TOKEN=${NPM_TOKEN} -t $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:local .
+      - run:
+          name: Save docker image to workspace
+          command: docker save -o /tmp/docker-image.tar $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:local
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - ./docker-image.tar
+
+  license-scan:
+    executor: default-machine
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Load the pre-built docker image from workspace
+          command: docker load -i /tmp/docker-image.tar
+      - run:
+          <<: *defaults_license_scanner
+      - run:
+          name: Run the license-scanner
+          command: cd /tmp/license-scanner && mode=docker dockerImages=$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:local make run
+      - store_artifacts:
+          path: /tmp/license-scanner/results
+          prefix: licenses
+
+##
+# Workflows
+#
+# CircleCI Workflow config
+##
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - setup:
+          context: wmt
+          filters:
+            branches:
+              ignore:
+                - /feature*/
+                - /bugfix*/
+                - /hotfix*/
+      - test-unit:
+          context: wmt
+          requires:
+            - setup
+          filters:
+            branches:
+              ignore:
+                - /feature*/
+                - /bugfix*/
+                - /hotfix*/
+      - lint:
+          context: wmt
+          requires:
+            - setup
+          filters:
+            branches:
+              ignore:
+                - /feature*/
+                - /bugfix*/
+                - /hotfix*/
+      - audit-licenses:
+          context: wmt
+          requires:
+            - setup
+          filters:
+            branches:
+              ignore:
+                - /feature*/
+                - /bugfix*/
+                - /hotfix*/
+      - build:
+          context: wmt
+          filters:
+            branches:
+              ignore:
+                - /feature*/
+                - /bugfix*/
+                - /hotfix*/
+  deploy:
+    jobs:
+      - docker/publish:
+          filters:
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*(\-snapshot)?(\-hotfix(\.[0-9]+))?/
+            branches:
+              ignore:
+                - /.*/
+          extra_build_args: '--build-arg NPM_TOKEN=${NPM_TOKEN}'
+          before_build:
+            - run:
+                name: Set image tag
+                command: |
+                  if [[ -v CIRCLE_TAG ]]; then
+                    echo 'export IMAGE_TAG=$(echo $CIRCLE_TAG | tr -d v)' >> $BASH_ENV
+                  else
+                    echo 'export IMAGE_TAG=$CIRCLE_BRANCH' >> $BASH_ENV
+                  fi
+          lint-dockerfile: false
+          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+          tag: $IMAGE_TAG
+          registry: $DOCKER_REGISTRY
+          docker-username: DOCKER_USER
+          docker-password: DOCKER_PASSWORD
+          after_build:
+            - slack/status:
+              success_message: Publish/deploy succeeded in branch $CIRCLE_BRANCH
+              failure_message: Public/deploy failed in branch $CIRCLE_BRANCH
+              webhook: $SLACK_WEBHOOK

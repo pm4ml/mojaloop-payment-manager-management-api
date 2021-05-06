@@ -1,0 +1,6 @@
+.idea
+node_modules/
+.swp
+src/junit.xml
+docker-compose-uncdf.yaml
+src/.env

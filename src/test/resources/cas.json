@@ -1,0 +1,140 @@
+[
+    {
+      "id": 1,
+      "type": "EXTERNAL",
+      "name": "Client CA",
+      "rootCertificate": "-----BEGIN CERTIFICATE-----\nMIIFWjCCA0KgAwIBAgIQCgdbQMto5gVNhujArj8HgjANBgkqhkiG9w0BAQsFADBH\nMREwDwYDVQQKEwhNb2R1c0JveDEcMBoGA1UECxMTSW5mcmFzdHJ1Y3R1cmUgVGVh\nbTEUMBIGA1UEAxMLZGV2IFJvb3QgQ0EwHhcNMjAwNTIwMTkxMzQxWhcNNDAwNTE1\nMTkxMzQxWjBHMREwDwYDVQQKEwhNb2R1c0JveDEcMBoGA1UECxMTSW5mcmFzdHJ1\nY3R1cmUgVGVhbTEUMBIGA1UEAxMLZGV2IFJvb3QgQ0EwggIiMA0GCSqGSIb3DQEB\nAQUAA4ICDwAwggIKAoICAQCYl4aUoDPwjq/D0F+4h7dVSPQ4gTbEl6kob215LoVt\nxk+X6fc5QrZIV3v5UUQ7E58JGGxP8hriMpFk37zYB94G2DnVdY6gk237OrZ4qmhZ\nDo3AQFtnL5FJDAFRGOFhq4id3JU3f0uOYrlKiZ5RfzLN2gdePjKgdHKOv1UXtfUD\n8SZItdE7/20z0ku7Ac+GmydNdQqy6ssuGJxWFNiK5Ag7ir03xvdRasSpdhkluZoa\nVInaslP7kgiY2krNvbYx6fxKjIrjSxv6DiPh/vDmnf9qbwYe/j+1hqDfGmLdTBD/\nuwraOw9WObk0rBuAWgqBgHIe9d/VdY0UsZGFKRHvq21ZMSYqu62+kmg279l1fFaS\ni8TYbMPN67C4npUhD27Xn1yLa0pRJPTfSw1sWfLTtT3tGkIhafhNojRxhzuY3N+Y\nO3Uz3eGfqlr0DbXvCadd+Ziz7i3drTE9bB76g3tbuQBFYC556agzdkqfqYqO/S3f\nCau05Z+vNJbKoe5ClUw9BJGRV+/WV/oAsrkcZ4sjDghdECQT0FU6J0tHyiMqdul3\n1m2eS7NF4SypFwzMiBr3rtfNq32fw6g/d11IoCeHXySlgPl2fw+vQqBGTl+2u+Yk\nGarN9SytaKHKmfnaD2ODzI6LGHS+cVKBWUkfnEoh58Q7H1RJF73G9dUYjxbeuWOB\nZQIDAQABo0IwQDAOBgNVHQ8BAf8EBAMCAQYwDwYDVR0TAQH/BAUwAwEB/zAdBgNV\nHQ4EFgQURIAWzh+pD0FEUT6u1iDVtonAa2QwDQYJKoZIhvcNAQELBQADggIBAFVF\nl/64QGhboei1UowVAZjWtxKo31OV9he9kNVxnaqDMI2gnJELLouI1skafzfsDxhc\n0Gol5802AdNO0+U7a+Q0IysXayc3hMq6Ezic3dWlGsAO0yOIzFayvXIx+jsM+JOU\n9yzixGT+rev1VJ5td/gGx9M+SY74L6/v5w21aCWmobYNkWkh6UMwa8mh6cjvIrWY\nHTMHVoSLQEGIz6hEwmQD0Dxl4fiWHbpBFd4u19uQcvFKolSC1BRzvLj3At59fSn/\nycC5cUnTn1gp6ql0db+KIIhnEBn8q+n8RnB+ihe2hmSoMgWpc6zimtTnUT8pAzYx\nxnyX8Z7O36FECzYjNySv76Sdlh+w3Z1010/3R9nqnbGy7LWyldgf5/Kj3ojpvy9T\nbox0fJUCu7mQgG+kN9YlS4cy2ZX75Y3l4RD41zUV3TsC3d1lLhJ3MAvomCguj9V6\nlslL+53m99uiO6fyiK4NOSvTLD8ZXnu7COkCdvq7MdYk+TTRDY7dcGer9rJ4ZCC5\noCC+uz6ve1xnrIy3w0FHdVqaJU8MGJgedQ1Fe7ixw32krbheBCSheUV0nm6fUvMn\nn5sZgw5/qsMFcDg8DaeHKXo1y+5QPlaUrvoYDKVUtKRV509j+dZsNdhLzhRvbq6G\n61UxOLw8tXde1r6bLLHVKBZ0EcPwate90jijmb/z\n-----END CERTIFICATE-----\n",
+      "intermediateChain": "-----BEGIN CERTIFICATE-----\nMIIGUDCCBDigAwIBAgIUDhIK7MaRIeq+uHVPi24RzxWwct4wDQYJKoZIhvcNAQEL\nBQAwRzERMA8GA1UEChMITW9kdXNCb3gxHDAaBgNVBAsTE0luZnJhc3RydWN0dXJl\nIFRlYW0xFDASBgNVBAMTC2RldiBSb290IENBMB4XDTIwMDUyMDE5MTMxMloXDTI1\nMDUxOTE5MTM0MlowbDERMA8GA1UEChMITW9kdXNCb3gxHDAaBgNVBAsTE0luZnJh\nc3RydWN0dXJlIFRlYW0xOTA3BgNVBAMTMGRldi51bmNkZi51bmNkZm1maS5vcmcu\naW50ZXJuYWwuIEludGVybWVkaWF0ZSBDQTCCAiIwDQYJKoZIhvcNAQEBBQADggIP\nADCCAgoCggIBALC4uUjuWtL+yoEfXkvXGMmOQNu3Tx12vd52QpCv5b+J7bo3j7LO\naBlbyjTz8GNuIZlCV79WNqQAZcCRhyszHOja7VB1/I2aiFwNyMXjUwbSBdTrYa4i\nEAuaghXn1asjfIDw1T3O6bIWw6/CmO6RZ6QqWPWBWpwmlHomipi9oGvIVtfRqJc2\n+TjSgKgTQhKh2/LriHbXsDK9aTf8hAouReyyzUcANHjfuo2GzW9Lk8Y7AI/9oluV\nGeIgk2UHjrT+6IF+vL3sakJjMu4g6xdOTyKqoYDHqZg4HGQm5+v8TS2hRqYczVnx\nDd/r+ld9SId0mPlCGCILKjE1bnMOTS/GP0pyavASV7LSmPT2OPttEzHZSTlfURBs\n27SjqcOBaljeDVJGjppY2JSSQRFVGblHp6M278X0UxpuuXzSr5qJhfF+fdsfBA/M\neLIRFUdha9gixylLAnZL3ZMGmLyBD20NcZPDeDOJHT+PswN9+N3cfLJC0Tz5Djqz\nWog0RC63kV52PQidzukkDefOtc47tgn9E1K9QLNQgC8CgfCdZxbmRzttnIrq2foS\nS31N2P4SltwaVncrhBO025nPsmSsdp31Zl0vRw9jfxf9ZRPItg5BjEEkcOZLqRMM\nhymVxbpfNhhisaGySq6bnc/u6IYAsu+Hf3EMEHFBWCAH01Dl/I7gUhV5AgMBAAGj\nggENMIIBCTAOBgNVHQ8BAf8EBAMCAQYwDwYDVR0TAQH/BAUwAwEB/zAdBgNVHQ4E\nFgQUXDsCouN1LbQHy7TTFXcE3O6YAhkwHwYDVR0jBBgwFoAURIAWzh+pD0FEUT6u\n1iDVtonAa2QwVwYIKwYBBQUHAQEESzBJMEcGCCsGAQUFBzAChjtodHRwOi8vdmF1\nbHQuZGV2LnVuY2RmLnVuY2RmbWZpLm9yZy5pbnRlcm5hbC46NDQzL3YxL3BraS9j\nYTBNBgNVHR8ERjBEMEKgQKA+hjxodHRwOi8vdmF1bHQuZGV2LnVuY2RmLnVuY2Rm\nbWZpLm9yZy5pbnRlcm5hbC46NDQzL3YxL3BraS9jcmwwDQYJKoZIhvcNAQELBQAD\nggIBAFEEJz7d5X8gEIFkmQdrbdfreuXznmXvwMP4jiIPkP6WY49/koIt6G0B3lUX\n38iCEh2Mz1tMKa+e5Bez4bI8DI16wL+18VisTdUgQV4jk5jrAX1fyN2nKr9n8kdr\n8fXVLqgo2cpzKHe8fqXb+741w9ifec9dFq1JtD8K4iplucYg/EUMAnbUj/aKa+uJ\nIFVJLncmaQ7vsVVdr30H9ttocKQeaKoQn/JRP6MILwPLOtdDlqUOmO/zAaqMkyms\n0DNz9I0gIW4gEeVCE/4RVSquYIJ7/II1CVk9UkQHNar+Neg8hdTs6m9v4YLKuwWW\nKUkjtrFlUyCXZXWW7QOL88nhNyK4fa2zSEC8/uKa+GwKGexJ78Yci0s+Yi0BXR5w\ncI8c1E24xk7ZX55kL/oVcEKfGUzvpAIVRDxpG17/XgUOBdTN/wCCqUztFMfJc8Yb\n1/IkZa2UsUfgCxuEYWZ+bxdMUPUqL2waOIl0vJwfakRBBIdqiowE44UB5kf2SfkO\nipo+8mtMlrTbgnnbQvsIhNB6zpJ7QKWNW/3RreHNgO42zsdjgBHy2/9O2PhZzoHP\nNVuzPMelO8/kw5LA1FyiyuuAIsXx2CoZ+pZtFRmzr2T12CYXlNcfaZF9IlhWq0Ha\n+J0/DTrb6Xiojbxye/JhooXYOBAD7KJjUuMDFBisBy8mQebX\n-----END CERTIFICATE-----\n",
+      "rootCertificateInfo": {
+        "issuer": {
+          "C": null,
+          "L": null,
+          "O": "ModusBox",
+          "CN": "dev Root CA",
+          "OU": "Infrastructure Team",
+          "ST": null,
+          "emailAddress": null
+        },
+        "subject": {
+          "C": null,
+          "L": null,
+          "O": "ModusBox",
+          "CN": "dev Root CA",
+          "OU": "Infrastructure Team",
+          "ST": null,
+          "emailAddress": null
+        },
+        "notAfter": "2040-05-15T19:13:41Z",
+        "notBefore": "2020-05-20T19:13:41Z",
+        "extensions": {
+          "subjectAltName": {
+            "dns": [],
+            "ips": [],
+            "uris": [],
+            "emailAddresses": []
+          }
+        },
+        "serialNumber": "13330476868687507258448128338089150338",
+        "signatureAlgorithm": "SHA256WithRSA",
+        "subjectAlternativeNames": null
+      },
+      "intermediateChainInfo": [],
+      "validationState": "VALID",
+      "validations": [
+        {
+          "data": {},
+          "result": "VALID",
+          "details": "VALID(SELF_SIGNED)",
+          "message": "The root certificate is valid with VALID(SELF_SIGNED) state.",
+          "performed": true,
+          "validationCode": "VERIFY_ROOT_CERTIFICATE",
+          "messageTemplate": ""
+        },
+        {
+          "data": {},
+          "result": "VALID",
+          "message": "The intermediateChain is made of valid CAs and at the top of the chain is signed by the root.",
+          "performed": true,
+          "validationCode": "VERIFY_CHAIN_CERTIFICATES",
+          "messageTemplate": ""
+        },
+        {
+          "data": {},
+          "result": "VALID",
+          "message": "The root certificate has the CA basic contraint extension ( CA = true )",
+          "performed": true,
+          "validationCode": "CA_CERTIFICATE_USAGE",
+          "messageTemplate": ""
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "type": "EXTERNAL",
+      "name": "mbox-qa",
+      "rootCertificate": "-----BEGIN CERTIFICATE-----\nMIIFWTCCA0GgAwIBAgIRAJj+dwB3Ave/0L7JcsEsOMcwDQYJKoZIhvcNAQELBQAw\nRjERMA8GA1UEChMITW9kdXNCb3gxHDAaBgNVBAsTE0luZnJhc3RydWN0dXJlIFRl\nYW0xEzARBgNVBAMTCnFhIFJvb3QgQ0EwHhcNMjAwOTE4MTYzNDExWhcNNDAwOTEz\nMTYzNDExWjBGMREwDwYDVQQKEwhNb2R1c0JveDEcMBoGA1UECxMTSW5mcmFzdHJ1\nY3R1cmUgVGVhbTETMBEGA1UEAxMKcWEgUm9vdCBDQTCCAiIwDQYJKoZIhvcNAQEB\nBQADggIPADCCAgoCggIBAMvVK655N8wgspnWF1hEjiyohcl02dnyGhjS6Xl88+b+\nYj71x4kx/Paw8Ev5DUWqQPILM4Ax9uz2pkh9fVItvpb0GswTEpvNo0K+hPhpeWWx\nXWIpzq160GxazYuvSdO2vRQpHgb4scMF+9IzdkubdGVbPjg4irKepHk6Oi4DUap2\nmmtJe9reL9Emugc+lvkSrZqALcn8gRm+t1PYBXBSP2cyhbz437jpDTtvdOqdG87k\nDYEBKw/IErjmbVaUvncTPYM/H6NglWb8/C5O0YafBQdz6etqHleYLw/YyUSZKaCJ\n3hCInciI3erqLBrwTdhTWZP2QCNM5CqxFYtInnF4bFQz+ZPp1vFUdrW1QkAmm/Nq\njw9cM4UyUpOSBNcM1RNbJ+2oHhPPAi1g7h2Z1msT+A08KFdFM4IJANxngEiSO2Of\nMA2Yz7j0ePv/71wAj7/C+IvEGZopnlFUjS3IGk5s6A3KYiOQx8fSNmiLPKxaO0BL\n80bsapoE/iN1ig+SZUsFw/ujIsz/EsH5oBc1f6YIAdEv5y0yYglkRwhlgfrWGQjo\nadiVmHktsfWIVavRWb3YBXeeuuDsqPhNHZvfq7549K1WNTwb7gYP59aAVSphsUDK\nfFaPWic49135vHMGzVju1RJp8bhiyVyRqfgZ6DecXXduRAoxPyRNYJlgZeT4iyel\nAgMBAAGjQjBAMA4GA1UdDwEB/wQEAwIBBjAPBgNVHRMBAf8EBTADAQH/MB0GA1Ud\nDgQWBBQlU4uvWIcf8YQZsfERkPwP0vNzdTANBgkqhkiG9w0BAQsFAAOCAgEAhCIn\nbJgqtYh5nhp+pDeHO2TS+/BYBYDKBC1yXVuT/LbuRrSZgu/11AykpJfwYV/Lyc7w\nvIv3JukjkyqHflvcJMfXNonx0qVn3szcj2q48XU0zcR+pyJBoysi6oRObn2lWTso\n2VKBWRH0CSJgfYhk4WkbrUJwBZNZXf77HT7f+7zZ5PoKxT31n05rwGORpnHmPTTM\nbI7jJJY2N4eLHXBvtBTy1qo8t8GxLmw6O4NSkQ/pQ0v7zBziHv7kfcOvoQuwl0F9\nxsIDHvCGJh2dQG/H6u6bv1CWwfAAPCPAHkXhqsLz7u/6Q2YM6WGGVKTj8SOM9j5W\nLIKXKVgnYEDIjnzJyeLJWkdedN/EXESiPwoA4+w4H6A2ZCRsZbEilj40UJoh55Mv\nBMWpiLLk/u30nmzvzhS6ASOBBr6VfikSUMByZGpANqnaMQF43jplo1EEZgsU7hT7\nBrxHgSLR27JWMKp27Zg6zayPb35kgEIinimhvnCMYXGosibaj4KYVBxOP9fWLnaF\ncQUtGHUYMSv28gErgJwI8rgs4Ge3WTZsIU23ftnzWYzkhiH3/Ts2Fl+sF90XeJGa\nVbFMkF8K8XbEI65h7Q4tn6FI3C6LFrE8sp9u7C5PZanh265bH92fddzQyAZoZikp\njFQ7KRKaDsqA27RXKNQ/UslWhNCWziZP6kJYoGo=\n-----END CERTIFICATE-----\n",
+      "intermediateChain": "-----BEGIN CERTIFICATE-----\nMIIGRzCCBC+gAwIBAgIUXEmT33CT2UzhNjZ1GoInyI+S4gcwDQYJKoZIhvcNAQEL\nBQAwRjERMA8GA1UEChMITW9kdXNCb3gxHDAaBgNVBAsTE0luZnJhc3RydWN0dXJl\nIFRlYW0xEzARBgNVBAMTCnFhIFJvb3QgQ0EwHhcNMjAwOTE4MTYzMzQxWhcNMjUw\nOTE3MTYzNDExWjBsMREwDwYDVQQKEwhNb2R1c0JveDEcMBoGA1UECxMTSW5mcmFz\ndHJ1Y3R1cmUgVGVhbTE5MDcGA1UEAxMwcWEucHJvZC1kZXYubWJveC1kZXYuaW8u\naW50ZXJuYWwgSW50ZXJtZWRpYXRlIENBMIICIjANBgkqhkiG9w0BAQEFAAOCAg8A\nMIICCgKCAgEAsg2NPOgYnaUn20LlumgobyQ27ZhxzmpJ5C/ODAgce5a1km8JWXmI\nDaRliIh/3dkcSMdvVrOCsHbahNP++8puiFVMPaBGTy308pokoibHV8zs8J8Hmm+e\nW7AhFfi7ZyRQx/mj94sI1BzJh2nw60dVhfqREIIAU9IUziXbHpujld4ISD/ShLND\nfkF6ksRwiY+/Mj6+s8szJH1bN/YjSQuX3Yo5Yax9UXbVfJItNpvrOt1xY5V18ZcD\n/CSpYzdI1XDpsVm6pmkC94bheUZhDnKbRshqLFvZlKGQX2InXswBxXQWSNN6Drh1\nMVYKACrCNBJYD+mM8RCAnOw4ZTYLx4AtgcrKaYWSQtzT0xMjmdj4X71TNF1FsTsZ\ni5f/lApBzTh+QZPWMHTOc3WPO2qVmCOmPr60Kum4LELmWmvyH5CZmsU8TH5EhCVA\n6SqCxYViJyH9n+3S6UlrQHlaEJisROBO8CGUgPuRy7OlCVJ4VANZH+oJZRaBYoOr\n7z5niHPlbEYx5P7tPkfMGD4DvPjBegCt2zS2P97n1WZozJIk5Xd4s0n4ZYNwgrQd\nd4uKe7YXcOc5Ff5hkbBA89pY3yN7YciZ60G0TKxRwNQ+RGTWUmXAhsH00rUOoqox\nLImtdI/sQiNvGGTKWv3iHZIRdv15ltgf+unBpewZ/lpDQ0KCE8h1W7ECAwEAAaOC\nAQUwggEBMA4GA1UdDwEB/wQEAwIBBjAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQW\nBBTvZjXevjvyWFWuVRcse/ZJAD7mHDAfBgNVHSMEGDAWgBQlU4uvWIcf8YQZsfER\nkPwP0vNzdTBTBggrBgEFBQcBAQRHMEUwQwYIKwYBBQUHMAKGN2h0dHA6Ly92YXVs\ndC5xYS5wcm9kLWRldi5tYm94LWRldi5pby5pbnRlcm5hbC92MS9wa2kvY2EwSQYD\nVR0fBEIwQDA+oDygOoY4aHR0cDovL3ZhdWx0LnFhLnByb2QtZGV2Lm1ib3gtZGV2\nLmlvLmludGVybmFsL3YxL3BraS9jcmwwDQYJKoZIhvcNAQELBQADggIBAJFDmzqo\nCmq/ZSRwVPsLSm34X5tk6s9edbpVwyOKDNuhTWQCpYhn4bQ6ugkKaGOUksH0fOCL\nMh5ZiscTYVL8m5GaU6EWxHLgs9YBorRPrMeEv13SErlFhEXHpy2/gBCBCLpYKRDe\nVsnfEn/KBZJpbVE1mGbUVn2m9DPbzcgcQZkuCr5sGhVOMtQn+QWWm1++OoUY288K\nrV9DOrcEpv74KuYmqzZRYN5bX4FYJb5Y3X+exqpsyH2n+UVyWyofdyEAV5O69H1U\nCY0JXmTkzcOCV0WfVPW+ffa8ifQz0KtGJ0R46f5zz2Lo92y3vuhRWrHdmqr75BvT\nuwmXJaTEbUDxV4IBgShLTA1oWwWHi5SNBZwicI3To5wMQnwWXvzXdeJWq/fq2dDN\ngov5ouzDwnBnD36NtJQruP7isphcVwTfwRhGOKkNUFxjNBhsmm6IAiPN3dZ/HoS2\nNgauculw4jgi38r7W9NdXXzmqvr6kpYR0D4Q+bf02ksKJLfQXjNeeMGtbNbtHUMn\n05M1V7SFwcbmBRCYzar16wvW+dqouEjiPo8+iOlhymvuX4kiM+B8fJZh9gn2hZpa\njXywkK2KbwBLd0QcBWn1WESoxxJICCJlX7yal2aKi7ys7lSDUEkbQquQ7esddTL1\nMXnQCrBKRoshd76CCLUYejvm3KHbePHYl9K9\n-----END CERTIFICATE-----\n",
+      "rootCertificateInfo": {
+        "issuer": {
+          "C": null,
+          "L": null,
+          "O": "ModusBox",
+          "CN": "qa Root CA",
+          "OU": "Infrastructure Team",
+          "ST": null,
+          "emailAddress": null
+        },
+        "subject": {
+          "C": null,
+          "L": null,
+          "O": "ModusBox",
+          "CN": "qa Root CA",
+          "OU": "Infrastructure Team",
+          "ST": null,
+          "emailAddress": null
+        },
+        "notAfter": "2040-09-13T16:34:11Z",
+        "notBefore": "2020-09-18T16:34:11Z",
+        "extensions": {
+          "subjectAltName": {
+            "dns": [],
+            "ips": [],
+            "uris": [],
+            "emailAddresses": []
+          }
+        },
+        "serialNumber": "203363912404950197431076229570796206279",
+        "signatureAlgorithm": "SHA256WithRSA",
+        "subjectAlternativeNames": null
+      },
+      "intermediateChainInfo": [],
+      "validationState": "VALID",
+      "validations": [
+        {
+          "data": {},
+          "result": "VALID",
+          "details": "VALID(SELF_SIGNED)",
+          "message": "The root certificate is valid with VALID(SELF_SIGNED) state.",
+          "performed": true,
+          "validationCode": "VERIFY_ROOT_CERTIFICATE",
+          "messageTemplate": ""
+        },
+        {
+          "data": {},
+          "result": "VALID",
+          "message": "The intermediateChain is made of valid CAs and at the top of the chain is signed by the root.",
+          "performed": true,
+          "validationCode": "VERIFY_CHAIN_CERTIFICATES",
+          "messageTemplate": ""
+        },
+        {
+          "data": {},
+          "result": "VALID",
+          "message": "The root certificate has the CA basic contraint extension ( CA = true )",
+          "performed": true,
+          "validationCode": "CA_CERTIFICATE_USAGE",
+          "messageTemplate": ""
+        }
+      ]
+    }
+  ]

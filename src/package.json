@@ -1,0 +1,67 @@
+{
+  "name": "mojaloop-payment-manager-management-api-service",
+  "version": "1.9.3",
+  "description": "Mojaloop Payment Manager - Management API Service",
+  "main": "index.js",
+  "author": "Murthy kakarlamudi, ModusBox Inc.",
+  "contributors": [
+    "Murthy Kakarlamudi <murthy@modusbox.com>",
+    "Yevhen Kyriukha <yevhen.kyriukha@modusbox.com>",
+    "James Bush <james.bush@modusbox.com>",
+    "Kamuela Franco <kamuela.franco@modusbox.com>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/modusintegration/mojaloop-payment-manager-management-api-service.git"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "jest --ci --reporters=default --reporters=jest-junit --env=node test/unit",
+    "test:int": "jest --ci --reporters=default --reporters=jest-junit --env=node test/integration --forceExit"
+  },
+  "jest": {
+    "setupFiles": [
+      "<rootDir>/test/jest/setEnvVars.js"
+    ]
+  },
+  "dependencies": {
+    "@internal/database": "file:lib/database",
+    "@internal/log": "file:lib/log",
+    "@internal/model": "file:lib/model",
+    "@internal/randomphrase": "file:lib/randomphrase",
+    "@modusbox/mcm-client": "1.0.34",
+    "ajv": "^6.12.4",
+    "babel-eslint": "^10.1.0",
+    "co-body": "^6.0.0",
+    "dotenv": "^8.2.0",
+    "env-var": "^6.3.0",
+    "knex": "^0.21.5",
+    "koa": "^2.13.0",
+    "koa-body": "^4.2.0",
+    "koa-bodyparser": "^4.3.0",
+    "koa-oas3": "^2.0.2",
+    "koa-router": "^9.4.0",
+    "koa2-oauth-server": "^1.0.0",
+    "mojaloop-connection-manager-pki-engine": "^1.0.0",
+    "node-fetch": "^2.6.0",
+    "node-forge": "^0.10.0",
+    "oas-validator": "^5.0.0",
+    "redis": "^3.0.2",
+    "uuid": "^8.3.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.12",
+    "eslint": "^7.8.1",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.0",
+    "jest": "^26.4.2",
+    "jest-junit": "^11.1.0",
+    "mockdate": "^3.0.2",
+    "nock": "^13.0.4",
+    "openapi-response-validator": "^7.0.1",
+    "redis-mock": "^0.51.0",
+    "supertest": "^4.0.2"
+  }
+}

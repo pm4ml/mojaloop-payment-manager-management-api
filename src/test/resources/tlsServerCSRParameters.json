@@ -1,0 +1,21 @@
+{
+  "subject": {
+    "emailAddress": "test@test.com",
+    "ST": "test_client",
+        "C": "US",
+        "L": "test",
+        "O": "test",
+        "CN": "test_client",
+        "OU": "test"
+  },
+  "extensions": {
+    "subjectAltName": {
+      "dns": [
+        "test"
+      ],
+      "ips": [
+        "test"
+      ]
+    }
+  }
+}
