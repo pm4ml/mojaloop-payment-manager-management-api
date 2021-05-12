@@ -188,7 +188,7 @@ workflows:
   build_and_test:
     jobs:
       - setup:
-          context: wmt
+          context: pm4ml-ci
           filters:
             branches:
               ignore:
@@ -196,7 +196,7 @@ workflows:
                 - /bugfix*/
                 - /hotfix*/
       - test-unit:
-          context: wmt
+          context: pm4ml-ci
           requires:
             - setup
           filters:
@@ -206,7 +206,7 @@ workflows:
                 - /bugfix*/
                 - /hotfix*/
       - lint:
-          context: wmt
+          context: pm4ml-ci
           requires:
             - setup
           filters:
@@ -216,7 +216,7 @@ workflows:
                 - /bugfix*/
                 - /hotfix*/
       - audit-licenses:
-          context: wmt
+          context: pm4ml-ci
           requires:
             - setup
           filters:
@@ -226,7 +226,7 @@ workflows:
                 - /bugfix*/
                 - /hotfix*/
       - build:
-          context: wmt
+          context: pm4ml-ci
           filters:
             branches:
               ignore:
@@ -236,6 +236,7 @@ workflows:
   deploy:
     jobs:
       - docker/publish:
+          context: pm4ml-ci
           filters:
             tags:
               only: /v[0-9]+(\.[0-9]+)*(\-snapshot)?(\-hotfix(\.[0-9]+))?/
