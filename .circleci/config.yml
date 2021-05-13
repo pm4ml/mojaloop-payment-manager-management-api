@@ -259,8 +259,8 @@ workflows:
           registry: $DOCKER_REGISTRY
           docker-username: DOCKER_USER
           docker-password: DOCKER_PASSWORD
-          after_build:
-            - slack/status:
-              success_message: Publish/deploy succeeded in branch $CIRCLE_BRANCH
-              failure_message: Public/deploy failed in branch $CIRCLE_BRANCH
-              webhook: $SLACK_WEBHOOK
+#          after_build:
+#            - slack/status:
+#              success_message: Publish/deploy succeeded in branch $CIRCLE_BRANCH
+#              failure_message: Public/deploy failed in branch $CIRCLE_BRANCH
+#              webhook: $SLACK_WEBHOOK
