@@ -434,7 +434,7 @@ const getMonetaryZones = async(ctx) => {
 const generateAllCerts = async(ctx) => {
     
     const { dfspId, mcmServerEndpoint, privateKeyLength, privateKeyAlgorithm, 
-        dfspServerCsrParameters, wsUrl, wsPort } = ctx.state.conf;
+        dfspServerCsrParameters } = ctx.state.conf;
 
     const certModel = new CertificatesModel({
         dfspId,
@@ -442,8 +442,6 @@ const generateAllCerts = async(ctx) => {
         envId: ctx.params.envId,
         logger: ctx.state.logger,
         storage: ctx.state.storage,
-        wsUrl: wsUrl,
-        wsPort: wsPort,
         db: ctx.state.db
     });
 
@@ -465,7 +463,7 @@ const generateAllCerts = async(ctx) => {
 const generateDfspServerCerts = async(ctx) => {
     
     const { dfspId, mcmServerEndpoint, privateKeyLength, privateKeyAlgorithm, 
-        dfspServerCsrParameters, dfspCaPath, wsUrl, wsPort } = ctx.state.conf;
+        dfspServerCsrParameters, dfspCaPath, } = ctx.state.conf;
 
     const certModel = new CertificatesModel({
         dfspId,
@@ -473,8 +471,6 @@ const generateDfspServerCerts = async(ctx) => {
         envId: ctx.params.envId,
         logger: ctx.state.logger,
         storage: ctx.state.storage,
-        wsUrl: wsUrl,
-        wsPort: wsPort,
         db: ctx.state.db
     });
 

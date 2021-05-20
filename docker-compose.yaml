@@ -1,0 +1,12 @@
+version: '3'
+services:
+ redis:
+   image: "redis"
+ management-api:
+   image: "mojaloop-payment-manager-management-api-service"
+   #image: "modusbox-mbx-docker.jfrog.io/modusintegration/mojaloop-payment-manager-management-api-service:v1.2.3"
+   environment:
+    - CACHE_HOST=redis
+    - PEER_ENDPOINT=localhost
+   ports:
+     - "9000:9000"

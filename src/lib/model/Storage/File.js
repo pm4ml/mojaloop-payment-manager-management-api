@@ -47,7 +47,7 @@ class File extends Storage {
 
     setSecret(key, value) {
         const keyPath = this._getKeyPath(key);
-        return writeFileAsync(keyPath, value);
+        return writeFileAsync(keyPath, value, { flag: 'w' });
     }
 
     deleteSecret(key) {
