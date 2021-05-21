@@ -30,6 +30,10 @@ const env = from(process.env, {
 
 module.exports = {
     dfspId: env.get('DFSP_ID').required().asString(),
+    envId: env.get('ENV_ID').required().asString(),
+    control: {
+        port: env.get('CONTROL_LISTEN_PORT').default('4005').asPortNumber(),
+    },
     inboundPort: env.get('INBOUND_LISTEN_PORT').default('9000').asPortNumber(),
     logIndent: env.get('LOG_INDENT').default('2').asIntPositive(),
     runMigrations: env.get('RUN_DB_MIGRATIONS').default('true').asBool(),
@@ -55,7 +59,4 @@ module.exports = {
     dfspClientCsrParameters: env.get('DFSP_CLIENT_CSR_PARAMETERS').asJsonConfig(),
     dfspServerCsrParameters: env.get('DFSP_SERVER_CSR_PARAMETERS').asJsonConfig(),
     dfspCaPath: env.get('DFSP_CA_PATH').required().asString(),
-    
-    wsUrl: env.get('WS_URL').required().asString(),
-    wsPort: env.get('WS_PORT').default('4003').asPortNumber()
 };

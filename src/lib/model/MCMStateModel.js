@@ -8,10 +8,10 @@
  *       Yevhen Kyriukha - yevhen.kyriukha@modusbox.com                   *
  **************************************************************************/
 
+const util = require('util');
 const { DFSPCertificateModel, HubCertificateModel, HubEndpointModel, AuthModel, ConnectorModel } = require('@modusbox/mcm-client');
 const { EmbeddedPKIEngine } = require('mojaloop-connection-manager-pki-engine');
 const CertificatesModel = require('./CertificatesModel');
-const util = require('util');
 
 const DEFAULT_REFRESH_INTERVAL = 60;
 
@@ -26,6 +26,7 @@ class MCMStateModel {
      * @param opts.envId {string}
      * @param opts.refreshIntervalSeconds {number}
      * @param opts.tlsServerPrivateKey {String}
+     * @param opts.controlServer {ConnectorManager.Server}
      */
     constructor(opts) {
         this._dfspCertificateModel = new DFSPCertificateModel(opts);
@@ -59,16 +60,31 @@ class MCMStateModel {
             //     dfspCerts.filter(cert => cert.certificate).map(cert => cert.certificate)
             // ));
             this._logger.log(`dfspCerts:: ${JSON.stringify(dfspCerts)}`);
-            // Commenting till mutual TLS is working as expected.
-            // const jwsCerts = await this._dfspCertificateModel.getAllJWSCertificates({ envId: this._envId, dfpsId: this._dfspId });
-            // await this._storage.setSecret('jwsCerts', JSON.stringify(
-            //     jwsCerts.map((cert) => ({
-            //         rootCertificate: cert.rootCertificate,
-            //         intermediateChain: cert.intermediateChain,
-            //         jwsCertificate: cert.jwsCertificate,
-            //     }))
-            // ));
-            // this._logger.log(`jwsCerts:: ${JSON.stringify(jwsCerts)}`);
+            
+            const jwsCerts = await this._dfspCertificateModel.getAllJWSCertificates({ envId: this._envId, dfpsId: this._dfspId });
+            const newCertsStr = JSON.stringify(
+                jwsCerts.map((cert) => ({
+                    rootCertificate: cert.rootCertificate,
+                    intermediateChain: cert.intermediateChain,
+                    jwsCertificate: cert.jwsCertificate,
+                }))
+            );
+
+            // Check if this set of certs differs from the ones in storage. 
+            // If so, store them then broadcast them to the connectors.
+            let oldJwsCerts = '';
+            try {
+                oldJwsCerts = await this._storage.getSecretAsString('jwsCerts');
+            } catch (_) { /* `jwsCerts` file/record does not exist yet.*/ }
+            
+            if (oldJwsCerts != newCertsStr && newCertsStr) {
+                await this._storage.setSecret('jwsCerts', newCertsStr);
+                this._logger.log(`jwsCerts:: ${JSON.stringify(jwsCerts)}`);
+                if (Array.isArray(jwsCerts) && jwsCerts.length) {
+                    await this._certificatesModel.exchangeJWSConfiguration(jwsCerts);
+                }
+            }
+            
 
             // Exchange Hub CSR 
             //await this.hubCSRExchangeProcess();
@@ -76,7 +92,6 @@ class MCMStateModel {
             // Check if Client certificates are available in Hub 
             await this.dfspClientCertificateExchangeProcess();
 
-            //await this._certificatesModel.exchangeJWSConfiguration(jwsCerts);
 
             //const hubEndpoints = await this._hubEndpointModel.findAll({ envId: this._envId, state: 'CONFIRMED' });
             // await this._storage.setSecret('hubEndpoints', JSON.stringify(hubEndpoints));
@@ -120,19 +135,7 @@ class MCMStateModel {
     }
 
     async start() {
-        let connected = false;
-
-        while(!connected) {
-            try {
-                await this._authModel.login();
-                connected = true;
-            }
-            catch(e) {
-                this._logger.push(e).error('Error authenticating with MCM server. Retrying in 1 second');
-                await new Promise(res => setTimeout(res, 1000));
-            }
-        }
-
+        await this._authModel.login();
         await this._refresh();
         this._timer = setInterval(this._refresh.bind(this), this._refreshIntervalSeconds * 10e3);
     }

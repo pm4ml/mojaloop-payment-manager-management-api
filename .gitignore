@@ -4,3 +4,5 @@ node_modules/
 src/junit.xml
 docker-compose-uncdf.yaml
 src/.env
+.vscode/
+src/secrets/jwsCerts

@@ -1,0 +1,11 @@
+version: '3'
+services:
+ redis:
+   image: "redis"
+ management-api:
+   image: "mojaloop-payment-manager-management-api-service"
+   environment:
+    - CACHE_HOST=redis
+    - PEER_ENDPOINT=localhost
+   ports:
+     - "9000:9000"

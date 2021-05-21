@@ -18,8 +18,6 @@ class CertificatesModel {
         this._logger = opts.logger;
         this._envId = opts.envId;
         this._storage = opts.storage;
-        this._wsUrl = opts.wsUrl;
-        this._wsPort = opts.wsPort;
         this._db = opts.db;
 
         this._mcmClientDFSPCertModel = new DFSPCertificateModel({
