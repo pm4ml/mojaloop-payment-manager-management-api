@@ -48,7 +48,7 @@ class Transfer {
         if (err.mojaloopError) {
             return err.mojaloopError.errorInformation.errorDescription;
         }
-        return `${err.httpStatusCode}`;
+        return `HTTP ${err.httpStatusCode}`;
     }
 
     _parseRawTransferRequestBodies(transferRaw) {
