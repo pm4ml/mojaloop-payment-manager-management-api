@@ -15,7 +15,6 @@ const Environment = require('./Environment');
 const Hub = require('./Hub');
 const CertificatesModel = require('./CertificatesModel');
 const MonetaryZone = require('./MonetaryZone');
-const Storage = require('./Storage');
 const MCMStateModel = require('./MCMStateModel');
 const ConnectorManager = require('./ConnectorManager');
 
@@ -27,7 +26,6 @@ module.exports = {
     Hub,
     CertificatesModel,
     MonetaryZone,
-    Storage,
     MCMStateModel,
-    ConnectorManager
+    ConnectorManager,
 };

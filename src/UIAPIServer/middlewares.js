@@ -68,6 +68,7 @@ const createRouter = (handlerMap) => {
         for (const [method, handler] of Object.entries(methods)) {
             router[method](koaEndpoint, async (ctx, next) => {
                 try {
+                    ctx.state.logger = ctx.state.logger.push({ handler: handler.name });
                     await Promise.resolve(handler(ctx, next));
                 } catch (e) {
                     ctx.state.logger.log(`Error: ${e.stack || util.inspect(e)}`);

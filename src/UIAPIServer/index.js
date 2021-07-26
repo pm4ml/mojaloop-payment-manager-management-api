@@ -14,9 +14,10 @@ const { oas } = require('koa-oas3');
 
 const http = require('http');
 const path = require('path');
-const { MCMStateModel, Storage } = require('@internal/model');
+const { MCMStateModel } = require('@internal/model');
+const Vault = require('@internal/vault');
 
-const { Logger, Transports } = require('@internal/log');
+const { Logger } = require('@mojaloop/sdk-standard-components');
 
 const database = require('@internal/database');
 const handlers = require('./handlers');
@@ -50,13 +51,18 @@ class UIAPIServer {
             logger: this._logger,
         });
 
+        this._vault = new Vault({
+            ...this._conf.vault,
+            envId: this._conf.envId,
+            logger: this._logger,
+        });
+        await this._vault.connect();
 
-        this._storage = new Storage.File({ dirName: this._conf.mcmClientSecretsLocation });
         this._api.use(async (ctx, next) => {
             ctx.state = {
                 conf: this._conf,
                 db: this._db,
-                storage: this._storage
+                vault: this._vault
             };
             await next();
         });
@@ -73,11 +79,9 @@ class UIAPIServer {
             dfspId: this._conf.dfspId,
             envId: 1, // FIXME: itereate over all the environments
             hubEndpoint: this._conf.mcmServerEndpoint,
-            refreshIntervalSeconds: this._conf.mcmClientRefreshInternal,
-            storage: this._storage,
+            refreshIntervalSeconds: this._conf.mcmClientRefreshIntervalSeconds,
+            vault: this._vault,
             logger: this._logger,
-            tlsServerPrivateKey: this._conf.tlsServerPrivateKey,
-            dfspCaPath: this._conf.dfspCaPath,
             auth: this._conf.auth,
             db: this._db
         });
@@ -89,7 +93,6 @@ class UIAPIServer {
         await new Promise((resolve) => this._server.listen(this._conf.inboundPort, resolve));
         await this._mcmState.start();
         this._logger.log(`Serving inbound API on port ${this._conf.inboundPort}`);
-
     }
 
     async stop() {
@@ -101,14 +104,12 @@ class UIAPIServer {
     }
 
     async _createLogger() {
-        const transports = await Promise.all([Transports.consoleDir()]);
         // Set up a logger for each running server
-        return new Logger({
+        return new Logger.Logger({
             context: {
                 app: 'mojaloop-payment-manager-management-api-service'
             },
-            space: this._conf.logIndent,
-            transports,
+            stringify: Logger.buildStringify({ space: this._conf.logIndent }),
         });
     }
 

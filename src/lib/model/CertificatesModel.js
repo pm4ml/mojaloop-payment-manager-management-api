@@ -9,7 +9,6 @@
  **************************************************************************/
 
 const { DFSPCertificateModel, HubCertificateModel } = require('@modusbox/mcm-client');
-const { EmbeddedPKIEngine } = require('mojaloop-connection-manager-pki-engine');
 const ConnectorManager = require('./ConnectorManager');
 const forge = require('node-forge');
 
@@ -17,7 +16,7 @@ class CertificatesModel {
     constructor(opts) {
         this._logger = opts.logger;
         this._envId = opts.envId;
-        this._storage = opts.storage;
+        this._vault = opts.vault;
         this._db = opts.db;
 
         this._mcmClientDFSPCertModel = new DFSPCertificateModel({
@@ -30,7 +29,7 @@ class CertificatesModel {
             dfspId: opts.dfspId,
             logger: opts.logger,
             hubEndpoint: opts.mcmServerEndpoint,
-        });      
+        });
 
         this._connectorManager = new ConnectorManager(opts);
     }
@@ -43,14 +42,7 @@ class CertificatesModel {
     }
 
     async createCSR(csrParameters) {
-        const createdCSR = await this._mcmClientDFSPCertModel.createCSR({
-            envId : this._envId,
-            csrParameters: csrParameters
-        });
-
-        //FIXME: createdCSR.key value should be saved in vault. Not being saved now in storage since secrets type in kubernetes are read-only
-
-        return createdCSR;
+        return this._vault.createCSR(csrParameters);
     }
 
     /**
@@ -74,16 +66,16 @@ class CertificatesModel {
     /**
      * Upload DFSP CA
      */
-    async uploadDFSPCA(body) {
+    async uploadDFSPCA(certPem, privateKeyPem) {
+        await this._vault.setDfspCaCert(certPem, privateKeyPem);
         return this._mcmClientDFSPCertModel.uploadDFSPCA({
             envId : this._envId,
-            entry: body,
+            entry: { rootCertificate: certPem },
         });
     }
 
     /**
      * Get DFSP Server Certificates
-     * @param
      */
     async getDFSPServerCertificates() {
         return this._mcmClientDFSPCertModel.getDFSPServerCertificates({
@@ -114,45 +106,21 @@ class CertificatesModel {
         });
     }
 
-    async processDfspServerCerts(csr, dfspCaPath) {
-        const dfspCA = await this._storage.getSecret(dfspCaPath);
+    async processDfspServerCert(csr) {
+        const cert = await this._vault.signCSR(csr.csr);
+        this._logger.push(cert).log('DFSP server cert signed with DFSP CA cert');
 
-        if (dfspCA) {
-            const embeddedPKIEngine = new EmbeddedPKIEngine(dfspCA, csr.key);
-            const cert = await embeddedPKIEngine.sign(csr.csr);
-            this._logger.log('Certificate created and signed :: ', cert);
+        await Promise.all([
+            this._vault.setDfspServerCert(cert.certificate),
+            await this.uploadServerCertificates({ rootCertificate: cert.issuing_ca, serverCertificate: cert.certificate }),
+        ]);
 
-            //key generated with csr is encrypted
-            try {
-                const decryptedCsrPrivateKey = await embeddedPKIEngine.decryptKey(csr.key);
-                this._logger.log('private key was decrypted :: ');
-
-                //Save in redis decrypted private key
-                // FIXME: (in the future will be in Vault)
-                const cache = this._db.redisCache;
-                await cache.set(`serverPrivateKey_${this._envId}`, {key: decryptedCsrPrivateKey});
-
-                this._logger.push({dfspCA: dfspCA.toString(), cert: cert}).log('Printing values of DFSP CA and cert');
-
-                await this.uploadServerCertificates({rootCertificate: dfspCA.toString(), serverCertificate: cert});
-                
-                await this._connectorManager.reconfigureInboundSdk(decryptedCsrPrivateKey, cert, dfspCA);
-
-            } catch (error) {
-                this._logger.log('Error decrypting or reconfiguring inbound sdk', error);
-                throw error;
-
-            }
-
-
-        } else {
-            throw new Error('Not signing dfsp own csr since dfsp CA  certificate is null or empty');
-        }
+        await this._connectorManager.reconfigureInboundSdk(csr.private_key, cert.certificate, cert.issuing_ca);
     }
 
     async exchangeOutboundSdkConfiguration(inboundEnrollmentId, key) {
         let exchanged = false;
-        
+
         const inboundEnrollment = await this.getClientCertificate(inboundEnrollmentId);
         this._logger.push({inboundEnrollment}).log('inboundEnrollment');
         if(inboundEnrollment.state === 'CERT_SIGNED'){
@@ -166,14 +134,13 @@ class CertificatesModel {
             exchanged = true;
         }
         return exchanged;
-    }   
-    
+    }
+
     async exchangeJWSConfiguration(jwsCerts) {
         let peerJWSPublicKeys = {};
         jwsCerts.forEach(jwsCert => {
-            const keyName = jwsCert.dfspId;
-            const keyValue = forge.pki.publicKeyToPem((forge.pki.certificateFromPem(jwsCert.jwsCertificate.trim().replace(/\\n/g,'\n'))).publicKey);
-            peerJWSPublicKeys[keyName] = keyValue;
+            peerJWSPublicKeys[jwsCert.dfspId] = forge.pki.publicKeyToPem((
+                forge.pki.certificateFromPem(jwsCert.jwsCertificate.trim().replace(/\\n/g, '\n'))).publicKey);
         });
         this._logger.push({peerJWSPublicKeys}).log('Peer JWS Public Keys');
         await this._connectorManager.reconfigureOutboundSdkForJWS(JSON.stringify(peerJWSPublicKeys));

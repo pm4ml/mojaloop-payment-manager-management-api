@@ -22,7 +22,7 @@ paths:
           description: ID of environment
           required: true
           schema:
-            type: string      
+            type: string
       responses:
         200:
           description: successful operation
@@ -493,13 +493,13 @@ paths:
       summary: "Returns all the environments"
       responses:
         200:
-          description: "successful operation"        
+          description: "successful operation"
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Environment"  
+                  $ref: "#/components/schemas/Environment"
 
   /environments/{envId}/dfsp/servercerts:
     parameters:
@@ -671,14 +671,14 @@ paths:
         - DFSP-client-ca-configuration
       summary: post client ca
       description: TBD
-      operationId: createDfspClientCA
+      operationId: uploadDFSPCA
       requestBody:
-        description: Client CA
+        description: Client CA cert
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CAInfo'
+              $ref: '#/components/schemas/CACertificate'
       responses:
         "200":
           description: successful operation
@@ -796,12 +796,12 @@ paths:
   /monetaryzones:
     get:
       tags:
-      - "monetaryzones"      
+      - "monetaryzones"
       summary: "Returns the monetary zones supported"
       operationId: "getMonetaryZones"
       responses:
         200:
-          description: successful operation        
+          description: successful operation
           content:
             application/json:
               schema:
@@ -815,7 +815,7 @@ paths:
       description: "ID of environment"
       required: true
       schema:
-        type: "string"      
+        type: "string"
     - name: "monetaryZoneId"
       in: "path"
       description: "ID of monetaryZone"
@@ -824,7 +824,7 @@ paths:
         type: "string"
     get:
       tags:
-      - "monetaryzones"    
+      - "monetaryzones"
       summary: "Returns all the dfsps for that monetary zone"
       parameters:
         - name: monetaryZoneId
@@ -858,7 +858,7 @@ paths:
           description: ID of the dfspId to get satus
           required: true
           schema:
-            type: string            
+            type: string
       responses:
           200:
             description: successful operation
@@ -1711,6 +1711,14 @@ components:
                   items:
                     type: string
                     example: 'http://modusbox.live'
+    CACertificate:
+      properties:
+        cert:
+          type: "string"
+          description: "PEM-encoded certificate"
+        privateKey:
+          type: "string"
+          description: "PEM-encoded private key corresponding to certificate"
     CAInfo:
       properties:
         rootCertificate:
@@ -2027,4 +2035,4 @@ components:
           type: "string"
       example:
         monetaryZoneId: "EUR"
-        name: "Euro"              
+        name: "Euro"
