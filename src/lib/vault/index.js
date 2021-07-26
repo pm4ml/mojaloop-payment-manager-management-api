@@ -50,14 +50,7 @@ class Vault {
     async connect() {
         await this._logger.log('Connecting to Vault');
 
-        // TODO: this is the only line that should be here, really. The rest should have executed
-        // before this service starts.
-        // TODO: we'll prob get a finite lease, what happens when that expires? Service just
-        // crashes? Probably fine.. Maybe not fine- that means the auth flow has died. Can it just
-        // be restarted? Probably.. Just handle the lease expiry and get a new lease. (Leases can
-        // be renewable- what does this mean?)
-        // Somewhat based on:
-        // https://github.com/kr1sp1n/node-vault/blob/70097269d35a58bb560b5290190093def96c87b1/example/auth_approle.js
+        // Vault configuration: https://www.vaultproject.io/docs/auth/approle
         const creds = await this._vault.approleLogin({
             role_id: this._roleId,
             secret_id: this._roleSecretId
