@@ -14,7 +14,6 @@ const { hostname } = require('os');
 const config = require('./config');
 const UIAPIServer = require('./UIAPIServer');
 const ControlServer = require('./ControlServer');
-const Log = require('@internal/log');
 const { Logger } = require('@mojaloop/sdk-standard-components');
 
 const LOG_ID = {
@@ -33,7 +32,7 @@ class Server {
         this.controlServer = null;
     }
 
-    async start() {        
+    async start() {
         // Start up the control server (websocket server) for communicating with connectors.
         // We register this instance to receive events from internal modules.
         // Internal communication with this server is facilitated by its event emitter.
@@ -97,5 +96,4 @@ if(require.main === module) {
 // scheme adapter as a service
 module.exports = {
     Server: Server,
-    Log: Log
 };

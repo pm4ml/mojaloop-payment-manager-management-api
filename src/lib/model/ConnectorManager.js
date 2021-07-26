@@ -17,9 +17,8 @@ const ControlServerEventEmitter = getInternalEventEmitter();
 
 class ConnectorManager {
     constructor(opts) {
-        this._storage = opts.storage;
+        this._vault = opts.vault;
         this._logger = opts.logger;
-        this._dfspCaPath = opts.dfspCaPath;
         this._tlsServerPrivateKey = opts.tlsServerPrivateKey;
     }
 
@@ -61,7 +60,7 @@ class ConnectorManager {
         const changedConfig = {
             peerJWSKeys: peerJWSPublicKeys,
         };
-        
+
         ControlServerEventEmitter.emit(INTERNAL_EVENTS.SERVER.BROADCAST_CONFIG_CHANGE, changedConfig);
     }
 }

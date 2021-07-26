@@ -8,6 +8,9 @@
  *       Murthy Kakarlamudi - murthy@modusbox.com                         *
  **************************************************************************/
 
+const { X509Certificate, createPrivateKey } = require('crypto');
+const assert = require('assert').strict;
+
 const {
     Transfer,
     Balances,
@@ -18,9 +21,21 @@ const {
     Environment
 } = require('@internal/model');
 
+const certModelFromContext = (ctx, overrides) => new CertificatesModel({
+    wsUrl: ctx.state.conf.wsUrl,
+    wsPort: ctx.state.conf.wsPort,
+    db: ctx.state.db,
+    dfspId: ctx.state.conf.dfspId,
+    mcmServerEndpoint: ctx.state.conf.mcmServerEndpoint,
+    envId: ctx.params.envId,
+    logger: ctx.state.logger,
+    vault: ctx.state.vault,
+    ...overrides,
+});
+
 
 const healthCheck = async(ctx) => {
-    ctx.body = JSON.stringify({'status':'ok'});
+    ctx.body = {'status':'ok'};
 };
 
 const getEnvironmentDfspStatus = async (ctx) => {
@@ -150,12 +165,12 @@ const getAllDfsps = async(ctx) => {
 
 const getAllEnvironments = async(ctx) => {
     const { mcmServerEndpoint } = ctx.state.conf;
-    
+
     const HubModel = new Hub({
         mcmServerEndpoint,
         logger: ctx.state.logger,
     });
-    
+
     ctx.response.status = 200;
     const responseData = await HubModel.getEnvironments();
     ctx.body = responseData;
@@ -199,7 +214,7 @@ const createDFSPEndpoints = async(ctx) => {
 
 /**
  * Update an existing DFSP endpoint
- * @param {*} ctx 
+ * @param {*} ctx
  */
 const updateDFSPEndpoint = async(ctx) => {
     const { dfspId, mcmServerEndpoint } = ctx.state.conf;
@@ -215,7 +230,7 @@ const updateDFSPEndpoint = async(ctx) => {
 
 /**
  * Update an existing DFSP endpoint
- * @param {*} ctx 
+ * @param {*} ctx
  */
 const deleteDFSPEndpoint = async(ctx) => {
     const { dfspId, mcmServerEndpoint } = ctx.state.conf;
@@ -242,76 +257,48 @@ const getHubEndpoints = async(ctx) => {
 };
 
 const uploadClientCSR = async(ctx) => {
-    const { dfspId, mcmServerEndpoint } = ctx.state.conf;
-    const certModel = new CertificatesModel({
-        dfspId,
-        mcmServerEndpoint,
-        envId: ctx.params.envId,
-        logger: ctx.state.logger,
-    });
+    const certModel = certModelFromContext(ctx);
     ctx.body = await certModel.uploadClientCSR(ctx.request.body.clientCSR);
 };
 
 const createClientCSR = async(ctx) => {
-    
-    const { dfspId, mcmServerEndpoint, privateKeyLength, privateKeyAlgorithm, 
-        dfspClientCsrParameters } = ctx.state.conf;
+    const certModel = certModelFromContext(ctx);
 
-    const certModel = new CertificatesModel({
-        dfspId,
-        mcmServerEndpoint,
-        envId: ctx.params.envId,
-        logger: ctx.state.logger,
-        storage: ctx.state.storage,
+    const createdCSR = await certModel.createCSR({
+        privateKeyAlgorithm: ctx.state.conf.privateKeyAlgorithm,
+        privateKeyLength: ctx.state.conf.privateKeyLength,
+        parameters: ctx.state.conf.dfspServerCsrParameters
     });
 
-    const csrParameters = {
-        privateKeyAlgorithm: privateKeyAlgorithm,
-        privateKeyLength: privateKeyLength,
-        parameters: dfspClientCsrParameters
-    };
-
-    const createdCSR = await certModel.createCSR(csrParameters);
     ctx.body = await certModel.uploadClientCSR(createdCSR.csr);
 
     // save the enrollment id in the cache to process later
     const cache = ctx.state.db.redisCache;
     await cache.set(`inboundEnrollmentId_${ctx.params.envId}`, ctx.body.id);
-    // FIXME: aslo persist the private key (in the future will be in Vault)
-    await cache.set(`clientPrivateKey_${ctx.params.envId}`, createdCSR.key.toString('utf8'));
+    // Persist private key for future use
+    await ctx.state.vault.setClientPrivateKey(createdCSR.private_key);
 };
 
 const getClientCertificates = async(ctx) => {
-    const { dfspId, mcmServerEndpoint } = ctx.state.conf;
-    const certModel = new CertificatesModel({
-        dfspId,
-        mcmServerEndpoint,
-        envId: ctx.params.envId,
-        logger: ctx.state.logger,
-    });
+    const certModel = certModelFromContext(ctx);
     ctx.body = await certModel.getCertificates();
 };
 
 const getDFSPCA = async(ctx) => {
-    const { dfspId, mcmServerEndpoint } = ctx.state.conf;
-    const certModel = new CertificatesModel({
-        dfspId,
-        mcmServerEndpoint,
-        envId: ctx.params.envId,
-        logger: ctx.state.logger,
-    });
+    const certModel = certModelFromContext(ctx);
     ctx.body = await certModel.getDFSPCA();
 };
 
 const uploadDFSPCA = async(ctx) => {
-    const { dfspId, mcmServerEndpoint } = ctx.state.conf;
-    const certModel = new CertificatesModel({
-        dfspId,
-        mcmServerEndpoint,
-        envId: ctx.params.envId,
-        logger: ctx.state.logger,
-    });
-    ctx.body = await certModel.uploadDFSPCA(ctx.request.body);
+    const { cert: certPem, privateKey: privateKeyPem } = ctx.request.body;
+
+    const cert = new X509Certificate(certPem);
+    const key = createPrivateKey(privateKeyPem);
+    assert(cert.checkPrivateKey(key), 'Private key does not match certificate');
+
+    const certModel = certModelFromContext(ctx);
+
+    ctx.body = await certModel.uploadDFSPCA(certPem, privateKeyPem);
 };
 
 const getHubCAS = async(ctx) => {
@@ -341,46 +328,22 @@ const getRootHubCA = async(ctx) => {
  * @param {*} ctx
  */
 const getDFSPServerCertificates = async(ctx) => {
-    const { dfspId, mcmServerEndpoint } = ctx.state.conf;
-    const certModel = new CertificatesModel({
-        dfspId,
-        mcmServerEndpoint,
-        envId: ctx.params.envId,
-        logger: ctx.state.logger,
-    });
+    const certModel = certModelFromContext(ctx);
     ctx.body = await certModel.getDFSPServerCertificates();
 };
 
 const getAllJWSCertificates = async(ctx) => {
-    const { dfspId, mcmServerEndpoint } = ctx.state.conf;
-    const certModel = new CertificatesModel({
-        dfspId,
-        mcmServerEndpoint,
-        envId: ctx.params.envId,
-        logger: ctx.state.logger,
-    });
+    const certModel = certModelFromContext(ctx);
     ctx.body = await certModel.getAllJWSCertificates();
 };
 
 const getJWSCertificates = async(ctx) => {
-    const { dfspId, mcmServerEndpoint } = ctx.state.conf;
-    const certModel = new CertificatesModel({
-        dfspId,
-        mcmServerEndpoint,
-        envId: ctx.params.envId,
-        logger: ctx.state.logger,
-    });
+    const certModel = certModelFromContext(ctx);
     ctx.body = await certModel.getDFSPJWSCertificates();
 };
 
 const uploadJWSCertificates = async(ctx) => {
-    const { dfspId, mcmServerEndpoint } = ctx.state.conf;
-    const certModel = new CertificatesModel({
-        dfspId,
-        mcmServerEndpoint,
-        envId: ctx.params.envId,
-        logger: ctx.state.logger,
-    });
+    const certModel = certModelFromContext(ctx);
     ctx.body = await certModel.uploadJWS(ctx.request.body);
 };
 
@@ -396,13 +359,7 @@ const updateJWSCertificates = async(ctx) => {
 };
 
 const deleteJWSCertificates = async(ctx) => {
-    const { dfspId, mcmServerEndpoint } = ctx.state.conf;
-    const certModel = new CertificatesModel({
-        dfspId,
-        mcmServerEndpoint,
-        envId: ctx.params.envId,
-        logger: ctx.state.logger,
-    });
+    const certModel = certModelFromContext(ctx);
     ctx.body = await certModel.deleteJWS();
 };
 
@@ -421,37 +378,23 @@ const getHubServerCertificates = async(ctx) => {
 
 const getMonetaryZones = async(ctx) => {
     const { mcmServerEndpoint } = ctx.state.conf;
-    
+
     const monetaryZone = new MonetaryZone({
         mcmServerEndpoint,
         logger: ctx.state.logger,
     });
     ctx.response.status = 200;
-    const responseData = await monetaryZone.getMonetaryZones();
-    ctx.body = responseData;
+    ctx.body = await monetaryZone.getMonetaryZones();
 };
 
 const generateAllCerts = async(ctx) => {
-    
-    const { dfspId, mcmServerEndpoint, privateKeyLength, privateKeyAlgorithm, 
-        dfspServerCsrParameters } = ctx.state.conf;
+    const certModel = certModelFromContext(ctx);
 
-    const certModel = new CertificatesModel({
-        dfspId,
-        mcmServerEndpoint,
-        envId: ctx.params.envId,
-        logger: ctx.state.logger,
-        storage: ctx.state.storage,
-        db: ctx.state.db
+    const createdCSR = await certModel.createCSR({
+        privateKeyAlgorithm: ctx.state.conf.privateKeyAlgorithm,
+        privateKeyLength: ctx.state.conf.privateKeyLength,
+        parameters: ctx.state.conf.dfspServerCsrParameters
     });
-
-    const csrParameters = {
-        privateKeyAlgorithm: privateKeyAlgorithm,
-        privateKeyLength: privateKeyLength,
-        parameters: dfspServerCsrParameters
-    };
-
-    const createdCSR = await certModel.createCSR(csrParameters);
 
     //Exchange inbound configuration
     await certModel.uploadClientCSR(createdCSR);
@@ -461,29 +404,16 @@ const generateAllCerts = async(ctx) => {
 };
 
 const generateDfspServerCerts = async(ctx) => {
-    
-    const { dfspId, mcmServerEndpoint, privateKeyLength, privateKeyAlgorithm, 
-        dfspServerCsrParameters, dfspCaPath, } = ctx.state.conf;
+    const certModel = certModelFromContext(ctx);
 
-    const certModel = new CertificatesModel({
-        dfspId,
-        mcmServerEndpoint,
-        envId: ctx.params.envId,
-        logger: ctx.state.logger,
-        storage: ctx.state.storage,
-        db: ctx.state.db
+    const createdCSR = await certModel.createCSR({
+        privateKeyAlgorithm: ctx.state.conf.privateKeyAlgorithm,
+        privateKeyLength: ctx.state.conf.privateKeyLength,
+        parameters: ctx.state.conf.dfspServerCsrParameters
     });
 
-    const csrParameters = {
-        privateKeyAlgorithm: privateKeyAlgorithm,
-        privateKeyLength: privateKeyLength,
-        parameters: dfspServerCsrParameters
-    };
-
-    const createdCSR = await certModel.createCSR(csrParameters);
-
     //Exchange inbound configuration
-    await certModel.process(createdCSR, dfspCaPath);
+    await certModel.processDfspServerCert(createdCSR);
 
     //FIXME: return something relevant when doing https://modusbox.atlassian.net/browse/MP-2135
     ctx.body = '';
@@ -536,7 +466,7 @@ module.exports = {
     },
     '/environments/{envId}/dfsps': {
         get: getAllDfsps,
-    },    
+    },
     '/environments/{envId}/dfsp/endpoints/{epId}': {
         put: updateDFSPEndpoint,
         delete: deleteDFSPEndpoint,
@@ -586,5 +516,5 @@ module.exports = {
     },
     '/environments/{envId}/dfsp/allcerts':{
         post: generateAllCerts
-    } 
+    }
 };

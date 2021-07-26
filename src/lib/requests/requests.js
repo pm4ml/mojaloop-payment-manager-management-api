@@ -56,7 +56,7 @@ class Requests {
         return request({...reqOpts, agent: this.agent})
             .then(throwOrJson)
             .catch(e => {
-                this.logger.push({ e }).log('Error attempting HTTP GET');
+                this.logger.push({ e, reqOpts }).log('Error attempting HTTP GET');
                 throw e;
             });
     }
@@ -74,7 +74,7 @@ class Requests {
         return request({...reqOpts, agent: this.agent})
             .then(throwOrJson)
             .catch(e => {
-                this.logger.push({ e }).log('Error attempting HTTP PUT');
+                this.logger.push({ e, reqOpts }).log('Error attempting HTTP PUT');
                 throw e;
             });
     }
@@ -92,7 +92,7 @@ class Requests {
         return request({...reqOpts, agent: this.agent})
             .then(throwOrJson)
             .catch(e => {
-                this.logger.push({ e }).log('Error attempting POST.');
+                this.logger.push({ e, reqOpts }).log('Error attempting POST.');
                 throw e;
             });
     }

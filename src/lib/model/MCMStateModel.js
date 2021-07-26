@@ -10,10 +10,7 @@
 
 const util = require('util');
 const { DFSPCertificateModel, HubCertificateModel, HubEndpointModel, AuthModel, ConnectorModel } = require('@modusbox/mcm-client');
-const { EmbeddedPKIEngine } = require('mojaloop-connection-manager-pki-engine');
 const CertificatesModel = require('./CertificatesModel');
-
-const DEFAULT_REFRESH_INTERVAL = 60;
 
 class MCMStateModel {
 
@@ -22,30 +19,28 @@ class MCMStateModel {
      * @param opts.hubEndpoint {string}
      * @param opts.logger {object}
      * @param opts.dfspId {string}
-     * @param opts.storage {object}
+     * @param opts.vault {object}
      * @param opts.envId {string}
      * @param opts.refreshIntervalSeconds {number}
      * @param opts.tlsServerPrivateKey {String}
      * @param opts.controlServer {ConnectorManager.Server}
      */
     constructor(opts) {
-        this._dfspCertificateModel = new DFSPCertificateModel(opts);
+        const { logger, hubEndpoint, dfspId } = opts;
+        this._dfspCertificateModel = new DFSPCertificateModel({ logger, hubEndpoint, dfspId });
         this._hubCertificateModel = new HubCertificateModel(opts);
         this._hubEndpointModel = new HubEndpointModel(opts);
         this._certificatesModel =  new CertificatesModel({
             ...opts,
             mcmServerEndpoint:opts.hubEndpoint
         });
-        this._refreshIntervalSeconds = parseInt(opts.refreshIntervalSeconds) > 0 ?
-            opts.refreshIntervalSeconds : DEFAULT_REFRESH_INTERVAL;
-        this._storage = opts.storage;
+        this._refreshIntervalSeconds = opts.refreshIntervalSeconds;
+        this._vault = opts.vault;
         this._envId = opts.envId;
         this._dfspId = opts.dfspId;
         this._logger = opts.logger;
         this._authEnabled = opts.authEnabled;
         this._hubEndpoint = opts.hubEndpoint;
-        this._tlsServerPrivateKey = opts.tlsServerPrivateKey;
-        this._dfspCaPath = opts.dfspCaPath;
 
         this._authModel = new AuthModel(opts);
         this._connectorModel = new ConnectorModel(opts);
@@ -55,12 +50,12 @@ class MCMStateModel {
     async _refresh() {
         try {
             this._logger.log('starting mcm client refresh');
-            const dfspCerts = await this._dfspCertificateModel.getCertificates({ envId: this._envId, dfpsId: this._dfspId });
-            // await this._storage.setSecret('dfspCerts', JSON.stringify(
+            const dfspCerts = await this._dfspCertificateModel.getCertificates({ envId: this._envId });
+            // await this._vault.setSecret('dfspCerts', JSON.stringify(
             //     dfspCerts.filter(cert => cert.certificate).map(cert => cert.certificate)
             // ));
             this._logger.log(`dfspCerts:: ${JSON.stringify(dfspCerts)}`);
-            
+
             const jwsCerts = await this._dfspCertificateModel.getAllJWSCertificates({ envId: this._envId, dfpsId: this._dfspId });
             const newCertsStr = JSON.stringify(
                 jwsCerts.map((cert) => ({
@@ -70,34 +65,34 @@ class MCMStateModel {
                 }))
             );
 
-            // Check if this set of certs differs from the ones in storage. 
+            // Check if this set of certs differs from the ones in vault.
             // If so, store them then broadcast them to the connectors.
             let oldJwsCerts = '';
             try {
-                oldJwsCerts = await this._storage.getSecretAsString('jwsCerts');
+                oldJwsCerts = await this._vault.getJWSCerts();
             } catch (_) { /* `jwsCerts` file/record does not exist yet.*/ }
-            
-            if (oldJwsCerts != newCertsStr && newCertsStr) {
-                await this._storage.setSecret('jwsCerts', newCertsStr);
+
+            if (oldJwsCerts !== newCertsStr && newCertsStr) {
+                await this._vault.setJWSCerts(newCertsStr);
                 this._logger.log(`jwsCerts:: ${JSON.stringify(jwsCerts)}`);
                 if (Array.isArray(jwsCerts) && jwsCerts.length) {
                     await this._certificatesModel.exchangeJWSConfiguration(jwsCerts);
                 }
             }
-            
 
-            // Exchange Hub CSR 
+
+            // Exchange Hub CSR
             //await this.hubCSRExchangeProcess();
 
-            // Check if Client certificates are available in Hub 
+            // Check if Client certificates are available in Hub
             await this.dfspClientCertificateExchangeProcess();
 
 
             //const hubEndpoints = await this._hubEndpointModel.findAll({ envId: this._envId, state: 'CONFIRMED' });
-            // await this._storage.setSecret('hubEndpoints', JSON.stringify(hubEndpoints));
+            // await this._vault.setSecret('hubEndpoints', JSON.stringify(hubEndpoints));
         }
         catch(err) {
-            this._logger.log(`Error refreshing MCM state model: ${err.stack || util.inspect(err)}`);
+            this._logger.push({ err }).log('Error refreshing MCM state model');
             //note: DONT throw at this point or we will crash our parent process!
         }
     }
@@ -106,17 +101,15 @@ class MCMStateModel {
         const cache = this._db.redisCache;
         const inboundEnrollmentId = await cache.get(`inboundEnrollmentId_${this._envId}`);
         this._logger.log(`inboundEnrollmentId:: ${inboundEnrollmentId}`);
-        if(inboundEnrollmentId){
-            const encryptedClientPvtKey = await cache.get(`clientPrivateKey_${this._envId}`);
-            const embeddedPKIEngine = new EmbeddedPKIEngine();
-            const decryptedClientPvtKey = await embeddedPKIEngine.decryptKey(encryptedClientPvtKey);
-            
+        if (inboundEnrollmentId) {
+            const privateKey = await this._vault.getClientPrivateKey();
+
             try {
-                const wasExchanged = await this._certificatesModel.exchangeOutboundSdkConfiguration(inboundEnrollmentId, decryptedClientPvtKey);
-                if(wasExchanged){
+                const wasExchanged = await this._certificatesModel.exchangeOutboundSdkConfiguration(inboundEnrollmentId, privateKey);
+                if (wasExchanged) {
                     await cache.del(`inboundEnrollmentId_${this._envId}`);
                 }
-            } catch(err){
+            } catch(err) {
                 this._logger.log(`Error refreshing client certificate: ${err.stack || util.inspect(err)}`);
             }
         }
@@ -126,8 +119,11 @@ class MCMStateModel {
         const hubCerts = await this.getUnprocessedCerts();
         for (const cert of hubCerts) {
             try {
-                const hubCertificate = await this.signCsrAndCreateCertificate(cert.csr);
-                await this.uploadCertificate(cert.id, hubCertificate);
+                const hubCertificate = await this._vault.signServerCSR({
+                    csr: cert.csr,
+                    commonName: cert.csrInfo.subject.CN,
+                });
+                await this.uploadCertificate(cert.id, hubCertificate.certificate);
             } catch (error) {
                 console.log('Error with signing and uploading certificate', error);
             }
@@ -137,6 +133,7 @@ class MCMStateModel {
     async start() {
         await this._authModel.login();
         await this._refresh();
+        this._logger.push({ interval: this._refreshIntervalSeconds }).log('Beginning MCM client refresh interval');
         this._timer = setInterval(this._refresh.bind(this), this._refreshIntervalSeconds * 10e3);
     }
 
@@ -146,34 +143,13 @@ class MCMStateModel {
 
     async getUnprocessedCerts() {
         const hubCerts = await this._hubCertificateModel.getCertificates({ envId: this._envId });
-        
+
         //filter all certs where cert state is CSR_LOADED
-        const filteredCerts = hubCerts.filter(cert => (cert.state == 'CSR_LOADED')).map(cert =>
-        { return { id: cert.id, csr: cert.csr };
-        });
-
-        return filteredCerts;
-    }
-
-    async signCsrAndCreateCertificate(csr) {
-        const dfspCA = await this._storage.getSecret(this._dfspCaPath);
-
-        const cache = this._db.redisCache;
-
-        const serverPK = await cache.get(`serverPrivateKey_${this._envId}`);
-        const tlsServerPrivateKey = serverPK.key;
-        this._logger.log('server pk::', tlsServerPrivateKey);
-
-        if (dfspCA) {
-            const embeddedPKIEngine = new EmbeddedPKIEngine(dfspCA, tlsServerPrivateKey);
-            const cert = await embeddedPKIEngine.sign(csr);
-            this._logger.log('Certificate created and signed :: ', cert);
-            return cert;
-
-        } else {
-            throw new Error('Not signing unprocessed csr since dfsp CA  certificate is null or empty');
-        }
-
+        return hubCerts.filter(cert => (cert.state === 'CSR_LOADED')).map(cert => ({
+            id: cert.id,
+            csr: cert.csr,
+            csrInfo: cert.csrInfo,
+        }));
     }
 
     async uploadCertificate(enrollmentId, hubCertificate) {

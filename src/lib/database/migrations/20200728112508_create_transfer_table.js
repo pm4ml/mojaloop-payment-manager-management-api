@@ -10,7 +10,7 @@
 
 const TABLE_NAME = 'transfer';
 
-exports.up = async (knex) => knex.schema.createTable(TABLE_NAME, (table) => {
+exports.up = (knex) => knex.schema.createTable(TABLE_NAME, (table) => {
     table.string('id').primary();
     table.string('redis_key').primary();
     table.boolean('success');   // TRUE - Fulfill, FALSE - Error, NULL - Pending
@@ -27,6 +27,4 @@ exports.up = async (knex) => knex.schema.createTable(TABLE_NAME, (table) => {
     table.string('raw');
 });
 
-exports.down = function (knex) {
-    return knex.schema.dropTableIfExists(TABLE_NAME);
-};
+exports.down = knex => knex.schema.dropTableIfExists(TABLE_NAME);

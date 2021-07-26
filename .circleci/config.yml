@@ -40,12 +40,12 @@ executors:
   default-docker:
     working_directory: /home/circleci/project/git
     docker:
-      - image: node:12.19.0-alpine
+      - image: node:lts-alpine
 
   default-machine:
     working_directory: /home/circleci/project/git
     machine:
-      image: ubuntu-1604:201903-01
+      image: ubuntu-2004:202010-01
 
 ##
 # Jobs

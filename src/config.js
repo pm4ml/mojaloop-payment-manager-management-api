@@ -16,7 +16,7 @@ const yaml = require('js-yaml');
 
 function getFileContent(path) {
     if (!fs.existsSync(path)) {
-        throw new Error('File doesn\'t exist');
+        throw new Error(`File ${path} doesn't exist`);
     }
     return fs.readFileSync(path);
 }
@@ -25,7 +25,8 @@ const env = from(process.env, {
     asFileContent: (path) => getFileContent(path),
     asFileListContent: (pathList) => pathList.split(',').map((path) => getFileContent(path)),
     asYamlConfig: (path) => yaml.load(getFileContent(path)),
-    asJsonConfig: (path) => JSON.parse(getFileContent(path))
+    asJsonConfig: (path) => JSON.parse(getFileContent(path)),
+    asTextFileContent: (path) => getFileContent(path).toString().trim(),
 });
 
 module.exports = {
@@ -37,14 +38,20 @@ module.exports = {
     inboundPort: env.get('INBOUND_LISTEN_PORT').default('9000').asPortNumber(),
     logIndent: env.get('LOG_INDENT').default('2').asIntPositive(),
     runMigrations: env.get('RUN_DB_MIGRATIONS').default('true').asBool(),
-    
+
     cacheHost: env.get('CACHE_HOST').asString(),
     cachePort: env.get('CACHE_PORT').default(6379).asPortNumber(),
     cacheSyncInterval: env.get('CACHE_SYNC_INTERVAL_SECONDS').default(30).asIntPositive(),
-    
+
     mcmServerEndpoint: env.get('MCM_SERVER_ENDPOINT').required().asString(),
-    mcmClientRefreshInternal: env.get('MCM_CLIENT_REFRESH_INTERVAL').default(300).asString(),
-    mcmClientSecretsLocation: env.get('MCM_CLIENT_SECRETS_LOCATION').required().asString(),
+    mcmClientRefreshIntervalSeconds: env.get('MCM_CLIENT_REFRESH_INTERVAL_SECONDS').default(60).asIntPositive(),
+    vault: {
+        endpoint: env.get('VAULT_ENDPOINT').required().asString(),
+        // Generated per: https://www.vaultproject.io/docs/auth/approle#via-the-cli-1
+        // Or: https://github.com/kr1sp1n/node-vault/blob/70097269d35a58bb560b5290190093def96c87b1/example/auth_approle.js
+        roleId: env.get('VAULT_ROLE_ID').default('/vault/role-id').asTextFileContent(),
+        roleSecretId: env.get('VAULT_ROLE_SECRET_ID').default('/vault/role-secret-id').asTextFileContent(),
+    },
     auth: {
         enabled:  env.get('AUTH_ENABLED').asBoolStrict(),
         creds: {
@@ -52,11 +59,8 @@ module.exports = {
             pass: env.get('AUTH_PASS').asString(),
         }
     },
-    
-    tlsServerPrivateKey: env.get('TLS_SERVER_PRIVATE_KEY').required().asString(),
     privateKeyLength: env.get('PRIVATE_KEY_LENGTH').default(4096).asIntPositive(),
     privateKeyAlgorithm: env.get('PRIVATE_KEY_ALGORITHM').default('rsa').asString(),
     dfspClientCsrParameters: env.get('DFSP_CLIENT_CSR_PARAMETERS').asJsonConfig(),
     dfspServerCsrParameters: env.get('DFSP_SERVER_CSR_PARAMETERS').asJsonConfig(),
-    dfspCaPath: env.get('DFSP_CA_PATH').required().asString(),
 };

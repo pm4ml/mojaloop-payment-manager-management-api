@@ -8,14 +8,13 @@
  *       Yevhen Kyriukha - yevhen.kyriukha@modusbox.com                   *
  **************************************************************************/
 
-const { Logger } = require('@internal/log');
+const { Logger } = require('@mojaloop/sdk-standard-components');
 const database = require('@internal/database');
 
 const transferTemplate = require('./data/transferTemplate');
 
 const createTestDb = async () => {
-    const logTransports = [() => {}];
-    const logger = new Logger({ context: { app: 'model-unit-tests-cache' }, space: 4, transports: logTransports });
+    const logger = new Logger.Logger({ buildStringify: () => '' });
     return database({
         cacheHost: 'dummyhost',
         cachePort: 1234,

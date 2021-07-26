@@ -15,7 +15,7 @@ COPY ./src/.npmrc ./.npmrc
 COPY ./src/package.json ./package.json
 # COPY ./src/package-lock.json ./package-lock.json
 COPY ./src/lib/database/package.json ./lib/database/package.json
-COPY ./src/lib/log/package.json ./lib/log/package.json
+COPY ./src/lib/vault/package.json ./lib/vault/package.json
 COPY ./src/lib/model/package.json ./lib/model/package.json
 COPY ./src/lib/randomphrase/package.json ./lib/randomphrase/package.json
 COPY ./src/lib/requests/package.json ./lib/requests/package.json
