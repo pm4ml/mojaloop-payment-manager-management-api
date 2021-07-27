@@ -29,6 +29,26 @@ const env = from(process.env, {
     asTextFileContent: (path) => getFileContent(path).toString().trim(),
 });
 
+const vaultAuthMethod = env.get('VAULT_AUTH_METHOD').required().asEnum(['K8S', 'APP_ROLE']);
+let vaultAuth;
+if (vaultAuthMethod === 'K8S') {
+    vaultAuth = {
+        k8s: {
+            token: env.get('VAULT_K8S_TOKEN_FILE').default('/var/run/secrets/kubernetes.io/serviceaccount/token').asTextFileContent(),
+            role: env.get('VAULT_K8S_ROLE').required().asString(),
+        },
+    };
+} else if (vaultAuthMethod === 'APP_ROLE') {
+    vaultAuth = {
+        appRole: {
+            // Generated per: https://www.vaultproject.io/docs/auth/approle#via-the-cli-1
+            // Or: https://github.com/kr1sp1n/node-vault/blob/70097269d35a58bb560b5290190093def96c87b1/example/auth_approle.js
+            roleId: env.get('VAULT_ROLE_ID_FILE').default('/vault/role-id').asTextFileContent(),
+            roleSecretId: env.get('VAULT_ROLE_SECRET_ID_FILE').default('/vault/role-secret-id').asTextFileContent(),
+        },
+    };
+}
+
 module.exports = {
     dfspId: env.get('DFSP_ID').required().asString(),
     envId: env.get('ENV_ID').required().asString(),
@@ -47,10 +67,12 @@ module.exports = {
     mcmClientRefreshIntervalSeconds: env.get('MCM_CLIENT_REFRESH_INTERVAL_SECONDS').default(60).asIntPositive(),
     vault: {
         endpoint: env.get('VAULT_ENDPOINT').required().asString(),
-        // Generated per: https://www.vaultproject.io/docs/auth/approle#via-the-cli-1
-        // Or: https://github.com/kr1sp1n/node-vault/blob/70097269d35a58bb560b5290190093def96c87b1/example/auth_approle.js
-        roleId: env.get('VAULT_ROLE_ID').default('/vault/role-id').asTextFileContent(),
-        roleSecretId: env.get('VAULT_ROLE_SECRET_ID').default('/vault/role-secret-id').asTextFileContent(),
+        mounts: {
+            pki: env.get('VAULT_MOUNT_PKI').default('pki').asString(),
+            kv: env.get('VAULT_MOUNT_KV').default('secrets').asString(),
+        },
+        pkiBaseDomain: env.get('VAULT_PKI_BASE_DOMAIN').required().asString(),
+        auth: vaultAuth,
     },
     auth: {
         enabled:  env.get('AUTH_ENABLED').asBoolStrict(),

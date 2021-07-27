@@ -23,44 +23,55 @@ const vaultPaths = {
     SERVER_PKEY: 'server-pkey',
 };
 
-// TODO: configuration?
-const storagePath = 'mcm-client';
-
 class Vault {
     /**
      *
      * @param opts {object}
      * @param opts.endpoint {string}
-     * @param opts.roleId {string}
-     * @param opts.roleSecretId {string}
+     * @param opts.mounts {object}
+     * @param opts.auth {object}
      * @param opts.logger {Logger}
      */
-    constructor({ envId, endpoint, roleId, roleSecretId, logger = new Logger.Logger() }) {
+    constructor({
+        endpoint,
+        mounts,
+        auth,
+        pkiBaseDomain,
+        logger = new Logger.Logger()
+    }) {
         this._logger = logger;
-        this._roleId = roleId;
-        this._roleSecretId = roleSecretId;
+        this._auth = auth;
         this._endpoint = endpoint;
-        this._envId = envId;
         this._vault = vault({ endpoint });
-        this._secretMount = `/${this._envId}/secret`;
-        this._pkiMount = `/${this._envId}/pki`;
-        this._logger.push({ endpoint, roleId, roleSecretId }).log('Vault constructed');
+        this._pkiBaseDomain = pkiBaseDomain;
+        this._secretMount = `/${mounts.kv}`;
+        this._pkiMount = `/${mounts.pki}`;
     }
 
     async connect() {
         await this._logger.log('Connecting to Vault');
 
-        // Vault configuration: https://www.vaultproject.io/docs/auth/approle
-        const creds = await this._vault.approleLogin({
-            role_id: this._roleId,
-            secret_id: this._roleSecretId
-        });
+        let creds;
+
+        if (this._auth.appRole) {
+            creds = await this._vault.approleLogin({
+                role_id: this._auth.appRole.roleId,
+                secret_id: this._auth.appRole.roleSecretId
+            });
+        } else if (this._auth.k8s) {
+            creds = await this._vault.kubernetesLogin({
+                role: this._auth.k8s.role,
+                jwt: this._auth.k8s.token,
+            });
+        } else {
+            throw new Error('Unsupported auth method');
+        }
         this._client = vault({
             endpoint: this._endpoint,
             token: creds.auth.client_token,
         });
 
-        await this._logger.push({ creds }).log('Connected to Vault');
+        await this._logger.push({ endpoint: this._endpoint }).log('Connected to Vault');
     }
 
     mountAll() {
@@ -72,7 +83,7 @@ class Vault {
 
     async createPkiRoles() {
         return this._client.request({
-            path: `${this._pkiMount}/roles/hub`,
+            path: `${this._pkiMount}/roles/${this._pkiBaseDomain}`,
             method: 'POST',
             json: {
                 allow_any_name: true,
@@ -82,18 +93,18 @@ class Vault {
 
     _setSecret(key, value) {
         assert(key !== null && key !== undefined, `Cannot set key: [${key}]`);
-        const path = `${this._secretMount}/${storagePath}/${key}`;
+        const path = `${this._secretMount}/${key}`;
         return this._client.write(path, value);
     }
 
     async _getSecret(key) {
-        const path = `${this._secretMount}/${storagePath}/${key}`;
+        const path = `${this._secretMount}/${key}`;
         const { data } = await this._client.read(path);
         return data;
     }
 
     async _deleteSecret(key) {
-        const path = `${this._secretMount}/${storagePath}/${key}`;
+        const path = `${this._secretMount}/${key}`;
         const { data } = await this._client.delete(path);
         return data;
     }
@@ -163,7 +174,7 @@ class Vault {
      */
     async signServerCSR(params) {
         const { data } = await this._client.request({
-            path: `${this._pkiMount}/sign/hub`,
+            path: `${this._pkiMount}/sign/${this._pkiBaseDomain}`,
             method: 'POST',
             json: {
                 common_name: params.commonName,
