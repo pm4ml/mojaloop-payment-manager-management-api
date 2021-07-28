@@ -53,7 +53,6 @@ class UIAPIServer {
 
         this._vault = new Vault({
             ...this._conf.vault,
-            envId: this._conf.envId,
             logger: this._logger,
         });
         await this._vault.connect();
