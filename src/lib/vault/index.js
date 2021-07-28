@@ -42,12 +42,7 @@ class Vault {
         this._logger = logger;
         this._auth = auth;
         this._endpoint = endpoint;
-        this._vault = vault({
-            endpoint,
-            rpDefaults: {
-                followAllRedirects: true,
-            },
-        });
+        this._vault = vault({ endpoint });
         this._pkiBaseDomain = pkiBaseDomain;
         this._secretMount = mounts.kv;
         this._pkiMount = mounts.pki;
@@ -74,9 +69,6 @@ class Vault {
         this._client = vault({
             endpoint: this._endpoint,
             token: creds.auth.client_token,
-            rpDefaults: {
-                followAllRedirects: true,
-            },
         });
 
         await this._logger.push({ endpoint: this._endpoint }).log('Connected to Vault');

@@ -76,7 +76,7 @@ class UIAPIServer {
         // Code to setup mcm client
         this._mcmState = new MCMStateModel({
             dfspId: this._conf.dfspId,
-            envId: 1, // FIXME: itereate over all the environments
+            envId: this._conf.envId, // FIXME: itereate over all the environments
             hubEndpoint: this._conf.mcmServerEndpoint,
             refreshIntervalSeconds: this._conf.mcmClientRefreshIntervalSeconds,
             vault: this._vault,
