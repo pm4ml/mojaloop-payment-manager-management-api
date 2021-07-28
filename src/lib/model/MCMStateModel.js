@@ -100,7 +100,7 @@ class MCMStateModel {
     async dfspClientCertificateExchangeProcess(){
         const cache = this._db.redisCache;
         const inboundEnrollmentId = await cache.get(`inboundEnrollmentId_${this._envId}`);
-        this._logger.log(`inboundEnrollmentId:: ${inboundEnrollmentId}`);
+        this._logger.log(`inboundEnrollmentId: ${inboundEnrollmentId}`);
         if (inboundEnrollmentId) {
             const privateKey = await this._vault.getClientPrivateKey();
 
