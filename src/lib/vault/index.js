@@ -42,10 +42,15 @@ class Vault {
         this._logger = logger;
         this._auth = auth;
         this._endpoint = endpoint;
-        this._vault = vault({ endpoint });
+        this._vault = vault({
+            endpoint,
+            rpDefaults: {
+                followAllRedirects: true,
+            },
+        });
         this._pkiBaseDomain = pkiBaseDomain;
-        this._secretMount = `/${mounts.kv}`;
-        this._pkiMount = `/${mounts.pki}`;
+        this._secretMount = mounts.kv;
+        this._pkiMount = mounts.pki;
     }
 
     async connect() {
@@ -69,6 +74,9 @@ class Vault {
         this._client = vault({
             endpoint: this._endpoint,
             token: creds.auth.client_token,
+            rpDefaults: {
+                followAllRedirects: true,
+            },
         });
 
         await this._logger.push({ endpoint: this._endpoint }).log('Connected to Vault');
@@ -94,13 +102,13 @@ class Vault {
     _setSecret(key, value) {
         assert(key !== null && key !== undefined, `Cannot set key: [${key}]`);
         const path = `${this._secretMount}/${key}`;
-        return this._client.write(path, value);
+        return this._client.write(path, { value });
     }
 
     async _getSecret(key) {
         const path = `${this._secretMount}/${key}`;
-        const { data } = await this._client.read(path);
-        return data;
+        const { data: { value } } = await this._client.read(path);
+        return value;
     }
 
     async _deleteSecret(key) {
