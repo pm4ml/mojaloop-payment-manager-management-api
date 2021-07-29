@@ -267,7 +267,7 @@ const createClientCSR = async(ctx) => {
     const createdCSR = await certModel.createCSR({
         privateKeyAlgorithm: ctx.state.conf.privateKeyAlgorithm,
         privateKeyLength: ctx.state.conf.privateKeyLength,
-        parameters: ctx.state.conf.dfspServerCsrParameters
+        parameters: ctx.state.conf.dfspClientCsrParameters,
     });
 
     ctx.body = await certModel.uploadClientCSR(createdCSR.csr);
