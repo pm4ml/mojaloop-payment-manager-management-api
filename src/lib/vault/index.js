@@ -15,7 +15,8 @@ const { Logger } = require('@mojaloop/sdk-standard-components');
 
 // TODO: find and link document containing rules on allowable paths
 const vaultPaths = {
-    JWS_CERTS: 'jws-certs',
+    JWS: 'jws',
+    PEER_JWS: 'peer-jws',
     HUB_ENDPOINTS: 'hub-endpoints',
     DFSP_CA_CERT: 'dfsp-ca-cert',
     SERVER_CERT: 'server-cert',
@@ -94,19 +95,18 @@ class Vault {
     _setSecret(key, value) {
         assert(key !== null && key !== undefined, `Cannot set key: [${key}]`);
         const path = `${this._secretMount}/${key}`;
-        return this._client.write(path, { value });
+        return this._client.write(path, value);
     }
 
     async _getSecret(key) {
         const path = `${this._secretMount}/${key}`;
-        const { data: { value } } = await this._client.read(path);
-        return value;
+        const { data } = await this._client.read(path);
+        return data;
     }
 
     async _deleteSecret(key) {
         const path = `${this._secretMount}/${key}`;
-        const { data } = await this._client.delete(path);
-        return data;
+        await this._client.delete(path);
     }
 
     async setClientPrivateKey(value) {
@@ -125,12 +125,20 @@ class Vault {
         return this._getSecret(vaultPaths.SERVER_PKEY);
     }
 
-    async setJWSCerts(value) {
-        return this._setSecret(vaultPaths.JWS_CERTS, value);
+    async setJWS(value) {
+        return this._setSecret(vaultPaths.JWS, value);
     }
 
-    async getJWSCerts() {
-        return this._getSecret(vaultPaths.JWS_CERTS);
+    async getJWS() {
+        return this._getSecret(vaultPaths.JWS);
+    }
+
+    async setPeerJWS(value) {
+        return this._setSecret(vaultPaths.PEER_JWS, value);
+    }
+
+    async getPeerJWS() {
+        return this._getSecret(vaultPaths.PEER_JWS);
     }
 
     /**
@@ -150,6 +158,27 @@ class Vault {
                 key_type: params.privateKeyAlgorithm,
                 key_bits: params.privateKeyLength,
             }
+        });
+        return data;
+    }
+
+    async createDFSPServerCert (params) {
+        const { names } = params;
+        const altNames = names.length > 1 ? names.slice(1).map((name) => name.CN).join(',') : '';
+        const { data } = await this._client.request({
+            path: `/${this._pkiMount}/issue/${this._pkiBaseDomain}`,
+            method: 'POST',
+            json: {
+                common_name: names[0].CN,
+                alt_names: altNames,
+                ou: names.map((name) => name.OU),
+                organization: names.map((name) => name.O),
+                locality: names.map((name) => name.L),
+                country: names.map((name) => name.C),
+                province: names.map((name) => name.ST),
+                key_type: params.key.algo,
+                key_bits: params.key.size,
+            },
         });
         return data;
     }
@@ -199,10 +228,11 @@ class Vault {
     }
 
     async getDfspCaCert() {
-        return this._client.request({
+        const { data } = await this._client.request({
             path: `${this._pkiMount}/ca/pem`,
             method: 'GET',
         });
+        return data;
     }
 
     async setDfspServerCert(certPem) {

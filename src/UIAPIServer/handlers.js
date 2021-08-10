@@ -344,18 +344,20 @@ const getJWSCertificates = async(ctx) => {
 
 const uploadJWSCertificates = async(ctx) => {
     const certModel = certModelFromContext(ctx);
-    ctx.body = await certModel.uploadJWS(ctx.request.body);
-};
-
-const updateJWSCertificates = async(ctx) => {
-    const { dfspId, mcmServerEndpoint } = ctx.state.conf;
-    const certModel = new CertificatesModel({
-        dfspId,
-        mcmServerEndpoint,
-        envId: ctx.params.envId,
-        logger: ctx.state.logger,
-    });
-    ctx.body = await certModel.updateJWS(ctx.request.body);
+    let jws = ctx.request.body;
+    if (!jws) {
+        jws = certModel.createJWS();
+    } else {
+        try {
+            certModel.validateJWSKeyPair(jws);
+        } catch (e) {
+            ctx.body = { error: e.message };
+            ctx.status = 400;
+            return;
+        }
+    }
+    await certModel.storeJWS(jws);
+    ctx.body = await certModel.uploadJWS({ publicKey: jws.publicKey });
 };
 
 const deleteJWSCertificates = async(ctx) => {
@@ -413,7 +415,10 @@ const generateDfspServerCerts = async(ctx) => {
     });
 
     //Exchange inbound configuration
-    await certModel.processDfspServerCert(createdCSR);
+    await certModel.processDfspServerCert({
+        ...createdCSR,
+        commonName: ctx.state.conf.dfspServerCsrParameters.subject.CN,
+    });
 
     //FIXME: return something relevant when doing https://modusbox.atlassian.net/browse/MP-2135
     ctx.body = '';
@@ -485,7 +490,6 @@ module.exports = {
     '/environments/{envId}/dfsp/jwscerts': {
         get: getJWSCertificates,
         post: uploadJWSCertificates,
-        put: updateJWSCertificates,
         delete: deleteJWSCertificates,
     },
     '/environments/{envId}/dfsp/clientcerts': {

@@ -20,7 +20,7 @@
 // and sends a message to all clients notifying them of the new application configuration.
 //
 // It expects new configuration to be supplied as an array of JSON patches. It therefore exposes
-// the current configuration to 
+// the current configuration to
 
 const ws = require('ws');
 const jsonPatch = require('fast-json-patch');
@@ -198,7 +198,7 @@ class Server extends ws.Server {
                     client.send(build.ERROR.NOTIFY.UNSUPPORTED_MESSAGE(msg.id));
                     break;
             }
-        };   
+        };
     }
 
     /*
@@ -208,17 +208,15 @@ class Server extends ws.Server {
 
         const updatedConfig = {};
 
-        // Section to populate Peer JWS Config 
+        // Section to populate Peer JWS Config
         let allJWSCerts = await this._certificatesModel.getAllJWSCertificates();
         let peerKeys = {};
         allJWSCerts
             .filter( jwsCert => jwsCert.dfspId !== this._appConfig.dfspId)
             .forEach( jwsCert => {
-                const keyName = jwsCert.dfspId;
-                const keyValue = this.convertFromCertToKey(jwsCert.jwsCertificate);
-                peerKeys[keyName] = keyValue;
+                peerKeys[jwsCert.dfspId] = jwsCert.publicKey;
             });
-        
+
         updatedConfig.peerJWSKeys = peerKeys;
 
         //TODO Section to populate Outbund TLS details
@@ -226,15 +224,6 @@ class Server extends ws.Server {
         //TODO Section to populate Inbound TLS details
 
         return updatedConfig;
-    }
-
-    /*
-    * Utility function to convert from certificate in Pem to public key format
-    */
-    convertFromCertToKey(certPem) {
-        const cert = forge.pki.certificateFromPem(certPem);
-        const publicKeyPem = forge.pki.publicKeyToPem(cert.publicKey);
-        return publicKeyPem;
     }
 
     /**
@@ -249,7 +238,7 @@ class Server extends ws.Server {
 
     /**
      * Broadcast configuration change to all connected clients.
-     * 
+     *
      * @param {object} params Updated configuration
      */
     async broadcastConfigChange(updatedConfig) {
@@ -263,7 +252,7 @@ class Server extends ws.Server {
 
     /**
     * Broadcasts a protocol message to all connected clients.
-    * 
+    *
     * @param {string} msg
     * @param {object} errorLogger
     */

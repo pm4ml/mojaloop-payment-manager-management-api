@@ -57,23 +57,16 @@ class MCMStateModel {
             this._logger.log(`dfspCerts:: ${JSON.stringify(dfspCerts)}`);
 
             const jwsCerts = await this._dfspCertificateModel.getAllJWSCertificates({ envId: this._envId, dfpsId: this._dfspId });
-            const newCertsStr = JSON.stringify(
-                jwsCerts.map((cert) => ({
-                    rootCertificate: cert.rootCertificate,
-                    intermediateChain: cert.intermediateChain,
-                    jwsCertificate: cert.jwsCertificate,
-                }))
-            );
 
             // Check if this set of certs differs from the ones in vault.
             // If so, store them then broadcast them to the connectors.
-            let oldJwsCerts = '';
+            let oldJwsCerts = {};
             try {
-                oldJwsCerts = await this._vault.getJWSCerts();
-            } catch (_) { /* `jwsCerts` file/record does not exist yet.*/ }
+                oldJwsCerts = await this._vault.getPeerJWS();
+            } catch { /* `jwsCerts` file/record does not exist yet.*/ }
 
-            if (oldJwsCerts !== newCertsStr && newCertsStr) {
-                await this._vault.setJWSCerts(newCertsStr);
+            if (jwsCerts && JSON.stringify(oldJwsCerts) !== JSON.stringify(jwsCerts)) {
+                await this._vault.setPeerJWS(jwsCerts);
                 this._logger.log(`jwsCerts:: ${JSON.stringify(jwsCerts)}`);
                 if (Array.isArray(jwsCerts) && jwsCerts.length) {
                     await this._certificatesModel.exchangeJWSConfiguration(jwsCerts);

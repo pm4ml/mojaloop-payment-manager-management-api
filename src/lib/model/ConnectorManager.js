@@ -55,10 +55,19 @@ class ConnectorManager {
         ControlServerEventEmitter.emit(INTERNAL_EVENTS.SERVER.BROADCAST_CONFIG_CHANGE, changedConfig);
     }
 
-    async reconfigureOutboundSdkForJWS(peerJWSPublicKeys) {
+    async reconfigureOutboundSdkForPeerJWS(peerJWSPublicKeys) {
         // Broadcast JWS keys for outbound server to connectors
         const changedConfig = {
             peerJWSKeys: peerJWSPublicKeys,
+        };
+
+        ControlServerEventEmitter.emit(INTERNAL_EVENTS.SERVER.BROADCAST_CONFIG_CHANGE, changedConfig);
+    }
+
+    async reconfigureOutboundSdkForJWS(key) {
+        // Broadcast JWS key for outbound server to connectors
+        const changedConfig = {
+            jwsSigningKey: key,
         };
 
         ControlServerEventEmitter.emit(INTERNAL_EVENTS.SERVER.BROADCAST_CONFIG_CHANGE, changedConfig);

@@ -42,7 +42,14 @@ class CertificatesModel {
     }
 
     async createCSR(csrParameters) {
-        return this._vault.createCSR(csrParameters);
+        const createdCSR = await this._mcmClientDFSPCertModel.createCSR({
+            envId : this._envId,
+            csrParameters: csrParameters
+        });
+
+        //FIXME: createdCSR.key value should be saved in vault. Not being saved now in storage since secrets type in kubernetes are read-only
+
+        return createdCSR;
     }
 
     /**
@@ -107,7 +114,7 @@ class CertificatesModel {
     }
 
     async processDfspServerCert(csr) {
-        const cert = await this._vault.signCSR(csr.csr);
+        const cert = await this._vault.signCSR(csr);
         this._logger.push(cert).log('DFSP server cert signed with DFSP CA cert');
 
         await Promise.all([
@@ -139,11 +146,10 @@ class CertificatesModel {
     async exchangeJWSConfiguration(jwsCerts) {
         let peerJWSPublicKeys = {};
         jwsCerts.forEach(jwsCert => {
-            peerJWSPublicKeys[jwsCert.dfspId] = forge.pki.publicKeyToPem((
-                forge.pki.certificateFromPem(jwsCert.jwsCertificate.trim().replace(/\\n/g, '\n'))).publicKey);
+            peerJWSPublicKeys[jwsCert.dfspId] = jwsCert.publicKey;
         });
         this._logger.push({peerJWSPublicKeys}).log('Peer JWS Public Keys');
-        await this._connectorManager.reconfigureOutboundSdkForJWS(JSON.stringify(peerJWSPublicKeys));
+        await this._connectorManager.reconfigureOutboundSdkForPeerJWS(JSON.stringify(peerJWSPublicKeys));
     }
 
     /**
@@ -163,6 +169,27 @@ class CertificatesModel {
             envId : this._envId,
             entry: body,
         });
+    }
+
+    async storeJWS(keypair) {
+        await this._vault.setJWS(keypair);
+        await this._connectorManager.reconfigureOutboundSdkForJWS(keypair.privateKey);
+    }
+
+    validateJWSKeyPair(jwsKeyPair) {
+        forge.pki.publicKeyFromPem(jwsKeyPair.publicKey);
+        forge.pki.privateKeyFromPem(jwsKeyPair.privateKey);
+    }
+
+    /**
+   * Upload DFSP JWS
+   */
+    createJWS() {
+        const keypair = forge.rsa.generateKeyPair({ bits: 2048 });
+        return {
+            publicKey: forge.pki.publicKeyToPem(keypair.publicKey, 72),
+            privateKey: forge.pki.privateKeyToPem(keypair.privateKey, 72)
+        };
     }
 
     /**
