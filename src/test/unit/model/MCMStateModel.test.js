@@ -23,8 +23,16 @@ describe('MCMState Model:', () => {
             this.dfspKey = dfspKey;
         }
 
-        async signServerCSR() {
+        async signHubCSR() {
             return { certificate: '' };
+        }
+
+        async setClientCert() {
+
+        }
+
+        async createClientCSR() {
+
         }
 
         async getSSLCerts() {

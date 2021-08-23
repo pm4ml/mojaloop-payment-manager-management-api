@@ -43,7 +43,7 @@ describe('create dfsp csr and upload to mcm', () => {
                     }
                 },
                 vault: {
-                    setClientPrivateKey: () => {},
+                    setClientCert: () => {},
                 }
             },
             params: { }
@@ -59,8 +59,6 @@ describe('create dfsp csr and upload to mcm', () => {
 
         expect(createCSRSpy).toHaveBeenCalledTimes(1);
         expect(uploadClientCSRSpy).toHaveBeenCalledTimes(1);
-
-        expect(createCSRSpy.mock.calls[0][0]).toStrictEqual(csrParameters);
 
         expect(uploadClientCSRSpy.mock.calls[0][0]).toStrictEqual(createdCsrMock.csr);
     });
@@ -90,8 +88,14 @@ describe('create dfsp csr and upload to mcm', () => {
                             // console.log(obj, msg);
                         }};
                     }
+                },
+                vault: {
+                    setClientCert: () => {},
+                    setJWS: () => {},
+                    createDFSPServerCert: () => ({ certificate: 'cert', private_key: 'pkey', issuing_ca: 'ca' })
                 }
             },
+            request: { },
             params: { }
         };
 
@@ -101,13 +105,17 @@ describe('create dfsp csr and upload to mcm', () => {
         const uploadCSRSpy = jest.spyOn(CertificatesModel.prototype, 'uploadClientCSR')
             .mockImplementation(() => { return {ctx: {body: 1}};});
 
+        const uploadServerCertificates = jest.spyOn(CertificatesModel.prototype, 'uploadServerCertificates')
+            .mockImplementation(() => { return {ctx: {body: 1}};});
+
+        const uploadJWS = jest.spyOn(CertificatesModel.prototype, 'uploadJWS')
+            .mockImplementation(() => { return {ctx: {body: 1}};});
+
         await handlers['/dfsp/allcerts'].post(context);
 
         expect(createCSRSpy).toHaveBeenCalledTimes(1);
         expect(uploadCSRSpy).toHaveBeenCalledTimes(1);
-
-        expect(createCSRSpy.mock.calls[0][0]).toStrictEqual(csrParameters);
-
-        expect(uploadCSRSpy.mock.calls[0][0]).toStrictEqual(createdCsrMock);
+        expect(uploadServerCertificates).toHaveBeenCalledTimes(1);
+        expect(uploadJWS).toHaveBeenCalledTimes(1);
     });
 });
