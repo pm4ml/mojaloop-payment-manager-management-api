@@ -24,7 +24,6 @@
 
 const ws = require('ws');
 const jsonPatch = require('fast-json-patch');
-const forge = require('node-forge');
 const randomPhrase = require('@internal/randomphrase');
 const CertificatesModel = require('@internal/model/CertificatesModel');
 const { getInternalEventEmitter, INTERNAL_EVENTS } = require('./events');

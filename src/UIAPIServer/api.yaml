@@ -13,16 +13,9 @@ paths:
         200:
           description: Returns empty body if the scheme adapter outbound transfers service is running.
 
-  /environments/{envId}/dfsp:
+  /dfsp:
     get:
       summary: Provide details of FSP based on the ID
-      parameters:
-        - name: envId
-          in: path
-          description: ID of environment
-          required: true
-          schema:
-            type: string
       responses:
         200:
           description: successful operation
@@ -215,20 +208,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/AverageTransferResponseTime'
 
-  /environments/{envId}/dfsp/endpoints:
+  /dfsp/endpoints:
     post:
       tags:
         - "DFSP-Endpoint-configuration"
       summary: "Adds a new entry to the DFSP endpoint"
       description: "Adds the entry with state NEW"
       operationId: "createDFSPIngressIp"
-      parameters:
-        - name: envId
-          in: path
-          description: ID of environment
-          required: true
-          schema:
-            type: string
       requestBody:
         description: DFSP entry
         required: true
@@ -265,12 +251,6 @@ paths:
       description: ""
       operationId: "getDFSPEndpoint"
       parameters:
-        - name: envId
-          in: path
-          description: ID of environment
-          required: true
-          schema:
-            type: integer
         - in: query
           name: direction
           required: false
@@ -294,19 +274,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/EndPointAny'
       x-swagger-router-controller: "DfspNetworkConfig"
-  /environments/{envId}/dfsps:
+  /dfsps:
     get:
       tags:
         - "DFSP"
       summary: "Get all the participants"
       description: "Get all the participants"
-      parameters:
-        - name: envId
-          in: path
-          description: ID of environment
-          required: true
-          schema:
-            type: string
       responses:
         200:
           description: successful operation
@@ -316,14 +289,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DFSPDetails'
-  /environments/{envId}/dfsp/endpoints/{epId}:
+  /dfsp/endpoints/{epId}:
     parameters:
-      - name: envId
-        in: path
-        description: ID of environment
-        required: true
-        schema:
-          type: integer
       - name: epId
         in: path
         description: ID of environment
@@ -373,7 +340,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/JWSCert"
       x-swagger-router-controller: DfspJWSCerts
-  /environments/{envId}/hub/endpoints:
+  /hub/endpoints:
     get:
       tags:
         - "DFSP-Endpoint-configuration"
@@ -381,12 +348,6 @@ paths:
       description: ""
       operationId: "getHubEndpoints"
       parameters:
-        - name: envId
-          in: path
-          description: ID of environment
-          required: true
-          schema:
-            type: string
         - in: query
           name: direction
           required: false
@@ -410,14 +371,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EndPointAny'
       x-swagger-router-controller: "DfspNetworkConfig"
-  /environments/{envId}/hub/servercerts:
-    parameters:
-      - name: envId
-        in: path
-        description: ID of environment
-        required: true
-        schema:
-          type: string
+  /hub/servercerts:
     get:
       tags:
         - Hub-server-certificates-configuration
@@ -501,14 +455,8 @@ paths:
                 items:
                   $ref: "#/components/schemas/Environment"
 
-  /environments/{envId}/dfsp/servercerts:
-    parameters:
-      - name: envId
-        in: path
-        description: ID of environment
-        required: true
-        schema:
-          type: string
+  /dfsp/servercerts:
+
     get:
       tags:
         - DFSP-server-certs-configuration
@@ -544,14 +492,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/ServerCert"
       x-swagger-router-controller: DfspServerCerts
-  /environments/{envId}/dfsp/alljwscerts:
-    parameters:
-      - name: envId
-        in: path
-        description: ID of environment
-        required: true
-        schema:
-          type: string
+  /dfsp/alljwscerts:
+
     get:
       tags:
         - DFSP-jws-certs-configuration
@@ -566,14 +508,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/DFSPJWSCert"
       x-swagger-router-controller: DfspJWS
-  /environments/{envId}/dfsp/jwscerts:
-    parameters:
-      - name: envId
-        in: path
-        description: ID of environment
-        required: true
-        schema:
-          type: string
+  /dfsp/jwscerts:
+
     get:
       tags:
         - DFSP-jws-certs-configuration
@@ -623,14 +559,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/JWSCert"
       x-swagger-router-controller: DfspJWSCerts
-  /environments/{envId}/dfsp/ca:
-    parameters:
-      - name: envId
-        in: path
-        description: ID of environment
-        required: true
-        schema:
-          type: string
+  /dfsp/ca:
+
     get:
       tags:
         - DFSP-client-ca-configuration
@@ -650,14 +580,17 @@ paths:
         - DFSP-client-ca-configuration
       summary: post client ca
       description: TBD
-      operationId: uploadDFSPCA
+      operationId: createDFSPCA
       requestBody:
-        description: Client CA cert
+        description: Create CA cert
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CACertificate'
+              type: object
+              oneOf:
+                  - $ref: "#/components/schemas/DFSPCAInfoInput"
+                  - $ref: "#/components/schemas/CAInitialInfo"
       responses:
         "200":
           description: successful operation
@@ -666,14 +599,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/CAInfo"
       x-swagger-router-controller: DfspCA
-  /environments/{envId}/hub/cas:
-    parameters:
-      - name: envId
-        in: path
-        description: ID of environment
-        required: true
-        schema:
-          type: string
+  /hub/ca:
+
     get:
       tags:
         - DFSP-hub-ca-configuration
@@ -686,18 +613,10 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/HubCAInfo"
-      x-swagger-router-controller: HubCAS
-  /environments/{envId}/dfsp/clientcerts:
-    parameters:
-      - name: envId
-        in: path
-        description: ID of environment
-        required: true
-        schema:
-          type: string
+                $ref: "#/components/schemas/HubCAInfo"
+      x-swagger-router-controller: HubCA
+  /dfsp/clientcerts:
+
     post:
       tags:
         - DFSP-client-certificates-configuration
@@ -735,14 +654,8 @@ paths:
                 items:
                   $ref: "#/components/schemas/ServerCert"
       x-swagger-router-controller: DfspServerCerts
-  /environments/{envId}/dfsp/clientcerts/csr:
-    parameters:
-      - name: envId
-        in: path
-        description: ID of environment
-        required: true
-        schema:
-          type: string
+  /dfsp/clientcerts/csr:
+
     post:
       tags:
         - DFSP-client-certificates-configuration
@@ -756,14 +669,8 @@ paths:
               schema:
                 $ref: "#/components/schemas/SuccessfulEnrollment"
       x-swagger-router-controller: DfspServerCerts
-  /environments/{envId}/dfsp/allcerts:
-    parameters:
-      - name: envId
-        in: path
-        description: ID of environment
-        required: true
-        schema:
-          type: string
+  /dfsp/allcerts:
+
     post:
       tags:
         - DFSP-all-certificates-configuration
@@ -787,14 +694,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/MonetaryZone"
-  /environments/{envId}/monetaryzones/{monetaryZoneId}/dfsps:
+  /monetaryzones/{monetaryZoneId}/dfsps:
     parameters:
-    - name: "envId"
-      in: "path"
-      description: "ID of environment"
-      required: true
-      schema:
-        type: "string"
     - name: "monetaryZoneId"
       in: "path"
       description: "ID of monetaryZone"
@@ -821,17 +722,11 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/DFSPDetails"
-  /environments/{envId}/dfsps/{dfspId}/status:
+  /dfsps/{dfspId}/status:
     get:
       summary: Retrieves environment dfsp status by phase and step completion
-      operationId: getEnvironmentDfspStatus
+      operationId: getDfspStatus
       parameters:
-        - name: envId
-          in: path
-          description: ID of the environment to get satus
-          required: true
-          schema:
-            type: string
         - name: dfspId
           in: path
           description: ID of the dfspId to get satus
@@ -846,7 +741,7 @@ paths:
                 schema:
                   type: array
                   items:
-                    $ref: '#/components/schemas/EnvironmentDfspStatus'
+                    $ref: '#/components/schemas/DfspStatus'
 components:
   schemas:
     Statuses:
@@ -869,7 +764,7 @@ components:
         - CERTIFICATE_AUTHORITY
         - SERVER_CERTIFICATES_EXCHANGE
         - JWS_CERTIFICATES
-    EnvironmentDfspStatus:
+    DfspStatus:
       type: object
       properties:
         phase:
@@ -1698,6 +1593,124 @@ components:
         privateKey:
           type: "string"
           description: "PEM-encoded private key corresponding to certificate"
+    CA_csr_dn:
+        required:
+            - CN
+            - O
+        type: object
+        properties:
+            CN:
+                type: string
+                description: Common Name
+            O:
+                type: string
+                description: Organization
+            OU:
+                type: string
+                description: Organizational Unit
+            C:
+                type: string
+                description: Country
+            ST:
+                type: string
+                description: State
+            L:
+                type: string
+                description: Location
+        description: Certificate Authority subject info
+    CA_csr_key:
+        required:
+            - algo
+            - size
+        type: object
+        properties:
+            algo:
+                type: string
+                enum:
+                    - rsa
+                    - ecdsa
+            size:
+                type: integer
+                format: int64
+        description: |
+            Key generation parameters
+        example:
+            size: 4096
+            algo: rsa
+    CAInitialInfo:
+        required:
+            - csr
+        type: object
+        properties:
+            default:
+                type: object
+                properties:
+                    expiry:
+                        type: string
+                        description: 'This should contain a time duration in the form understood
+                    by Go''s time package ( https://golang.org/pkg/time/#ParseDuration
+                    ). This unfortunately means that the maximum unit of time that can
+                    be used here is the hour. Example 8760h ( = 1 year ). Default: "87600h",
+                    // 10 years'
+                    usages:
+                        type: array
+                        description: Key usages
+                        items:
+                            type: string
+                            enum:
+                                - signing
+                                - key encipherment
+                                - server auth
+                                - client auth
+                    signature_algorithm:
+                        type: string
+                        description: Signature algorithm to use when signing certificates.
+                        enum:
+                            - SHA256WithRSA
+                            - SHA512WithRSA
+                description: To be used as default when generating keys, CSRs and certs
+            csr:
+                required:
+                    - hosts
+                    - key
+                    - names
+                type: object
+                properties:
+                    hosts:
+                        type: array
+                        description: List of hostnames.
+                        items:
+                            type: string
+                    names:
+                        maxItems: 1
+                        minItems: 1
+                        type: array
+                        description: List of DN names.
+                        items:
+                            $ref: '#/components/schemas/CA_csr_dn'
+                    key:
+                        $ref: '#/components/schemas/CA_csr_key'
+                description: CA root certificate parameters
+        description: CA initial parameters
+    DFSPCAInfoInput:
+        required:
+            - type
+        type: object
+        properties:
+            privateKey:
+                type: string
+                description: PEM-encoded private key
+            rootCertificate:
+                type: string
+                description: PEM-encoded certificate
+            intermediateChain:
+                type: string
+                description: PEM-encoded certificate
+            type:
+                type: string
+                enum:
+                    - EXTERNAL
+        description: Hub CA Input Body
     CAInfo:
       properties:
         rootCertificate:

@@ -56,7 +56,6 @@ describe('MCMState Model:', () => {
             const vault = new Vault('MOCK CA', 'MOCK KEY');
             const mcmState = new MCMStateModel({
                 dfspId: 'dfsptest',
-                envId: 1,
                 hubEndpoint: 'localhost',
                 refreshIntervalSeconds: 1000,
                 vault,
@@ -73,7 +72,6 @@ describe('MCMState Model:', () => {
             await mcmState.hubCSRExchangeProcess();
 
             expect(getCertificatesSpy).toHaveBeenCalledTimes(1);
-            expect(getCertificatesSpy.mock.calls[0][0]).toStrictEqual({ envId: 1 });
 
             expect(uploadServerCertificateSpy).toHaveBeenCalledTimes(0);
 
@@ -85,7 +83,6 @@ describe('MCMState Model:', () => {
 
             const mcmState = new MCMStateModel({
                 dfspId: 'dfsptest',
-                envId: 1,
                 hubEndpoint: 'localhost',
                 refreshIntervalSeconds: 1000,
                 vault,
@@ -102,7 +99,6 @@ describe('MCMState Model:', () => {
             await mcmState.hubCSRExchangeProcess();
 
             expect(getCertificatesSpy).toHaveBeenCalledTimes(1);
-            expect(getCertificatesSpy.mock.calls[0][0]).toStrictEqual({ envId: 1 });
 
             expect(uploadServerCertificateSpy).toHaveBeenCalledTimes(0);
         });
@@ -113,7 +109,6 @@ describe('MCMState Model:', () => {
 
             const mcmState = new MCMStateModel({
                 dfspId: 'dfsptest',
-                envId: 1,
                 hubEndpoint: 'localhost',
                 refreshIntervalSeconds: 1000,
                 vault,
@@ -127,7 +122,6 @@ describe('MCMState Model:', () => {
             await mcmState.hubCSRExchangeProcess();
 
             expect(getCertificatesSpy).toHaveBeenCalledTimes(1);
-            expect(getCertificatesSpy.mock.calls[0][0]).toStrictEqual({ envId: 1 });
         });
 
         test('when outbound enrollment list comes with one csr in CSR_LOADED and there is one DFSP CA then sign and upload', async () => {
@@ -136,7 +130,6 @@ describe('MCMState Model:', () => {
 
             const mcmState = new MCMStateModel({
                 dfspId: 'dfsptest',
-                envId: 1,
                 hubEndpoint: 'localhost',
                 refreshIntervalSeconds: 1000,
                 vault,
@@ -153,13 +146,11 @@ describe('MCMState Model:', () => {
             await mcmState.hubCSRExchangeProcess();
 
             expect(getCertificatesSpy).toHaveBeenCalledTimes(1);
-            expect(getCertificatesSpy.mock.calls[0][0]).toStrictEqual({ envId: 1 });
 
             expect(uploadServerCertificateSpy).toHaveBeenCalledTimes(1);
 
             const certificateToUpload = uploadServerCertificateSpy.mock.calls[0][0];
 
-            expect(certificateToUpload.envId).toStrictEqual(1);
             expect(certificateToUpload.enId).toStrictEqual(11);
 
         });

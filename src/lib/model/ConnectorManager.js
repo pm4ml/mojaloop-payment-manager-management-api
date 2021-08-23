@@ -31,7 +31,6 @@ class ConnectorManager {
                         ca: [Buffer.from(dfspCA)],
                         cert: Buffer.from(inServerCert),
                         key: Buffer.from(csrPrivateKey),
-
                     },
                 },
             },

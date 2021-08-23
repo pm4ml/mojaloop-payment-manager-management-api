@@ -22,7 +22,6 @@ describe('create dfsp csr and upload to mcm', () => {
         const context =  {
             'state': {
                 'conf': {
-                    envId: '1',
                     dfspId: 'pm4mltest',
                     privateKeyAlgorithm: csrParameters.privateKeyAlgorithm,
                     privateKeyLength : csrParameters.privateKeyLength,
@@ -47,7 +46,7 @@ describe('create dfsp csr and upload to mcm', () => {
                     setClientPrivateKey: () => {},
                 }
             },
-            params: { 'envId': '1' }
+            params: { }
         };
 
         const createCSRSpy = jest.spyOn(CertificatesModel.prototype, 'createCSR')
@@ -56,7 +55,7 @@ describe('create dfsp csr and upload to mcm', () => {
         const uploadClientCSRSpy = jest.spyOn(CertificatesModel.prototype, 'uploadClientCSR')
             .mockImplementation(() => { return {ctx: {body: 1}};});
 
-        await handlers['/environments/{envId}/dfsp/clientcerts/csr'].post(context);
+        await handlers['/dfsp/clientcerts/csr'].post(context);
 
         expect(createCSRSpy).toHaveBeenCalledTimes(1);
         expect(uploadClientCSRSpy).toHaveBeenCalledTimes(1);
@@ -79,7 +78,6 @@ describe('create dfsp csr and upload to mcm', () => {
         const context =  {
             'state': {
                 'conf': {
-                    envId: '1',
                     dfspId: 'pm4mltest',
                     privateKeyAlgorithm: csrParameters.privateKeyAlgorithm,
                     privateKeyLength : csrParameters.privateKeyLength,
@@ -94,7 +92,7 @@ describe('create dfsp csr and upload to mcm', () => {
                     }
                 }
             },
-            params: { 'envId': '1' }
+            params: { }
         };
 
         const createCSRSpy = jest.spyOn(CertificatesModel.prototype, 'createCSR')
@@ -103,7 +101,7 @@ describe('create dfsp csr and upload to mcm', () => {
         const uploadCSRSpy = jest.spyOn(CertificatesModel.prototype, 'uploadClientCSR')
             .mockImplementation(() => { return {ctx: {body: 1}};});
 
-        await handlers['/environments/{envId}/dfsp/allcerts'].post(context);
+        await handlers['/dfsp/allcerts'].post(context);
 
         expect(createCSRSpy).toHaveBeenCalledTimes(1);
         expect(uploadCSRSpy).toHaveBeenCalledTimes(1);

@@ -8,9 +8,6 @@
  *       Murthy Kakarlamudi - murthy@modusbox.com                         *
  **************************************************************************/
 
-const { X509Certificate, createPrivateKey } = require('crypto');
-const assert = require('assert').strict;
-
 const {
     Transfer,
     Balances,
@@ -18,7 +15,6 @@ const {
     Hub,
     CertificatesModel,
     MonetaryZone,
-    Environment
 } = require('@internal/model');
 
 const certModelFromContext = (ctx, overrides) => new CertificatesModel({
@@ -27,7 +23,6 @@ const certModelFromContext = (ctx, overrides) => new CertificatesModel({
     db: ctx.state.db,
     dfspId: ctx.state.conf.dfspId,
     mcmServerEndpoint: ctx.state.conf.mcmServerEndpoint,
-    envId: ctx.params.envId,
     logger: ctx.state.logger,
     vault: ctx.state.vault,
     ...overrides,
@@ -35,20 +30,18 @@ const certModelFromContext = (ctx, overrides) => new CertificatesModel({
 
 
 const healthCheck = async(ctx) => {
-    ctx.body = {'status':'ok'};
+    ctx.body = { status : 'ok' };
 };
 
-const getEnvironmentDfspStatus = async (ctx) => {
-    const envId = ctx.params.envId;
+const getDfspStatus = async (ctx) => {
     const dfspId = ctx.params.dfspId;
     const { mcmServerEndpoint } = ctx.state.conf;
-    const environment = new Environment({
-        envId: ctx.params.envId,
-        dfspId: ctx.params.dfspId,
+    const dfsp = new DFSP({
+        dfspId,
+        mcmServerEndpoint,
         logger: ctx.state.logger,
-        mcmServerEndpoint
     });
-    ctx.body = await environment.getEnvironmentDfspStatus(envId, dfspId);
+    ctx.body = await dfsp.getDfspStatus();
 };
 
 const getTransfers = async (ctx) => {
@@ -143,7 +136,6 @@ const getBalances = async(ctx) => {
 const getDFSPDetails = async(ctx) => {
     const { dfspId, mcmServerEndpoint } = ctx.state.conf;
     const dfsp = new DFSP({
-        envId: ctx.params.envId,
         dfspId,
         mcmServerEndpoint,
         logger: ctx.state.logger,
@@ -154,7 +146,6 @@ const getDFSPDetails = async(ctx) => {
 const getAllDfsps = async(ctx) => {
     const { dfspId, mcmServerEndpoint } = ctx.state.conf;
     const dfsp = new DFSP({
-        envId: ctx.params.envId,
         dfspId,
         mcmServerEndpoint,
         logger: ctx.state.logger,
@@ -172,14 +163,12 @@ const getAllEnvironments = async(ctx) => {
     });
 
     ctx.response.status = 200;
-    const responseData = await HubModel.getEnvironments();
-    ctx.body = responseData;
+    ctx.body = await HubModel.getEnvironments();
 };
 
 const getDFSPSByMonetaryZone = async(ctx) => {
-    const { envId, dfspId, mcmServerEndpoint } = ctx.state.conf;
+    const { dfspId, mcmServerEndpoint } = ctx.state.conf;
     const dfsp = new DFSP({
-        envId,
         dfspId,
         mcmServerEndpoint,
         logger: ctx.state.logger,
@@ -195,7 +184,6 @@ const getDFSPEndpoints = async(ctx) => {
     const dfsp = new DFSP({
         dfspId,
         mcmServerEndpoint,
-        envId: ctx.params.envId,
         logger: ctx.state.logger,
     });
     ctx.body = await dfsp.getEndpoints({ direction, type, state });
@@ -206,7 +194,6 @@ const createDFSPEndpoints = async(ctx) => {
     const dfsp = new DFSP({
         dfspId,
         mcmServerEndpoint,
-        envId: ctx.params.envId,
         logger: ctx.state.logger,
     });
     ctx.body = await dfsp.createEndpoints(ctx.request.body);
@@ -222,7 +209,6 @@ const updateDFSPEndpoint = async(ctx) => {
     const dfsp = new DFSP({
         dfspId,
         mcmServerEndpoint,
-        envId: ctx.params.envId,
         logger: ctx.state.logger,
     });
     ctx.body = await dfsp.updateEndpoint({ epId, ...ctx.request.body });
@@ -238,7 +224,6 @@ const deleteDFSPEndpoint = async(ctx) => {
     const dfsp = new DFSP({
         dfspId,
         mcmServerEndpoint,
-        envId: ctx.params.envId,
         logger: ctx.state.logger,
     });
     ctx.body = await dfsp.deleteEndpoint({ epId });
@@ -250,7 +235,6 @@ const getHubEndpoints = async(ctx) => {
     const hub = new Hub({
         dfspId,
         mcmServerEndpoint,
-        envId: ctx.params.envId,
         logger: ctx.state.logger,
     });
     ctx.body = await hub.getEndpoints({ direction, state });
@@ -264,19 +248,16 @@ const uploadClientCSR = async(ctx) => {
 const createClientCSR = async(ctx) => {
     const certModel = certModelFromContext(ctx);
 
-    const createdCSR = await certModel.createCSR({
-        privateKeyAlgorithm: ctx.state.conf.privateKeyAlgorithm,
-        privateKeyLength: ctx.state.conf.privateKeyLength,
-        parameters: ctx.state.conf.dfspClientCsrParameters,
-    });
+    const createdCSR = await certModel.createCSR(
+        ctx.state.conf.dfspClientCsrParameters,
+        ctx.state.conf.privateKeyLength);
 
     ctx.body = await certModel.uploadClientCSR(createdCSR.csr);
 
-    // save the enrollment id in the cache to process later
-    const cache = ctx.state.db.redisCache;
-    await cache.set(`inboundEnrollmentId_${ctx.params.envId}`, ctx.body.id);
-    // Persist private key for future use
-    await ctx.state.vault.setClientPrivateKey(createdCSR.private_key);
+    await ctx.state.vault.setClientCert({
+        id: ctx.body.id,
+        privateKey: createdCSR.privateKey,
+    });
 };
 
 const getClientCertificates = async(ctx) => {
@@ -289,38 +270,21 @@ const getDFSPCA = async(ctx) => {
     ctx.body = await certModel.getDFSPCA();
 };
 
-const uploadDFSPCA = async(ctx) => {
-    const { cert: certPem, privateKey: privateKeyPem } = ctx.request.body;
-
-    const cert = new X509Certificate(certPem);
-    const key = createPrivateKey(privateKeyPem);
-    assert(cert.checkPrivateKey(key), 'Private key does not match certificate');
-
+const createDFSPCA = async(ctx) => {
     const certModel = certModelFromContext(ctx);
-
-    ctx.body = await certModel.uploadDFSPCA(certPem, privateKeyPem);
+    ctx.body = (ctx.request.body.type === 'EXTERNAL')
+        ? await certModel.createExternalDFSPCA(ctx.request.body)
+        : await certModel.createInternalDFSPCA(ctx.request.body);
 };
 
-const getHubCAS = async(ctx) => {
+const getHubCA = async(ctx) => {
     const { dfspId, mcmServerEndpoint } = ctx.state.conf;
     const hub = new Hub({
         dfspId,
         mcmServerEndpoint,
-        envId: ctx.params.envId,
         logger: ctx.state.logger,
     });
-    ctx.body = await hub.getHubCAS();
-};
-
-const getRootHubCA = async(ctx) => {
-    const { dfspId, mcmServerEndpoint } = ctx.state.conf;
-    const hub = new Hub({
-        dfspId,
-        mcmServerEndpoint,
-        envId: ctx.params.envId,
-        logger: ctx.state.logger,
-    });
-    ctx.body = await hub.getRootHubCA();
+    ctx.body = await hub.getHubCA();
 };
 
 /**
@@ -371,7 +335,6 @@ const getHubServerCertificates = async(ctx) => {
     const hub = new Hub({
         dfspId,
         mcmServerEndpoint,
-        envId: ctx.params.envId,
         logger: ctx.state.logger,
     });
     ctx.body = await hub.getServerCertificates({ direction, type, state });
@@ -390,16 +353,9 @@ const getMonetaryZones = async(ctx) => {
 };
 
 const generateAllCerts = async(ctx) => {
-    const certModel = certModelFromContext(ctx);
-
-    const createdCSR = await certModel.createCSR({
-        privateKeyAlgorithm: ctx.state.conf.privateKeyAlgorithm,
-        privateKeyLength: ctx.state.conf.privateKeyLength,
-        parameters: ctx.state.conf.dfspServerCsrParameters
-    });
-
-    //Exchange inbound configuration
-    await certModel.uploadClientCSR(createdCSR);
+    await createClientCSR(ctx);
+    await generateDfspServerCerts(ctx);
+    await uploadJWSCertificates(ctx);
 
     //FIXME: return something relevant when doing https://modusbox.atlassian.net/browse/MP-2135
     ctx.body = '';
@@ -407,18 +363,7 @@ const generateAllCerts = async(ctx) => {
 
 const generateDfspServerCerts = async(ctx) => {
     const certModel = certModelFromContext(ctx);
-
-    const createdCSR = await certModel.createCSR({
-        privateKeyAlgorithm: ctx.state.conf.privateKeyAlgorithm,
-        privateKeyLength: ctx.state.conf.privateKeyLength,
-        parameters: ctx.state.conf.dfspServerCsrParameters
-    });
-
-    //Exchange inbound configuration
-    await certModel.processDfspServerCert({
-        ...createdCSR,
-        commonName: ctx.state.conf.dfspServerCsrParameters.subject.CN,
-    });
+    await certModel.createDfspServerCert(ctx.state.conf.dfspServerCsrParameters, ctx.state.conf.privateKeyLength);
 
     //FIXME: return something relevant when doing https://modusbox.atlassian.net/browse/MP-2135
     ctx.body = '';
@@ -429,8 +374,8 @@ module.exports = {
     '/health': {
         get: healthCheck
     },
-    '/environments/{envId}/dfsps/{dfspId}/status': {
-        get: getEnvironmentDfspStatus,
+    '/dfsps/{dfspId}/status': {
+        get: getDfspStatus,
     },
     '/transfers': {
         get: getTransfers,
@@ -459,66 +404,63 @@ module.exports = {
     '/balances': {
         get: getBalances,
     },
-    '/environments/{envId}/dfsp': {
+    '/dfsp': {
         get: getDFSPDetails,
     },
     '/environments': {
         get: getAllEnvironments,
     },
-    '/environments/{envId}/dfsp/endpoints': {
+    '/dfsp/endpoints': {
         get: getDFSPEndpoints,
         post: createDFSPEndpoints,
     },
-    '/environments/{envId}/dfsps': {
+    '/dfsps': {
         get: getAllDfsps,
     },
-    '/environments/{envId}/dfsp/endpoints/{epId}': {
+    '/dfsp/endpoints/{epId}': {
         put: updateDFSPEndpoint,
         delete: deleteDFSPEndpoint,
     },
-    '/environments/{envId}/hub/endpoints': {
+    '/hub/endpoints': {
         get: getHubEndpoints,
     },
-    '/environments/{envId}/dfsp/servercerts': {
+    '/dfsp/servercerts': {
         get: getDFSPServerCertificates,
         // post: uploadServerCertificates,
         post: generateDfspServerCerts,
     },
-    '/environments/{envId}/dfsp/alljwscerts': {
+    '/dfsp/alljwscerts': {
         get: getAllJWSCertificates,
     },
-    '/environments/{envId}/dfsp/jwscerts': {
+    '/dfsp/jwscerts': {
         get: getJWSCertificates,
         post: uploadJWSCertificates,
         delete: deleteJWSCertificates,
     },
-    '/environments/{envId}/dfsp/clientcerts': {
+    '/dfsp/clientcerts': {
         get: getClientCertificates,
         post: uploadClientCSR,
     },
-    '/environments/{envId}/dfsp/clientcerts/csr': {
+    '/dfsp/clientcerts/csr': {
         post: createClientCSR,
     },
-    '/environments/{envId}/dfsp/ca': {
+    '/dfsp/ca': {
         get: getDFSPCA,
-        post: uploadDFSPCA,
+        post: createDFSPCA,
     },
-    '/environments/{envId}/hub/cas': {
-        get: getHubCAS,
+    '/hub/ca': {
+        get: getHubCA,
     },
-    '/environments/{envId}/ca/rootCert': {
-        get: getRootHubCA,
-    },
-    '/environments/{envId}/hub/servercerts': {
+    '/hub/servercerts': {
         get: getHubServerCertificates,
     },
     '/monetaryzones': {
         get: getMonetaryZones
     },
-    '/environments/{envId}/monetaryzones/{monetaryZoneId}/dfsps':{
+    '/monetaryzones/{monetaryZoneId}/dfsps':{
         get: getDFSPSByMonetaryZone
     },
-    '/environments/{envId}/dfsp/allcerts':{
+    '/dfsp/allcerts':{
         post: generateAllCerts
     }
 };
