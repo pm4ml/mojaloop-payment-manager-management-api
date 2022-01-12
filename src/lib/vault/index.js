@@ -171,7 +171,8 @@ class Vault {
         try { await this.deleteCA(); } catch (e) { }
 
         const { names } = caOptions.csr;
-        const altNames = names.length > 1 ? names.slice(1).map((name) => name.CN).join(',') : '';
+        const [,...altNamesObjs] = names;
+        const altNames = altNamesObjs.map((name) => name.CN).join(',');
         const { data } = await this._client.request({
             path: `/${this._pkiMount}/root/generate/exported`,
             method: 'POST',
