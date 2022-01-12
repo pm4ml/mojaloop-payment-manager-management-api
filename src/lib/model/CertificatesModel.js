@@ -53,8 +53,8 @@ class CertificatesModel {
                 extensions: [{
                     name: 'subjectAltName',
                     altNames: [
-                        ...dns ? dns.map(value => ({ type: DNS_TYPE, value })) : [],
-                        ...ips ? ips.map(value => ({ type: IP_TYPE, value })) : [],
+                        ...(dns?.map?.(value => ({ type: DNS_TYPE, value })) || []),
+                        ...(ips?.map?.(value => ({ type: IP_TYPE, value })) || []),
                     ]
                 }]
             }]);
