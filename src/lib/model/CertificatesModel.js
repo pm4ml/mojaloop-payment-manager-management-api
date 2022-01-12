@@ -94,7 +94,7 @@ class CertificatesModel {
         assert(privateKey, 'Missing "privateKey" property');
 
         const info = await this.uploadDFSPCA(rootCertificate, intermediateChain);
-        await this._vault.setDFSPCaCertChain(rootCertificate + intermediateChain, privateKey);
+        await this._vault.setDFSPCaCertChain(rootCertificate + '\n' + intermediateChain, privateKey);
         return info;
     }
 
