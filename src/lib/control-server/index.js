@@ -138,8 +138,8 @@ class Client extends ws {
 
     async send(msg) {
         const data = typeof msg === 'string' ? msg : serialise(msg);
-        this._logger.log('Send msg as a client through websocket :: ', data);
-        this._logger.log('Websocket client information :: ', this.url);
+        this._logger.log('Send msg as a client through websocket : ', data);
+        this._logger.log('Websocket client information : ', this.url);
         return new Promise((resolve) => super.send.call(this, data, resolve));
     }
 

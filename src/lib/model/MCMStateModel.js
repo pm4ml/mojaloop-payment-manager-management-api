@@ -9,6 +9,7 @@
  **************************************************************************/
 
 const util = require('util');
+const stringify = require('json-stringify-deterministic');
 const { DFSPCertificateModel, HubCertificateModel, HubEndpointModel, AuthModel, ConnectorModel } = require('@modusbox/mcm-client');
 const CertificatesModel = require('./CertificatesModel');
 
@@ -81,9 +82,9 @@ class MCMStateModel {
         // Check if this set of certs differs from the ones in vault.
         // If so, store them then broadcast them to the connectors.
         const oldJwsCerts = await this._vault.getPeerJWS();
-        if (jwsCerts && JSON.stringify(oldJwsCerts) !== JSON.stringify(jwsCerts)) {
+        if (jwsCerts && stringify(oldJwsCerts) !== stringify(jwsCerts)) {
             await this._vault.setPeerJWS(jwsCerts);
-            this._logger.log(`jwsCerts:: ${JSON.stringify(jwsCerts)}`);
+            this._logger.push(jwsCerts).log('Exchanged JWS certs');
             if (Array.isArray(jwsCerts) && jwsCerts.length) {
                 await this._certificatesModel.exchangeJWSConfiguration(jwsCerts);
             }
