@@ -11,6 +11,7 @@
 const { DFSPCertificateModel, HubCertificateModel } = require('@modusbox/mcm-client');
 const ConnectorManager = require('./ConnectorManager');
 const forge = require('node-forge');
+const assert = require('assert');
 
 class CertificatesModel {
     constructor(opts) {
