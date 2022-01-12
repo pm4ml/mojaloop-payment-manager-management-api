@@ -200,7 +200,7 @@ class Vault {
         const reqJson = {
             common_name: csrParameters.subject.CN,
         };
-        if (csrParameters.extensions && csrParameters.extensions.subjectAltName) {
+        if (csrParameters?.extensions?.subjectAltName) {
             const { dns, ips } = csrParameters.extensions.subjectAltName;
             if (dns) {
                 reqJson.alt_names = dns.join(',');
