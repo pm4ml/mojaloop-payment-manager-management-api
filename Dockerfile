@@ -29,33 +29,6 @@ RUN rm -f ./.npmrc
 
 FROM node:lts-alpine
 
-# Install cfssl git make
-RUN apk add --no-cache git make musl-dev go openssl
-
-# golang env
-ENV GOPATH /go
-ENV GOROOT /usr/lib/go
-
-ENV PATH /go/bin:$PATH:$GOROOT/bin:$GOPATH/bin/
-
-# Install cfssl with Go and clean up
-RUN rm -rf $GOPATH/src/github.com/cloudflare/cfssl
-
-# WARNING: The next layer will be cached, it won't be re-fetched even if the tag changes on the github repo.
-RUN git clone https://github.com/modusintegration/cfssl.git --branch=v1.3.4 $GOPATH/src/github.com/cloudflare/cfssl
-
-WORKDIR $GOPATH/src/github.com/cloudflare/cfssl
-# home made: build locally
-RUN make
-RUN ls -l bin
-RUN cp bin/* /usr/bin
-# clean up
-RUN rm -rf ${GOROOT} ${GOPATH}
-
-# Check cfssl version
-RUN which cfssl
-RUN cfssl version
-
 # APP
 WORKDIR /
 
