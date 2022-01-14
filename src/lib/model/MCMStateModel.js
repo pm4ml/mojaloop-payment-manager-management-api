@@ -9,7 +9,8 @@
  **************************************************************************/
 
 const util = require('util');
-const { DFSPCertificateModel, HubCertificateModel, HubEndpointModel, AuthModel, ConnectorModel } = require('@modusbox/mcm-client');
+const stringify = require('json-stringify-deterministic');
+const { DFSPCertificateModel, HubCertificateModel, HubEndpointModel, AuthModel, ConnectorModel } = require('@pm4ml/mcm-client');
 const CertificatesModel = require('./CertificatesModel');
 
 class MCMStateModel {
@@ -20,7 +21,6 @@ class MCMStateModel {
      * @param opts.logger {object}
      * @param opts.dfspId {string}
      * @param opts.vault {object}
-     * @param opts.envId {string}
      * @param opts.refreshIntervalSeconds {number}
      * @param opts.tlsServerPrivateKey {String}
      * @param opts.controlServer {ConnectorManager.Server}
@@ -36,7 +36,6 @@ class MCMStateModel {
         });
         this._refreshIntervalSeconds = opts.refreshIntervalSeconds;
         this._vault = opts.vault;
-        this._envId = opts.envId;
         this._dfspId = opts.dfspId;
         this._logger = opts.logger;
         this._authEnabled = opts.authEnabled;
@@ -50,45 +49,17 @@ class MCMStateModel {
     async _refresh() {
         try {
             this._logger.log('starting mcm client refresh');
-            const dfspCerts = await this._dfspCertificateModel.getCertificates({ envId: this._envId });
-            // await this._vault.setSecret('dfspCerts', JSON.stringify(
-            //     dfspCerts.filter(cert => cert.certificate).map(cert => cert.certificate)
-            // ));
-            this._logger.log(`dfspCerts:: ${JSON.stringify(dfspCerts)}`);
 
-            const jwsCerts = await this._dfspCertificateModel.getAllJWSCertificates({ envId: this._envId, dfpsId: this._dfspId });
-            const newCertsStr = JSON.stringify(
-                jwsCerts.map((cert) => ({
-                    rootCertificate: cert.rootCertificate,
-                    intermediateChain: cert.intermediateChain,
-                    jwsCertificate: cert.jwsCertificate,
-                }))
-            );
-
-            // Check if this set of certs differs from the ones in vault.
-            // If so, store them then broadcast them to the connectors.
-            let oldJwsCerts = '';
-            try {
-                oldJwsCerts = await this._vault.getJWSCerts();
-            } catch (_) { /* `jwsCerts` file/record does not exist yet.*/ }
-
-            if (oldJwsCerts !== newCertsStr && newCertsStr) {
-                await this._vault.setJWSCerts(newCertsStr);
-                this._logger.log(`jwsCerts:: ${JSON.stringify(jwsCerts)}`);
-                if (Array.isArray(jwsCerts) && jwsCerts.length) {
-                    await this._certificatesModel.exchangeJWSConfiguration(jwsCerts);
-                }
-            }
-
+            await this.exchangeJWS();
 
             // Exchange Hub CSR
-            //await this.hubCSRExchangeProcess();
+            await this.hubCSRExchangeProcess();
 
             // Check if Client certificates are available in Hub
             await this.dfspClientCertificateExchangeProcess();
 
 
-            //const hubEndpoints = await this._hubEndpointModel.findAll({ envId: this._envId, state: 'CONFIRMED' });
+            //const hubEndpoints = await this._hubEndpointModel.findAll({ state: 'CONFIRMED' });
             // await this._vault.setSecret('hubEndpoints', JSON.stringify(hubEndpoints));
         }
         catch(err) {
@@ -98,19 +69,24 @@ class MCMStateModel {
     }
 
     async dfspClientCertificateExchangeProcess(){
-        const cache = this._db.redisCache;
-        const inboundEnrollmentId = await cache.get(`inboundEnrollmentId_${this._envId}`);
-        this._logger.log(`inboundEnrollmentId: ${inboundEnrollmentId}`);
-        if (inboundEnrollmentId) {
-            const privateKey = await this._vault.getClientPrivateKey();
+        try {
+            await this._certificatesModel.exchangeOutboundSdkConfiguration();
+        } catch (err) {
+            this._logger.log(`Error refreshing client certificate: ${err.stack || util.inspect(err)}`);
+        }
+    }
 
-            try {
-                const wasExchanged = await this._certificatesModel.exchangeOutboundSdkConfiguration(inboundEnrollmentId, privateKey);
-                if (wasExchanged) {
-                    await cache.del(`inboundEnrollmentId_${this._envId}`);
-                }
-            } catch(err) {
-                this._logger.log(`Error refreshing client certificate: ${err.stack || util.inspect(err)}`);
+    async exchangeJWS() {
+        const jwsCerts = await this._dfspCertificateModel.getAllJWSCertificates({ dfpsId: this._dfspId });
+
+        // Check if this set of certs differs from the ones in vault.
+        // If so, store them then broadcast them to the connectors.
+        const oldJwsCerts = await this._vault.getPeerJWS();
+        if (jwsCerts && stringify(oldJwsCerts) !== stringify(jwsCerts)) {
+            await this._vault.setPeerJWS(jwsCerts);
+            this._logger.push(jwsCerts).log('Exchanged JWS certs');
+            if (Array.isArray(jwsCerts) && jwsCerts.length) {
+                await this._certificatesModel.exchangeJWSConfiguration(jwsCerts);
             }
         }
     }
@@ -119,7 +95,7 @@ class MCMStateModel {
         const hubCerts = await this.getUnprocessedCerts();
         for (const cert of hubCerts) {
             try {
-                const hubCertificate = await this._vault.signServerCSR({
+                const hubCertificate = await this._vault.signHubCSR({
                     csr: cert.csr,
                     commonName: cert.csrInfo.subject.CN,
                 });
@@ -142,7 +118,7 @@ class MCMStateModel {
     }
 
     async getUnprocessedCerts() {
-        const hubCerts = await this._hubCertificateModel.getCertificates({ envId: this._envId });
+        const hubCerts = await this._hubCertificateModel.getCertificates();
 
         //filter all certs where cert state is CSR_LOADED
         return hubCerts.filter(cert => (cert.state === 'CSR_LOADED')).map(cert => ({
@@ -157,7 +133,7 @@ class MCMStateModel {
             certificate: hubCertificate
         };
 
-        return this._hubCertificateModel.uploadServerCertificate({ envId: this._envId, dfpsId: this._dfspId, enId: enrollmentId, entry: body } );
+        return this._hubCertificateModel.uploadServerCertificate({ enId: enrollmentId, entry: body } );
 
     }
 }

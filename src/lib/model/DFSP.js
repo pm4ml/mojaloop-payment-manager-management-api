@@ -8,14 +8,13 @@
  *       Murthy Kakarlamudi - murthy@modusbox.com                   *
  **************************************************************************/
 
-const { DFSPEnvConfigModel, DFSPEndpointModel } = require('@modusbox/mcm-client');
+const { DFSPConfigModel, DFSPEndpointModel } = require('@pm4ml/mcm-client');
 
 class DFSP {
     constructor(opts) {
         this._logger = opts.logger;
-        this._envId = opts.envId;
         this._dfspId = opts.dfspId;
-        this._mcmDFSPEnvConfigModel = new DFSPEnvConfigModel({
+        this._mcmDFSPConfigModel = new DFSPConfigModel({
             dfspId: opts.dfspId,
             logger: opts.logger,
             hubEndpoint: opts.mcmServerEndpoint,
@@ -33,51 +32,37 @@ class DFSP {
         };
     }
 
-    /**
-     *
-     * @param envId {string}
-     * @param dfspId {string}
-     */
-    async getEnvironmentDfspStatus(envId, dfspId) {
-
-        let environmentDfspStatus = this._mcmDFSPEnvConfigModel.findStatus({
-            envId : envId,
-            dfspId : dfspId
+    async getDfspStatus() {
+        return this._mcmDFSPConfigModel.findStatus({
+            dfspId: this._dfspId
         });
-
-        return environmentDfspStatus;
     }
 
     /**
      *
      */
     async getDfspDetails() {
-        const fspList = await this._mcmDFSPEnvConfigModel.getDFSPList({
-            envId : this._envId
-        });
+        const fspList = await this._mcmDFSPConfigModel.getDFSPList();
         return fspList.filter(fsp => fsp.id === this._dfspId)[0];
     }
 
     /**
-     * 
+     *
      */
     async getAllDfsps() {
-        return this._mcmDFSPEnvConfigModel.getDFSPList({
-            envId : this._envId
-        });
+        return this._mcmDFSPConfigModel.getDFSPList();
     }
 
 
     /**
-     * 
+     *
      * @param [opts.monetaryZoneId] {string}
      */
     async getDfspsByMonetaryZone(opts) {
-        return this._mcmDFSPEnvConfigModel.getDFSPListByMonetaryZone({
-            envId : this._envId,
+        return this._mcmDFSPConfigModel.getDFSPListByMonetaryZone({
             ...opts
         });
-    }    
+    }
 
     /**
      *
@@ -88,7 +73,6 @@ class DFSP {
      */
     async getEndpoints(opts) {
         return this._endpointModel.findAll({
-            envId : this._envId,
             ...opts,
         });
     }
@@ -104,7 +88,6 @@ class DFSP {
      */
     async createEndpoints(opts) {
         return this._endpointModel.create({
-            envId : this._envId,
             ...opts,
         });
     }
@@ -120,7 +103,6 @@ class DFSP {
      */
     async updateEndpoint(opts) {
         return this._endpointModel.update({
-            envId : this._envId,
             ...opts,
         });
     }
@@ -136,7 +118,6 @@ class DFSP {
      */
     async deleteEndpoint(opts) {
         return this._endpointModel.delete({
-            envId : this._envId,
             ...opts,
         });
     }

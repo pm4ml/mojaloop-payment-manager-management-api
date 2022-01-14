@@ -22,7 +22,6 @@ describe('create dfsp csr and upload to mcm', () => {
         const context =  {
             'state': {
                 'conf': {
-                    envId: '1',
                     dfspId: 'pm4mltest',
                     privateKeyAlgorithm: csrParameters.privateKeyAlgorithm,
                     privateKeyLength : csrParameters.privateKeyLength,
@@ -44,10 +43,10 @@ describe('create dfsp csr and upload to mcm', () => {
                     }
                 },
                 vault: {
-                    setClientPrivateKey: () => {},
+                    setClientCert: () => {},
                 }
             },
-            params: { 'envId': '1' }
+            params: { }
         };
 
         const createCSRSpy = jest.spyOn(CertificatesModel.prototype, 'createCSR')
@@ -56,12 +55,10 @@ describe('create dfsp csr and upload to mcm', () => {
         const uploadClientCSRSpy = jest.spyOn(CertificatesModel.prototype, 'uploadClientCSR')
             .mockImplementation(() => { return {ctx: {body: 1}};});
 
-        await handlers['/environments/{envId}/dfsp/clientcerts/csr'].post(context);
+        await handlers['/dfsp/clientcerts/csr'].post(context);
 
         expect(createCSRSpy).toHaveBeenCalledTimes(1);
         expect(uploadClientCSRSpy).toHaveBeenCalledTimes(1);
-
-        expect(createCSRSpy.mock.calls[0][0]).toStrictEqual(csrParameters);
 
         expect(uploadClientCSRSpy.mock.calls[0][0]).toStrictEqual(createdCsrMock.csr);
     });
@@ -79,7 +76,6 @@ describe('create dfsp csr and upload to mcm', () => {
         const context =  {
             'state': {
                 'conf': {
-                    envId: '1',
                     dfspId: 'pm4mltest',
                     privateKeyAlgorithm: csrParameters.privateKeyAlgorithm,
                     privateKeyLength : csrParameters.privateKeyLength,
@@ -92,9 +88,15 @@ describe('create dfsp csr and upload to mcm', () => {
                             // console.log(obj, msg);
                         }};
                     }
+                },
+                vault: {
+                    setClientCert: () => {},
+                    setJWS: () => {},
+                    createDFSPServerCert: () => ({ certificate: 'cert', private_key: 'pkey', issuing_ca: 'ca' })
                 }
             },
-            params: { 'envId': '1' }
+            request: { },
+            params: { }
         };
 
         const createCSRSpy = jest.spyOn(CertificatesModel.prototype, 'createCSR')
@@ -103,13 +105,17 @@ describe('create dfsp csr and upload to mcm', () => {
         const uploadCSRSpy = jest.spyOn(CertificatesModel.prototype, 'uploadClientCSR')
             .mockImplementation(() => { return {ctx: {body: 1}};});
 
-        await handlers['/environments/{envId}/dfsp/allcerts'].post(context);
+        const uploadServerCertificates = jest.spyOn(CertificatesModel.prototype, 'uploadServerCertificates')
+            .mockImplementation(() => { return {ctx: {body: 1}};});
+
+        const uploadJWS = jest.spyOn(CertificatesModel.prototype, 'uploadJWS')
+            .mockImplementation(() => { return {ctx: {body: 1}};});
+
+        await handlers['/dfsp/allcerts'].post(context);
 
         expect(createCSRSpy).toHaveBeenCalledTimes(1);
         expect(uploadCSRSpy).toHaveBeenCalledTimes(1);
-
-        expect(createCSRSpy.mock.calls[0][0]).toStrictEqual(csrParameters);
-
-        expect(uploadCSRSpy.mock.calls[0][0]).toStrictEqual(createdCsrMock);
+        expect(uploadServerCertificates).toHaveBeenCalledTimes(1);
+        expect(uploadJWS).toHaveBeenCalledTimes(1);
     });
 });

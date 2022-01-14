@@ -51,7 +51,6 @@ if (vaultAuthMethod === 'K8S') {
 
 module.exports = {
     dfspId: env.get('DFSP_ID').required().asString(),
-    envId: env.get('ENV_ID').required().asString(),
     control: {
         port: env.get('CONTROL_LISTEN_PORT').default('4005').asPortNumber(),
     },
@@ -73,6 +72,7 @@ module.exports = {
         },
         pkiBaseDomain: env.get('VAULT_PKI_BASE_DOMAIN').required().asString(),
         auth: vaultAuth,
+        signExpiryHours: env.get('VAULT_SIGN_EXPIRY_HOURS').default('43800').asString(),
     },
     auth: {
         enabled:  env.get('AUTH_ENABLED').asBoolStrict(),

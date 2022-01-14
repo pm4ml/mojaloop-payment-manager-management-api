@@ -8,7 +8,7 @@
  *       Damián García - damian.garcia@modusbox.com                       *
  **************************************************************************/
 
-const { MonetaryZoneModel } = require('@modusbox/mcm-client');
+const { MonetaryZoneModel } = require('@pm4ml/mcm-client');
 
 class MonetaryZone {
     /**

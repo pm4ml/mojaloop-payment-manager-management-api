@@ -8,12 +8,11 @@
  *       Murthy Kakarlamudi - murthy@modusbox.com                   *
  **************************************************************************/
 
-const { HubEndpointModel,HubCertificateModel, EnvironmentModel } = require('@modusbox/mcm-client');
+const { HubEndpointModel, HubCertificateModel } = require('@pm4ml/mcm-client');
 
 class Hub {
     constructor(opts) {
         this._logger = opts.logger;
-        this._envId = opts.envId;
         this._dfspId = opts.dfspId;
         this._endpointModel = new HubEndpointModel({
             dfspId: opts.dfspId,
@@ -22,10 +21,6 @@ class Hub {
         });
         this._certificateModel = new HubCertificateModel({
             dfspId: opts.dfspId,
-            logger: opts.logger,
-            hubEndpoint: opts.mcmServerEndpoint,
-        });
-        this._environmentModel = new EnvironmentModel({
             logger: opts.logger,
             hubEndpoint: opts.mcmServerEndpoint,
         });
@@ -40,35 +35,16 @@ class Hub {
      */
     async getEndpoints(opts) {
         return this._endpointModel.findAll({
-            envId : this._envId,
             ...opts,
         });
     }
 
     /**
-     *  Get all environments
-     */
-    async getEnvironments() {
-        return this._environmentModel.findAll();
-    }    
-
-    /**
      * Gets Hub CAs
      */
-    async getHubCAS() {
-        return this._certificateModel.getHubCAS({
-            envId : this._envId,
-        });
+    async getHubCA() {
+        return this._certificateModel.getHubCA();
     }
-
-    /**
-     * Gets root Hub CA
-     */
-    async getRootHubCA() {
-        return this._certificateModel.getRootHubCA({
-            envId : this._envId,
-        });
-    }    
 
     /**
      *
@@ -79,7 +55,6 @@ class Hub {
      */
     async getServerCertificates(opts) {
         return this._certificateModel.getServerCertificates({
-            envId : this._envId,
             ...opts,
         });
     }

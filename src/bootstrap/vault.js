@@ -11,7 +11,6 @@ const { Logger } = require('@mojaloop/sdk-standard-components');
     });
     const vault = new Vault({
         ...config.vault,
-        envId: config.envId,
         logger,
     });
     await vault.connect();

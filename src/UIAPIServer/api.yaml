@@ -8,21 +8,14 @@ paths:
       summary: Health check endpoint
       description: This endpoint checks the health of the endpoint.
       tags:
-        - Health
+      - Health
       responses:
         200:
           description: Returns empty body if the scheme adapter outbound transfers service is running.
 
-  /environments/{envId}/dfsp:
+  /dfsp:
     get:
       summary: Provide details of FSP based on the ID
-      parameters:
-        - name: envId
-          in: path
-          description: ID of environment
-          required: true
-          schema:
-            type: string
       responses:
         200:
           description: successful operation
@@ -35,31 +28,31 @@ paths:
       summary: Retrieves all transfers
       operationId: findAllTransfers
       parameters:
-        - in: query
-          name: startTimestamp
-          required: false
-          schema:
-            $ref: "#/components/schemas/Timestamp"
-        - in: query
-          name: endTimestamp
-          required: false
-          schema:
-            $ref: "#/components/schemas/Timestamp"
-        - in: query
-          name: id
-          required: false
-          schema:
-            type: string
-        - in: query
-          name: institution
-          required: false
-          schema:
-            type: string
-        - in: query
-          name: status
-          required: false
-          schema:
-            $ref: "#/components/schemas/TransferStatus"
+      - in: query
+        name: startTimestamp
+        required: false
+        schema:
+          $ref: "#/components/schemas/Timestamp"
+      - in: query
+        name: endTimestamp
+        required: false
+        schema:
+          $ref: "#/components/schemas/Timestamp"
+      - in: query
+        name: id
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: institution
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: status
+        required: false
+        schema:
+          $ref: "#/components/schemas/TransferStatus"
       responses:
         200:
           description: successful operation
@@ -75,31 +68,31 @@ paths:
       summary: Retrieves all transfers with errors
       operationId: findAllTransferErrors
       parameters:
-        - in: query
-          name: startTimestamp
-          required: false
-          schema:
-            $ref: "#/components/schemas/Timestamp"
-        - in: query
-          name: endTimestamp
-          required: false
-          schema:
-            $ref: "#/components/schemas/Timestamp"
-        - in: query
-          name: id
-          required: false
-          schema:
-            type: string
-        - in: query
-          name: institution
-          required: false
-          schema:
-            type: string
-        - in: query
-          name: status
-          required: false
-          schema:
-            $ref: "#/components/schemas/TransferStatus"
+      - in: query
+        name: startTimestamp
+        required: false
+        schema:
+          $ref: "#/components/schemas/Timestamp"
+      - in: query
+        name: endTimestamp
+        required: false
+        schema:
+          $ref: "#/components/schemas/Timestamp"
+      - in: query
+        name: id
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: institution
+        required: false
+        schema:
+          type: string
+      - in: query
+        name: status
+        required: false
+        schema:
+          $ref: "#/components/schemas/TransferStatus"
       responses:
         200:
           description: successful operation
@@ -115,12 +108,12 @@ paths:
       summary: Retrieves a transfer
       operationId: findTransfer
       parameters:
-        - name: transferId
-          in: path
-          description: UUID of the transfer to get
-          required: true
-          schema:
-            type: string
+      - name: transferId
+        in: path
+        description: UUID of the transfer to get
+        required: true
+        schema:
+          type: string
       responses:
         200:
           description: successful operation
@@ -134,12 +127,12 @@ paths:
       summary: Retrieves full details for a transfer
       operationId: findTransferDetails
       parameters:
-        - name: transferId
-          in: path
-          description: UUID of the transfer to get
-          required: true
-          schema:
-            type: string
+      - name: transferId
+        in: path
+        description: UUID of the transfer to get
+        required: true
+        schema:
+          type: string
       responses:
         200:
           description: successful operation
@@ -155,13 +148,13 @@ paths:
       summary: Retrieves hourly flow data
       operationId: findHourlyFlow
       parameters:
-        - in: query
-          name: hoursPrevious
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 720
+      - in: query
+        name: hoursPrevious
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 720
       responses:
         200:
           description: successful operation
@@ -177,13 +170,13 @@ paths:
       summary: Retrieves minute by minute successful transfer percentage data
       operationId: findMinuteSuccessfulTransfer
       parameters:
-        - in: query
-          name: minutePrevious
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 1440
+      - in: query
+        name: minutePrevious
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1440
       responses:
         200:
           description: successful operation
@@ -198,13 +191,13 @@ paths:
       summary: Retrieves minute by minute average transfer response time data
       operationId: findMinuteAverageTransferResponseTime
       parameters:
-        - in: query
-          name: minutePrevious
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 1440
+      - in: query
+        name: minutePrevious
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1440
       responses:
         200:
           description: successful operation
@@ -215,20 +208,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/AverageTransferResponseTime'
 
-  /environments/{envId}/dfsp/endpoints:
+  /dfsp/endpoints:
     post:
       tags:
-        - "DFSP-Endpoint-configuration"
+      - "DFSP-Endpoint-configuration"
       summary: "Adds a new entry to the DFSP endpoint"
       description: "Adds the entry with state NEW"
       operationId: "createDFSPIngressIp"
-      parameters:
-        - name: envId
-          in: path
-          description: ID of environment
-          required: true
-          schema:
-            type: string
       requestBody:
         description: DFSP entry
         required: true
@@ -240,16 +226,16 @@ paths:
                 type:
                   type: "string"
                   enum:
-                    - "IP"
-                    - "URL"
+                  - "IP"
+                  - "URL"
                 direction:
                   type: "string"
                   enum:
-                    - "INGRESS"
-                    - "EGRESS"
+                  - "INGRESS"
+                  - "EGRESS"
               allOf:
-                - $ref: "#/components/schemas/IPEntry"
-                - $ref: "#/components/schemas/URLEntry"
+              - $ref: "#/components/schemas/IPEntry"
+              - $ref: "#/components/schemas/URLEntry"
       responses:
         200:
           description: "successful operation"
@@ -260,32 +246,26 @@ paths:
       x-swagger-router-controller: "DfspNetworkConfig"
     get:
       tags:
-        - "DFSP-Endpoint-configuration"
+      - "DFSP-Endpoint-configuration"
       summary: "Get the DFSP endpoints"
       description: ""
       operationId: "getDFSPEndpoint"
       parameters:
-        - name: envId
-          in: path
-          description: ID of environment
-          required: true
-          schema:
-            type: integer
-        - in: query
-          name: direction
-          required: false
-          schema:
-            $ref: "#/components/schemas/EndpointDirection"
-        - in: query
-          name: type
-          required: false
-          schema:
-            $ref: "#/components/schemas/EndpointType"
-        - in: query
-          name: state
-          required: false
-          schema:
-            $ref: "#/components/schemas/EndpointState"
+      - in: query
+        name: direction
+        required: false
+        schema:
+          $ref: "#/components/schemas/EndpointDirection"
+      - in: query
+        name: type
+        required: false
+        schema:
+          $ref: "#/components/schemas/EndpointType"
+      - in: query
+        name: state
+        required: false
+        schema:
+          $ref: "#/components/schemas/EndpointState"
       responses:
         200:
           description: "successful operation"
@@ -294,19 +274,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/EndPointAny'
       x-swagger-router-controller: "DfspNetworkConfig"
-  /environments/{envId}/dfsps:
+  /dfsps:
     get:
       tags:
-        - "DFSP"
+      - "DFSP"
       summary: "Get all the participants"
       description: "Get all the participants"
-      parameters:
-        - name: envId
-          in: path
-          description: ID of environment
-          required: true
-          schema:
-            type: string
       responses:
         200:
           description: successful operation
@@ -316,23 +289,17 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DFSPDetails'
-  /environments/{envId}/dfsp/endpoints/{epId}:
+  /dfsp/endpoints/{epId}:
     parameters:
-      - name: envId
-        in: path
-        description: ID of environment
-        required: true
-        schema:
-          type: integer
-      - name: epId
-        in: path
-        description: ID of environment
-        required: true
-        schema:
-          type: integer
+    - name: epId
+      in: path
+      description: ID of environment
+      required: true
+      schema:
+        type: integer
     put:
       tags:
-        - "DFSP-Endpoint-configuration"
+      - "DFSP-Endpoint-configuration"
       summary: "Updates existing entry of the DFSP endpoint"
       description: "Updates existing entry of the DFSP endpoint"
       operationId: "updateDFSPEndpoint"
@@ -349,8 +316,8 @@ paths:
                 direction:
                   $ref: "#/components/schemas/EndpointDirection"
               allOf:
-                - $ref: "#/components/schemas/IPEntry"
-                - $ref: "#/components/schemas/URLEntry"
+              - $ref: "#/components/schemas/IPEntry"
+              - $ref: "#/components/schemas/URLEntry"
       responses:
         200:
           description: "successful operation"
@@ -361,7 +328,7 @@ paths:
       x-swagger-router-controller: "DfspNetworkConfig"
     delete:
       tags:
-        - DFSP-jws-certificates-configuration
+      - DFSP-jws-certificates-configuration
       summary: delete JWS certificate
       description: TBD
       operationId: deleteDfspEndpoint
@@ -373,35 +340,29 @@ paths:
               schema:
                 $ref: "#/components/schemas/JWSCert"
       x-swagger-router-controller: DfspJWSCerts
-  /environments/{envId}/hub/endpoints:
+  /hub/endpoints:
     get:
       tags:
-        - "DFSP-Endpoint-configuration"
+      - "DFSP-Endpoint-configuration"
       summary: "Get the Hub endpoints"
       description: ""
       operationId: "getHubEndpoints"
       parameters:
-        - name: envId
-          in: path
-          description: ID of environment
-          required: true
-          schema:
-            type: string
-        - in: query
-          name: direction
-          required: false
-          schema:
-            $ref: "#/components/schemas/EndpointDirection"
-        - in: query
-          name: type
-          required: false
-          schema:
-            $ref: "#/components/schemas/EndpointType"
-        - in: query
-          name: state
-          required: false
-          schema:
-            $ref: "#/components/schemas/EndpointState"
+      - in: query
+        name: direction
+        required: false
+        schema:
+          $ref: "#/components/schemas/EndpointDirection"
+      - in: query
+        name: type
+        required: false
+        schema:
+          $ref: "#/components/schemas/EndpointType"
+      - in: query
+        name: state
+        required: false
+        schema:
+          $ref: "#/components/schemas/EndpointState"
       responses:
         200:
           description: "successful operation"
@@ -410,17 +371,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/EndPointAny'
       x-swagger-router-controller: "DfspNetworkConfig"
-  /environments/{envId}/hub/servercerts:
-    parameters:
-      - name: envId
-        in: path
-        description: ID of environment
-        required: true
-        schema:
-          type: string
+  /hub/servercerts:
     get:
       tags:
-        - Hub-server-certificates-configuration
+      - Hub-server-certificates-configuration
       summary: get hub server certificate
       description: TBD
       operationId: getHubServerCerts
@@ -436,16 +390,16 @@ paths:
     get:
       summary: Retrieves transfers status summary
       parameters:
-        - in: query
-          name: startTimestamp
-          required: false
-          schema:
-            $ref: "#/components/schemas/Timestamp"
-        - in: query
-          name: endTimestamp
-          required: false
-          schema:
-            $ref: "#/components/schemas/Timestamp"
+      - in: query
+        name: startTimestamp
+        required: false
+        schema:
+          $ref: "#/components/schemas/Timestamp"
+      - in: query
+        name: endTimestamp
+        required: false
+        schema:
+          $ref: "#/components/schemas/Timestamp"
       responses:
         200:
           description: successful operation
@@ -466,16 +420,16 @@ paths:
       summary: 'Retrieves position, reserved, committed balances for a given time-period '
       operationId: findBalances
       parameters:
-        - in: query
-          name: startTimestamp
-          required: false
-          schema:
-            $ref: "#/components/schemas/Timestamp"
-        - in: query
-          name: endTimestamp
-          required: false
-          schema:
-            $ref: "#/components/schemas/Timestamp"
+      - in: query
+        name: startTimestamp
+        required: false
+        schema:
+          $ref: "#/components/schemas/Timestamp"
+      - in: query
+        name: endTimestamp
+        required: false
+        schema:
+          $ref: "#/components/schemas/Timestamp"
       responses:
         200:
           description: successful operation
@@ -501,17 +455,11 @@ paths:
                 items:
                   $ref: "#/components/schemas/Environment"
 
-  /environments/{envId}/dfsp/servercerts:
-    parameters:
-      - name: envId
-        in: path
-        description: ID of environment
-        required: true
-        schema:
-          type: string
+  /dfsp/servercerts:
+
     get:
       tags:
-        - DFSP-server-certs-configuration
+      - DFSP-server-certs-configuration
       summary: get dfsp server certs
       description: TBD
       operationId: getDfspServerCerts
@@ -525,7 +473,7 @@ paths:
       x-swagger-router-controller: DfspCA
     post:
       tags:
-        - DFSP-server-certificates-configuration
+      - DFSP-server-certificates-configuration
       summary: post server certificate
       description: TBD
       operationId: createDfspServerCerts
@@ -544,17 +492,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/ServerCert"
       x-swagger-router-controller: DfspServerCerts
-  /environments/{envId}/dfsp/alljwscerts:
-    parameters:
-      - name: envId
-        in: path
-        description: ID of environment
-        required: true
-        schema:
-          type: string
+  /dfsp/alljwscerts:
+
     get:
       tags:
-        - DFSP-jws-certs-configuration
+      - DFSP-jws-certs-configuration
       summary: get JWS certificates for all DFSPs in the environment
       description: TBD
       operationId: getAllDfspJWSCerts
@@ -566,17 +508,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/DFSPJWSCert"
       x-swagger-router-controller: DfspJWS
-  /environments/{envId}/dfsp/jwscerts:
-    parameters:
-      - name: envId
-        in: path
-        description: ID of environment
-        required: true
-        schema:
-          type: string
+  /dfsp/jwscerts:
+
     get:
       tags:
-        - DFSP-jws-certs-configuration
+      - DFSP-jws-certs-configuration
       summary: get jws server certs
       description: TBD
       operationId: getDfspJWSCerts
@@ -588,30 +524,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/DFSPJWSCert"
       x-swagger-router-controller: DfspJWS
-    put:
-      tags:
-        - DFSP-jws-certificates-configuration
-      summary: update JWS certificate
-      description: TBD
-      operationId: updateDfspJwsCerts
-      requestBody:
-        description: Certificate
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BaseJWSCert'
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/JWSCert"
-      x-swagger-router-controller: DfspJWSCerts
     delete:
       tags:
-        - DFSP-jws-certificates-configuration
+      - DFSP-jws-certificates-configuration
       summary: delete JWS certificate
       description: TBD
       operationId: deleteDfspJwsCerts
@@ -625,13 +540,13 @@ paths:
       x-swagger-router-controller: DfspJWSCerts
     post:
       tags:
-        - DFSP-jws-certificates-configuration
+      - DFSP-jws-certificates-configuration
       summary: create JWS certificate
       description: TBD
       operationId: createDfspJwsCerts
       requestBody:
         description: Certificate
-        required: true
+        required: false
         content:
           application/json:
             schema:
@@ -644,17 +559,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/JWSCert"
       x-swagger-router-controller: DfspJWSCerts
-  /environments/{envId}/dfsp/ca:
-    parameters:
-      - name: envId
-        in: path
-        description: ID of environment
-        required: true
-        schema:
-          type: string
+  /dfsp/ca:
+
     get:
       tags:
-        - DFSP-client-ca-configuration
+      - DFSP-client-ca-configuration
       summary: get dfsp ca
       description: TBD
       operationId: getDfspCA
@@ -668,17 +577,20 @@ paths:
       x-swagger-router-controller: DfspCA
     post:
       tags:
-        - DFSP-client-ca-configuration
+      - DFSP-client-ca-configuration
       summary: post client ca
       description: TBD
-      operationId: uploadDFSPCA
+      operationId: createDFSPCA
       requestBody:
-        description: Client CA cert
+        description: Create CA cert
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CACertificate'
+              type: object
+              oneOf:
+              - $ref: "#/components/schemas/DFSPCAInfoInput"
+              - $ref: "#/components/schemas/CAInitialInfo"
       responses:
         "200":
           description: successful operation
@@ -687,17 +599,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/CAInfo"
       x-swagger-router-controller: DfspCA
-  /environments/{envId}/hub/cas:
-    parameters:
-      - name: envId
-        in: path
-        description: ID of environment
-        required: true
-        schema:
-          type: string
+  /hub/ca:
+
     get:
       tags:
-        - DFSP-hub-ca-configuration
+      - DFSP-hub-ca-configuration
       summary: get hub ca
       description: TBD
       operationId: getHubCA
@@ -707,21 +613,13 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/HubCAInfo"
-      x-swagger-router-controller: HubCAS
-  /environments/{envId}/dfsp/clientcerts:
-    parameters:
-      - name: envId
-        in: path
-        description: ID of environment
-        required: true
-        schema:
-          type: string
+                $ref: "#/components/schemas/HubCAInfo"
+      x-swagger-router-controller: HubCA
+  /dfsp/clientcerts:
+
     post:
       tags:
-        - DFSP-client-certificates-configuration
+      - DFSP-client-certificates-configuration
       summary: post client certificates
       description: TBD
       operationId: createDfspClientCerts
@@ -742,7 +640,7 @@ paths:
       x-swagger-router-controller: DfspServerCerts
     get:
       tags:
-        - DFSP-client-certificates-configuration
+      - DFSP-client-certificates-configuration
       summary: get client certificates
       description: TBD
       operationId: getDfspClientCSR
@@ -756,17 +654,11 @@ paths:
                 items:
                   $ref: "#/components/schemas/ServerCert"
       x-swagger-router-controller: DfspServerCerts
-  /environments/{envId}/dfsp/clientcerts/csr:
-    parameters:
-      - name: envId
-        in: path
-        description: ID of environment
-        required: true
-        schema:
-          type: string
+  /dfsp/clientcerts/csr:
+
     post:
       tags:
-        - DFSP-client-certificates-configuration
+      - DFSP-client-certificates-configuration
       summary: post client certificates
       description: Creates inbound CSR and uploads it to MCM
       responses:
@@ -777,17 +669,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/SuccessfulEnrollment"
       x-swagger-router-controller: DfspServerCerts
-  /environments/{envId}/dfsp/allcerts:
-    parameters:
-      - name: envId
-        in: path
-        description: ID of environment
-        required: true
-        schema:
-          type: string
+  /dfsp/allcerts:
+
     post:
       tags:
-        - DFSP-all-certificates-configuration
+      - DFSP-all-certificates-configuration
       summary: autogenerate and configure all certificates
       description: TBD
       responses:
@@ -808,14 +694,8 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/MonetaryZone"
-  /environments/{envId}/monetaryzones/{monetaryZoneId}/dfsps:
+  /monetaryzones/{monetaryZoneId}/dfsps:
     parameters:
-    - name: "envId"
-      in: "path"
-      description: "ID of environment"
-      required: true
-      schema:
-        type: "string"
     - name: "monetaryZoneId"
       in: "path"
       description: "ID of monetaryZone"
@@ -827,12 +707,12 @@ paths:
       - "monetaryzones"
       summary: "Returns all the dfsps for that monetary zone"
       parameters:
-        - name: monetaryZoneId
-          in: "path"
-          description: "ID of monetaryZone"
-          required: true
-          schema:
-            type: "string"
+      - name: monetaryZoneId
+        in: "path"
+        description: "ID of monetaryZone"
+        required: true
+        schema:
+          type: "string"
       responses:
         200:
           description: "successful operation"
@@ -842,55 +722,49 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/DFSPDetails"
-  /environments/{envId}/dfsps/{dfspId}/status:
+  /dfsps/{dfspId}/status:
     get:
       summary: Retrieves environment dfsp status by phase and step completion
-      operationId: getEnvironmentDfspStatus
+      operationId: getDfspStatus
       parameters:
-        - name: envId
-          in: path
-          description: ID of the environment to get satus
-          required: true
-          schema:
-            type: string
-        - name: dfspId
-          in: path
-          description: ID of the dfspId to get satus
-          required: true
-          schema:
-            type: string
+      - name: dfspId
+        in: path
+        description: ID of the dfspId to get satus
+        required: true
+        schema:
+          type: string
       responses:
-          200:
-            description: successful operation
-            content:
-              application/json:
-                schema:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/EnvironmentDfspStatus'
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DfspStatus'
 components:
   schemas:
     Statuses:
       type: string
       enum:
-        - NOT_STARTED
-        - IN_PROGRESS
-        - COMPLETED
+      - NOT_STARTED
+      - IN_PROGRESS
+      - COMPLETED
     Phases:
       type: string
       enum:
-        - BUSINESS_SETUP
-        - TECHNICAL_SETUP
+      - BUSINESS_SETUP
+      - TECHNICAL_SETUP
     Identifier:
       type: string
       enum:
-        - ID_GENERATION
-        - ENDPOINTS
-        - CSR_EXCHANGE
-        - CERTIFICATE_AUTHORITY
-        - SERVER_CERTIFICATES_EXCHANGE
-        - JWS_CERTIFICATES
-    EnvironmentDfspStatus:
+      - ID_GENERATION
+      - ENDPOINTS
+      - CSR_EXCHANGE
+      - CERTIFICATE_AUTHORITY
+      - SERVER_CERTIFICATES_EXCHANGE
+      - JWS_CERTIFICATES
+    DfspStatus:
       type: object
       properties:
         phase:
@@ -912,10 +786,10 @@ components:
         status:
           type: string
           enum:
-            - OPEN
-            - ON TRACK
-            - HAS ERRORS
-            - OVERDUE
+          - OPEN
+          - ON TRACK
+          - HAS ERRORS
+          - OVERDUE
         transferCount:
           type: integer
         transferTotals:
@@ -945,8 +819,8 @@ components:
         direction:
           type: string
           enum:
-            - INBOUND
-            - OUTBOUND
+          - INBOUND
+          - OUTBOUND
         currency:
           $ref: '#/components/schemas/Currency'
         amount:
@@ -954,7 +828,7 @@ components:
         type:
           type: string
           enum:
-            - P2P
+          - P2P
         status:
           $ref: "#/components/schemas/TransferStatus"
         initiatedTimestamp:
@@ -984,8 +858,8 @@ components:
         direction:
           type: string
           enum:
-            - INBOUND
-            - OUTBOUND
+          - INBOUND
+          - OUTBOUND
         sender:
           type: string
         recipient:
@@ -1067,8 +941,8 @@ components:
           $ref: '#/components/schemas/ExtensionListComplex'
           description: 'Optional list of extensions, specific to deployment.'
       required:
-        - errorCode
-        - errorDescription
+      - errorCode
+      - errorDescription
 
     ErrorCode:
       title: ErrorCode
@@ -1114,8 +988,8 @@ components:
     TransferParty:
       type: object
       required:
-        - idType
-        - idValue
+      - idType
+      - idValue
       properties:
         type:
           $ref: '#/components/schemas/payerType'
@@ -1165,7 +1039,7 @@ components:
           maxItems: 16
           description: Number of Extension elements
       required:
-        - extension
+      - extension
 
     ExtensionItem:
       type: object
@@ -1208,9 +1082,9 @@ components:
       - ALIAS
       description: Below are the allowed values for the enumeration.
 
-        - MSISDN -  An MSISDN (Mobile Station International Subscriber Directory Number, that is, the phone number) is used as reference to a participant. The MSISDN identifier should be in international format according to the [ITU-T E.164 standard](https://www.itu.int/rec/T-REC-E.164/en). Optionally, the MSISDN may be prefixed by a single plus sign, indicating the international prefix.
+      - MSISDN -  An MSISDN (Mobile Station International Subscriber Directory Number, that is, the phone number) is used as reference to a participant. The MSISDN identifier should be in international format according to the [ITU-T E.164 standard](https://www.itu.int/rec/T-REC-E.164/en). Optionally, the MSISDN may be prefixed by a single plus sign, indicating the international prefix.
 
-        - ACCOUNT_ID - A bank account number or FSP account ID should be used as reference to a participant. The ACCOUNT_ID identifier can be in any format, as formats can greatly differ depending on country and FSP.
+      - ACCOUNT_ID - A bank account number or FSP account ID should be used as reference to a participant. The ACCOUNT_ID identifier can be in any format, as formats can greatly differ depending on country and FSP.
 
     idValue:
       type: string
@@ -1234,12 +1108,12 @@ components:
         direction:
           type: string
           enum:
-            - INBOUND
-            - OUTBOUND
+          - INBOUND
+          - OUTBOUND
         type:
           type: string
           enum:
-            - P2P
+          - P2P
         currency:
           $ref: '#/components/schemas/Currency'
         value:
@@ -1247,7 +1121,7 @@ components:
         errorType:
           type: string
           enum:
-            - FROM HUB
+          - FROM HUB
         committedDate:
           $ref: '#/components/schemas/Timestamp'
 
@@ -1281,8 +1155,8 @@ components:
     Environment:
       type: "object"
       required:
-        - "name"
-        - "id"
+      - "name"
+      - "id"
       properties:
         id:
           type: integer
@@ -1298,8 +1172,8 @@ components:
       type: "object"
       description: "Hub CA Input Body"
       required:
-        - name
-        - type
+      - name
+      - type
       properties:
         rootCertificate:
           type: "string"
@@ -1313,28 +1187,28 @@ components:
         type:
           type: "string"
           enum:
-            - "EXTERNAL"
+          - "EXTERNAL"
     HubCAInfo:
       type: "object"
       description: "Hub CA Input"
       allOf:
-        - $ref: "#/components/schemas/HubCAInfoInput"
-        - type: object
-          properties:
-            id:
-              type: "integer"
-              format: "int32"
-            rootCertificateInfo:
+      - $ref: "#/components/schemas/HubCAInfoInput"
+      - type: object
+        properties:
+          id:
+            type: "integer"
+            format: "int32"
+          rootCertificateInfo:
+            $ref: "#/components/schemas/CertInfo"
+          intermediateChainInfo:
+            type: "array"
+            description: "List of CertInfo."
+            items:
               $ref: "#/components/schemas/CertInfo"
-            intermediateChainInfo:
-              type: "array"
-              description: "List of CertInfo."
-              items:
-                $ref: "#/components/schemas/CertInfo"
-            validations:
-              $ref: "#/components/schemas/ValidationList"
-            validationState:
-              $ref: "#/components/schemas/ValidationState"
+          validations:
+            $ref: "#/components/schemas/ValidationList"
+          validationState:
+            $ref: "#/components/schemas/ValidationState"
     DFSPDetails:
       type: object
       properties:
@@ -1349,8 +1223,8 @@ components:
         direction:
           type: string
           enum:
-            - INBOUND
-            - OUTBOUND
+          - INBOUND
+          - OUTBOUND
         currency:
           $ref: '#/components/schemas/Currency'
         amount:
@@ -1358,7 +1232,7 @@ components:
         type:
           type: string
           enum:
-            - P2P
+          - P2P
         status:
           $ref: "#/components/schemas/TransferStatus"
         initiatedTimestamp:
@@ -1406,9 +1280,9 @@ components:
       description: Transfer statuses
       type: string
       enum:
-        - SUCCESS
-        - PENDING
-        - ERROR
+      - SUCCESS
+      - PENDING
+      - ERROR
 
     Currency:
       title: CurrencyEnum
@@ -1419,168 +1293,168 @@ components:
       minLength: 3
       maxLength: 3
       enum:
-        - AED
-        - AFN
-        - ALL
-        - AMD
-        - ANG
-        - AOA
-        - ARS
-        - AUD
-        - AWG
-        - AZN
-        - BAM
-        - BBD
-        - BDT
-        - BGN
-        - BHD
-        - BIF
-        - BMD
-        - BND
-        - BOB
-        - BRL
-        - BSD
-        - BTN
-        - BWP
-        - BYN
-        - BZD
-        - CAD
-        - CDF
-        - CHF
-        - CLP
-        - CNY
-        - COP
-        - CRC
-        - CUC
-        - CUP
-        - CVE
-        - CZK
-        - DJF
-        - DKK
-        - DOP
-        - DZD
-        - EGP
-        - ERN
-        - ETB
-        - EUR
-        - FJD
-        - FKP
-        - GBP
-        - GEL
-        - GGP
-        - GHS
-        - GIP
-        - GMD
-        - GNF
-        - GTQ
-        - GYD
-        - HKD
-        - HNL
-        - HRK
-        - HTG
-        - HUF
-        - IDR
-        - ILS
-        - IMP
-        - INR
-        - IQD
-        - IRR
-        - ISK
-        - JEP
-        - JMD
-        - JOD
-        - JPY
-        - KES
-        - KGS
-        - KHR
-        - KMF
-        - KPW
-        - KRW
-        - KWD
-        - KYD
-        - KZT
-        - LAK
-        - LBP
-        - LKR
-        - LRD
-        - LSL
-        - LYD
-        - MAD
-        - MDL
-        - MGA
-        - MKD
-        - MMK
-        - MNT
-        - MOP
-        - MRO
-        - MUR
-        - MVR
-        - MWK
-        - MXN
-        - MYR
-        - MZN
-        - NAD
-        - NGN
-        - NIO
-        - NOK
-        - NPR
-        - NZD
-        - OMR
-        - PAB
-        - PEN
-        - PGK
-        - PHP
-        - PKR
-        - PLN
-        - PYG
-        - QAR
-        - RON
-        - RSD
-        - RUB
-        - RWF
-        - SAR
-        - SBD
-        - SCR
-        - SDG
-        - SEK
-        - SGD
-        - SHP
-        - SLL
-        - SOS
-        - SPL
-        - SRD
-        - STD
-        - SVC
-        - SYP
-        - SZL
-        - THB
-        - TJS
-        - TMT
-        - TND
-        - TOP
-        - TRY
-        - TTD
-        - TVD
-        - TWD
-        - TZS
-        - UAH
-        - UGX
-        - USD
-        - UYU
-        - UZS
-        - VEF
-        - VND
-        - VUV
-        - WST
-        - XAF
-        - XCD
-        - XDR
-        - XOF
-        - XPF
-        - YER
-        - ZAR
-        - ZMW
-        - ZWD
+      - AED
+      - AFN
+      - ALL
+      - AMD
+      - ANG
+      - AOA
+      - ARS
+      - AUD
+      - AWG
+      - AZN
+      - BAM
+      - BBD
+      - BDT
+      - BGN
+      - BHD
+      - BIF
+      - BMD
+      - BND
+      - BOB
+      - BRL
+      - BSD
+      - BTN
+      - BWP
+      - BYN
+      - BZD
+      - CAD
+      - CDF
+      - CHF
+      - CLP
+      - CNY
+      - COP
+      - CRC
+      - CUC
+      - CUP
+      - CVE
+      - CZK
+      - DJF
+      - DKK
+      - DOP
+      - DZD
+      - EGP
+      - ERN
+      - ETB
+      - EUR
+      - FJD
+      - FKP
+      - GBP
+      - GEL
+      - GGP
+      - GHS
+      - GIP
+      - GMD
+      - GNF
+      - GTQ
+      - GYD
+      - HKD
+      - HNL
+      - HRK
+      - HTG
+      - HUF
+      - IDR
+      - ILS
+      - IMP
+      - INR
+      - IQD
+      - IRR
+      - ISK
+      - JEP
+      - JMD
+      - JOD
+      - JPY
+      - KES
+      - KGS
+      - KHR
+      - KMF
+      - KPW
+      - KRW
+      - KWD
+      - KYD
+      - KZT
+      - LAK
+      - LBP
+      - LKR
+      - LRD
+      - LSL
+      - LYD
+      - MAD
+      - MDL
+      - MGA
+      - MKD
+      - MMK
+      - MNT
+      - MOP
+      - MRO
+      - MUR
+      - MVR
+      - MWK
+      - MXN
+      - MYR
+      - MZN
+      - NAD
+      - NGN
+      - NIO
+      - NOK
+      - NPR
+      - NZD
+      - OMR
+      - PAB
+      - PEN
+      - PGK
+      - PHP
+      - PKR
+      - PLN
+      - PYG
+      - QAR
+      - RON
+      - RSD
+      - RUB
+      - RWF
+      - SAR
+      - SBD
+      - SCR
+      - SDG
+      - SEK
+      - SGD
+      - SHP
+      - SLL
+      - SOS
+      - SPL
+      - SRD
+      - STD
+      - SVC
+      - SYP
+      - SZL
+      - THB
+      - TJS
+      - TMT
+      - TND
+      - TOP
+      - TRY
+      - TTD
+      - TVD
+      - TWD
+      - TZS
+      - UAH
+      - UGX
+      - USD
+      - UYU
+      - UZS
+      - VEF
+      - VND
+      - VUV
+      - WST
+      - XAF
+      - XCD
+      - XDR
+      - XOF
+      - XPF
+      - YER
+      - ZAR
+      - ZMW
+      - ZWD
     Amount:
       title: Amount
       type: string
@@ -1614,27 +1488,27 @@ components:
     ServerCert:
       description: The server certificate, with info and id.
       allOf:
-        - $ref: "#/components/schemas/BaseServerCert"
-        - type: object
-          properties:
-            id:
-              type: integer
-              format: int32
-            rootCertificateInfo:
+      - $ref: "#/components/schemas/BaseServerCert"
+      - type: object
+        properties:
+          id:
+            type: integer
+            format: int32
+          rootCertificateInfo:
+            $ref: "#/components/schemas/CertInfo"
+          intermediateChainInfo:
+            type: array
+            description: List of CertInfo.
+            items:
               $ref: "#/components/schemas/CertInfo"
-            intermediateChainInfo:
-              type: array
-              description: List of CertInfo.
-              items:
-                $ref: "#/components/schemas/CertInfo"
-            serverCertificateInfo:
-              $ref: "#/components/schemas/CertInfo"
-            validations:
-              $ref: "#/components/schemas/ValidationList"
-            validationState:
-              $ref: "#/components/schemas/ValidationState"
-            state:
-              $ref: "#/components/schemas/ValidInvalidState"
+          serverCertificateInfo:
+            $ref: "#/components/schemas/CertInfo"
+          validations:
+            $ref: "#/components/schemas/ValidationList"
+          validationState:
+            $ref: "#/components/schemas/ValidationState"
+          state:
+            $ref: "#/components/schemas/ValidInvalidState"
     ClientCertificate:
       type: object
       properties:
@@ -1647,10 +1521,10 @@ components:
         state:
           type: string
           enum:
-            - NEW
-            - CSR_LOADED
-            - CERT_SIGNED
-            - INVALID
+          - NEW
+          - CSR_LOADED
+          - CERT_SIGNED
+          - INVALID
         certInfo:
           $ref: '#/components/schemas/CertInfo'
         csrInfo:
@@ -1719,6 +1593,124 @@ components:
         privateKey:
           type: "string"
           description: "PEM-encoded private key corresponding to certificate"
+    CA_csr_dn:
+      required:
+      - CN
+      - O
+      type: object
+      properties:
+        CN:
+          type: string
+          description: Common Name
+        O:
+          type: string
+          description: Organization
+        OU:
+          type: string
+          description: Organizational Unit
+        C:
+          type: string
+          description: Country
+        ST:
+          type: string
+          description: State
+        L:
+          type: string
+          description: Location
+      description: Certificate Authority subject info
+    CA_csr_key:
+      required:
+      - algo
+      - size
+      type: object
+      properties:
+        algo:
+          type: string
+          enum:
+          - rsa
+          - ecdsa
+        size:
+          type: integer
+          format: int64
+      description: |
+        Key generation parameters
+      example:
+        size: 4096
+        algo: rsa
+    CAInitialInfo:
+      required:
+      - csr
+      type: object
+      properties:
+        default:
+          type: object
+          properties:
+            expiry:
+              type: string
+              description: 'This should contain a time duration in the form understood
+                    by Go''s time package ( https://golang.org/pkg/time/#ParseDuration
+                    ). This unfortunately means that the maximum unit of time that can
+                    be used here is the hour. Example 8760h ( = 1 year ). Default: "87600h",
+                    // 10 years'
+            usages:
+              type: array
+              description: Key usages
+              items:
+                type: string
+                enum:
+                - signing
+                - key encipherment
+                - server auth
+                - client auth
+            signature_algorithm:
+              type: string
+              description: Signature algorithm to use when signing certificates.
+              enum:
+              - SHA256WithRSA
+              - SHA512WithRSA
+          description: To be used as default when generating keys, CSRs and certs
+        csr:
+          required:
+          - hosts
+          - key
+          - names
+          type: object
+          properties:
+            hosts:
+              type: array
+              description: List of hostnames.
+              items:
+                type: string
+            names:
+              maxItems: 1
+              minItems: 1
+              type: array
+              description: List of DN names.
+              items:
+                $ref: '#/components/schemas/CA_csr_dn'
+            key:
+              $ref: '#/components/schemas/CA_csr_key'
+          description: CA root certificate parameters
+      description: CA initial parameters
+    DFSPCAInfoInput:
+      required:
+      - type
+      type: object
+      properties:
+        privateKey:
+          type: string
+          description: PEM-encoded private key
+        rootCertificate:
+          type: string
+          description: PEM-encoded certificate
+        intermediateChain:
+          type: string
+          description: PEM-encoded certificate
+        type:
+          type: string
+          enum:
+          - EXTERNAL
+      description: Hub CA Input Body
     CAInfo:
       properties:
         rootCertificate:
@@ -1810,16 +1802,16 @@ components:
     ValidationState:
       type: string
       enum:
-        - VALID
-        - INVALID
-        - NOT_AVAILABLE
+      - VALID
+      - INVALID
+      - NOT_AVAILABLE
     Validation:
       type: object
       required:
-        - validationCode
-        - performed
-        - result
-        - message
+      - validationCode
+      - performed
+      - result
+      - message
       properties:
         validationCode:
           $ref: "#/components/schemas/ValidationCodes"
@@ -1829,9 +1821,9 @@ components:
         result:
           type: string
           enum:
-            - VALID
-            - INVALID
-            - NOT_AVAILABLE
+          - VALID
+          - INVALID
+          - NOT_AVAILABLE
         message:
           description: Textual description of the validation result
           type: string
@@ -1850,20 +1842,20 @@ components:
       type: string
       description: Identifies the type of validation
       enum:
-        - CSR_CERT_SAME_PUBLIC_KEY
-        - CSR_CERT_SAME_SUBJECT_INFO
-        - CSR_CERT_PUBLIC_PRIVATE_KEY_MATCH
-        - CERTIFICATE_SIGNED_BY_DFSP_CA
-        - CERTIFICATE_VALIDITY
-        - CERTIFICATE_USAGE_CLIENT
-        - CSR_SIGNATURE_VALID
-        - CSR_PUBLIC_KEY_LENGTH
-        - CSR_SIGNATURE_ALGORITHM
-        - CERTIFICATE_USAGE_SERVER
-        - CERTIFICATE_CHAIN
-        - CA_CERTIFICATE_USAGE
-        - CERTIFICATE_VALID_OCSP
-        - CERTIFICATE_VALID_CRL
+      - CSR_CERT_SAME_PUBLIC_KEY
+      - CSR_CERT_SAME_SUBJECT_INFO
+      - CSR_CERT_PUBLIC_PRIVATE_KEY_MATCH
+      - CERTIFICATE_SIGNED_BY_DFSP_CA
+      - CERTIFICATE_VALIDITY
+      - CERTIFICATE_USAGE_CLIENT
+      - CSR_SIGNATURE_VALID
+      - CSR_PUBLIC_KEY_LENGTH
+      - CSR_SIGNATURE_ALGORITHM
+      - CERTIFICATE_USAGE_SERVER
+      - CERTIFICATE_CHAIN
+      - CA_CERTIFICATE_USAGE
+      - CERTIFICATE_VALID_OCSP
+      - CERTIFICATE_VALID_CRL
     URLEntry:
       properties:
         url:
@@ -1891,8 +1883,8 @@ components:
             description: "Individual port or port range"
             example: "8000-8080"
           example:
-            - "80"
-            - "8000-8080"
+          - "80"
+          - "8000-8080"
     BaseEndpoint:
       description: Common properties to both IP and URL endpoints
       properties:
@@ -1902,19 +1894,19 @@ components:
         type:
           type: "string"
           enum:
-            - "IP"
-            - "URL"
+          - "IP"
+          - "URL"
         direction:
           type: "string"
           enum:
-            - "INGRESS"
-            - "EGRESS"
+          - "INGRESS"
+          - "EGRESS"
         state:
           type: "string"
           enum:
-            - "NEW"
-            - "CONFIRMED"
-            - "INVALID"
+          - "NEW"
+          - "CONFIRMED"
+          - "INVALID"
         createdDate:
           type: "string"
           format: "date-time"
@@ -1924,28 +1916,28 @@ components:
           type: "string"
     EndPointIp:
       allOf:
-        - $ref: "#/components/schemas/BaseEndpoint"
-        - type: object
-          properties:
-            value:
-              $ref: "#/components/schemas/IPEntry"
+      - $ref: "#/components/schemas/BaseEndpoint"
+      - type: object
+        properties:
+          value:
+            $ref: "#/components/schemas/IPEntry"
     EndPointURL:
       allOf:
-        - $ref: "#/components/schemas/BaseEndpoint"
-        - type: object
-          properties:
-            value:
-              $ref: "#/components/schemas/URLEntry"
+      - $ref: "#/components/schemas/BaseEndpoint"
+      - type: object
+        properties:
+          value:
+            $ref: "#/components/schemas/URLEntry"
     EndPointAny:
       allOf:
-        - $ref: "#/components/schemas/BaseEndpoint"
-        - type: object
-          properties:
-            value:
-              description: It's *either* {url} OR {address and ports}.
-              allOf:
-                - $ref: "#/components/schemas/IPEntry"
-                - $ref: "#/components/schemas/URLEntry"
+      - $ref: "#/components/schemas/BaseEndpoint"
+      - type: object
+        properties:
+          value:
+            description: It's *either* {url} OR {address and ports}.
+            allOf:
+            - $ref: "#/components/schemas/IPEntry"
+            - $ref: "#/components/schemas/URLEntry"
     InputIPValue:
       type: object
       properties:
@@ -1959,19 +1951,19 @@ components:
     EndpointType:
       type: "string"
       enum:
-        - "IP"
-        - "URL"
+      - "IP"
+      - "URL"
     EndpointDirection:
       type: "string"
       enum:
-        - "INGRESS"
-        - "EGRESS"
+      - "INGRESS"
+      - "EGRESS"
     EndpointState:
       type: "string"
       enum:
-        - "NEW"
-        - "CONFIRMED"
-        - "INVALID"
+      - "NEW"
+      - "CONFIRMED"
+      - "INVALID"
     SuccessfulEnrollment:
       type: object
       properties:
@@ -1982,7 +1974,7 @@ components:
       type: "object"
       description: "JWS Certificate."
       required:
-        - jwsCertificate
+      - jwsCertificate
       properties:
         rootCertificate:
           type: "string"
@@ -1996,35 +1988,35 @@ components:
     JWSCert:
       description: "The JWS certificate, with info and id."
       allOf:
-        - $ref: "#/components/schemas/BaseJWSCert"
-        - type: object
-          required:
-            - id
-          properties:
-            id:
-              type: "integer"
-              format: "int32"
-            rootCertificateInfo:
+      - $ref: "#/components/schemas/BaseJWSCert"
+      - type: object
+        required:
+        - id
+        properties:
+          id:
+            type: "integer"
+            format: "int32"
+          rootCertificateInfo:
+            $ref: "#/components/schemas/CertInfo"
+          intermediateChainInfo:
+            type: "array"
+            description: "List of CertInfo."
+            items:
               $ref: "#/components/schemas/CertInfo"
-            intermediateChainInfo:
-              type: "array"
-              description: "List of CertInfo."
-              items:
-                $ref: "#/components/schemas/CertInfo"
-            jwsCertificateInfo:
-              $ref: "#/components/schemas/CertInfo"
-            validations:
-              $ref: "#/components/schemas/ValidationList"
-            validationState:
-              $ref: "#/components/schemas/ValidationState"
+          jwsCertificateInfo:
+            $ref: "#/components/schemas/CertInfo"
+          validations:
+            $ref: "#/components/schemas/ValidationList"
+          validationState:
+            $ref: "#/components/schemas/ValidationState"
     DFSPJWSCert:
       description: "The JWS certificate with the dfpsId."
       allOf:
-        - $ref: "#/components/schemas/JWSCert"
-        - type: object
-          properties:
-            dfspId:
-              type: "string"
+      - $ref: "#/components/schemas/JWSCert"
+      - type: object
+        properties:
+          dfspId:
+            type: "string"
     MonetaryZone:
       type: "object"
       properties:
