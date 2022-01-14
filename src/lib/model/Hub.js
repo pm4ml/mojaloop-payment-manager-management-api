@@ -8,7 +8,7 @@
  *       Murthy Kakarlamudi - murthy@modusbox.com                   *
  **************************************************************************/
 
-const { HubEndpointModel, HubCertificateModel } = require('@modusbox/mcm-client');
+const { HubEndpointModel, HubCertificateModel } = require('@pm4ml/mcm-client');
 
 class Hub {
     constructor(opts) {

@@ -12,7 +12,7 @@ const util = require('util');
 const Router = require('koa-router');
 
 const randomPhrase = require('@internal/randomphrase');
-const { HTTPResponseError } = require('@modusbox/mcm-client');
+const { HTTPResponseError } = require('@pm4ml/mcm-client');
 
 /**
  * Log raw to console as a last resort

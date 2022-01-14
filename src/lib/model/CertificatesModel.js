@@ -8,7 +8,7 @@
  *       Murthy Kakarlamudi - murthy@modusbox.com                   *
  **************************************************************************/
 
-const { DFSPCertificateModel, HubCertificateModel } = require('@modusbox/mcm-client');
+const { DFSPCertificateModel, HubCertificateModel } = require('@pm4ml/mcm-client');
 const ConnectorManager = require('./ConnectorManager');
 const forge = require('node-forge');
 const assert = require('assert');

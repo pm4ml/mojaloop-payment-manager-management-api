@@ -1,7 +1,7 @@
 'use strict';
 const MCMStateModel = require('../../../lib/model/MCMStateModel');
 const hubCertsResource = require('./resources/hubCerts');
-const { HubCertificateModel } = require('@modusbox/mcm-client');
+const { HubCertificateModel } = require('@pm4ml/mcm-client');
 
 describe('MCMState Model:', () => {
 

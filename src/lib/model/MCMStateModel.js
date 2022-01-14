@@ -10,7 +10,7 @@
 
 const util = require('util');
 const stringify = require('json-stringify-deterministic');
-const { DFSPCertificateModel, HubCertificateModel, HubEndpointModel, AuthModel, ConnectorModel } = require('@modusbox/mcm-client');
+const { DFSPCertificateModel, HubCertificateModel, HubEndpointModel, AuthModel, ConnectorModel } = require('@pm4ml/mcm-client');
 const CertificatesModel = require('./CertificatesModel');
 
 class MCMStateModel {

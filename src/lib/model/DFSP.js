@@ -8,7 +8,7 @@
  *       Murthy Kakarlamudi - murthy@modusbox.com                   *
  **************************************************************************/
 
-const { DFSPConfigModel, DFSPEndpointModel } = require('@modusbox/mcm-client');
+const { DFSPConfigModel, DFSPEndpointModel } = require('@pm4ml/mcm-client');
 
 class DFSP {
     constructor(opts) {
