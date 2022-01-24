@@ -16,8 +16,7 @@ const transferTemplate = require('./data/transferTemplate');
 const createTestDb = async () => {
     const logger = new Logger.Logger({ buildStringify: () => '' });
     return database({
-        cacheHost: 'dummyhost',
-        cachePort: 1234,
+        cacheUrl: 'redis://dummyhost:1234',
         logger,
         runMigrations: true,
         manualSync: true,

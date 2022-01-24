@@ -58,8 +58,7 @@ module.exports = {
     logIndent: env.get('LOG_INDENT').default('2').asIntPositive(),
     runMigrations: env.get('RUN_DB_MIGRATIONS').default('true').asBool(),
 
-    cacheHost: env.get('CACHE_HOST').asString(),
-    cachePort: env.get('CACHE_PORT').default(6379).asPortNumber(),
+    cacheUrl: env.get('CACHE_URL').default('redis://redis:6379').asUrlString(),
     cacheSyncInterval: env.get('CACHE_SYNC_INTERVAL_SECONDS').default(30).asIntPositive(),
 
     mcmServerEndpoint: env.get('MCM_SERVER_ENDPOINT').required().asString(),

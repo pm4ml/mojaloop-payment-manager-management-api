@@ -37,10 +37,10 @@ class Server {
         // We register this instance to receive events from internal modules.
         // Internal communication with this server is facilitated by its event emitter.
         // @see `ConnectorManager.getInternalEventEmitter()`
-        this.controlServer = await new ControlServer.Server({
+        this.controlServer = new ControlServer.Server({
             appConfig: this.conf,
             logger: this.logger.push(LOG_ID.CONTROL),
-        }),
+        });
         this.controlServer.registerInternalEvents();
         await Promise.all([
             this._startUIAPIServer()

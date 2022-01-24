@@ -189,8 +189,7 @@ async function init(config) {
 
     const redisCache = new Cache({
         logger: config.logger,
-        port: config.cachePort,
-        host: config.cacheHost,
+        url: config.cacheUrl,
     });
     await redisCache.connect();
 

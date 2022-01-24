@@ -9,6 +9,7 @@
  **************************************************************************/
 
 const redisMock = require('redis-mock');
+const {promisify} = require('util');
 
 // redis-mock currently ignores callback arguments, the following class fixes that
 class RedisClient extends redisMock.RedisClient {
@@ -16,27 +17,28 @@ class RedisClient extends redisMock.RedisClient {
         super(opts);
     }
 
-    _executeCallback(...args) {
-        if (typeof args[args.length - 1] === 'function') {
-            const callback = args[args.length - 1];
-            const argList = Array.prototype.slice.call(args, 0, args.length - 1);
-            callback(null, argList);
-        }
-    }
-
     subscribe(...args) {
-        super.subscribe(...args);
-        this._executeCallback(...args);
+        return promisify(super.set.subscribe(this))(...args);
     }
 
     publish(...args) {
-        super.publish(...args);
-        this._executeCallback(...args);
+        return promisify(super.set.publish(this))(...args);
     }
 
     set(...args) {
-        super.set(...args);
-        this._executeCallback(...args);
+        return promisify(super.set.bind(this))(...args);
+    }
+
+    get(...args) {
+        return promisify(super.get.bind(this))(...args);
+    }
+
+    keys(...args) {
+        return promisify(super.keys.bind(this))(...args);
+    }
+
+    connect() {
+
     }
 }
 
