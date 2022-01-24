@@ -309,7 +309,7 @@ const getJWSCertificates = async(ctx) => {
 const uploadJWSCertificates = async(ctx) => {
     const certModel = certModelFromContext(ctx);
     let jws = ctx.request.body;
-    if (!jws) {
+    if (Object.keys(jws).length === 0) {
         jws = certModel.createJWS();
     } else {
         try {

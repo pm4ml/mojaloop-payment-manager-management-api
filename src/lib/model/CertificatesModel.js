@@ -146,7 +146,7 @@ class CertificatesModel {
     async exchangeOutboundSdkConfiguration() {
         const cert = await this._vault.getClientCert();
 
-        if (cert.certificate) return;
+        if (cert?.certificate || !cert?.id) return;
 
         const inboundEnrollment = await this.getClientCertificate(cert.id);
         if(inboundEnrollment.state === 'CERT_SIGNED'){

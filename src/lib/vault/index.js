@@ -136,11 +136,12 @@ class Vault {
     }
 
     async setPeerJWS(value) {
-        return this._setSecret(vaultPaths.PEER_JWS, value);
+        return this._setSecret(vaultPaths.PEER_JWS, { list: value });
     }
 
     async getPeerJWS() {
-        return this._getSecret(vaultPaths.PEER_JWS);
+        const data = await this._getSecret(vaultPaths.PEER_JWS);
+        return data?.list;
     }
 
     async setILP(value) {
