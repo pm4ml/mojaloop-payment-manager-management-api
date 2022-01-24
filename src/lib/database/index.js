@@ -74,7 +74,7 @@ async function syncDB({redisCache, db, logger}) {
             }
             catch (err) {
                 this._logger.push({ err }).log('Error parsing JSON cache value');
-                
+
             }
         }
 
@@ -101,11 +101,11 @@ async function syncDB({redisCache, db, logger}) {
 
         //logger.push({ data }).log('processing cache item');
 
-        if(data.direction == 'INBOUND') {
-            if(data.quoteResponse && data.quoteResponse.body) {
+        if(data.direction === 'INBOUND') {
+            if(data.quoteResponse?.body) {
                 data.quoteResponse.body = JSON.parse(data.quoteResponse.body);
             }
-            if(data.fulfil && data.fulfil.body) {
+            if(data.fulfil?.body) {
                 data.fulfil.body = JSON.parse(data.fulfil.body);
             }
 
@@ -113,23 +113,18 @@ async function syncDB({redisCache, db, logger}) {
                 ...row,
                 sender: getPartyNameFromQuoteRequest(data.quoteRequest, 'payer'),
                 recipient: getPartyNameFromQuoteRequest(data.quoteRequest, 'payee'),
-                amount: data.quoteResponse && data.quoteResponse.body
-                    && data.quoteResponse.body.transferAmount.amount,
-                currency: data.quoteResponse && data.quoteResponse.body
-                    && data.quoteResponse.body.transferAmount.currency,
+                amount: data.quoteResponse?.body?.transferAmount.amount,
+                currency: data.quoteResponse?.body?.transferAmount.currency,
                 direction: -1,
                 batch_id: '',
-                details: data.quoteRequest && data.quoteRequest.body
-                    && data.quoteRequest.body.note,
-                dfsp: data.quoteRequest && data.quoteRequest.body
-                    && data.quoteRequest.body.payer
-                    && data.quoteRequest.body.payer.partyIdInfo.fspId,
+                details: data.quoteRequest?.body?.note,
+                dfsp: data.quoteRequest?.body?.payer?.partyIdInfo.fspId,
 
-                success: (data.fulfil && data.fulfil.body && data.fulfil.body.transferState == 'COMMITTED') ? true : null,
+                success: (data?.fulfil?.body?.transferState === 'COMMITTED') ? true : null,
             };
         }
 
-        if(data.direction == 'OUTBOUND') {
+        if(data.direction === 'OUTBOUND') {
             row = {
                 ...row,
                 sender: getName(data.from),
