@@ -19,8 +19,8 @@ class Transfer {
 
     static STATUSES = {
         null: 'PENDING',
-        1: 'SUCCESS',
-        0: 'ERROR',
+        'true': 'SUCCESS',
+        'false': 'ERROR',
     };
 
     _convertToApiFormat(transfer) {
@@ -40,7 +40,7 @@ class Transfer {
             sender: transfer.sender,
             recipient: transfer.recipient,
             details: transfer.details,
-            errorType: transfer.success == 0 ? Transfer._transferLastErrorToErrorType(raw.lastError) : null,
+            errorType: transfer.success === 'false' ? Transfer._transferLastErrorToErrorType(raw.lastError) : null,
         };
     }
 
@@ -199,7 +199,7 @@ class Transfer {
             if (opts.status === 'PENDING') {
                 query.andWhereRaw('success IS NULL');
             } else {
-                query.andWhere('success', opts.status === 'SUCCESS');
+                query.andWhere('success', opts.status === 'SUCCESS' ? 'true' : 'false');
             }
         }
         if (opts.offset) {
@@ -235,7 +235,7 @@ class Transfer {
 
 
     async findErrors() {
-        const rows = await this._db('transfer').where('success', false);
+        const rows = await this._db('transfer').where('success', 'false');
         return rows.map(this._convertToApiFormat.bind(this));
     }
 
@@ -253,7 +253,7 @@ class Transfer {
                 .select(this._db.raw('MIN(((created_at) / (60 * 1000)) * 60 * 1000) as timestamp'))  // trunc (milli)seconds
                 .whereRaw(`(${now} - created_at) < ${(opts.minutePrevious || 10) * 60 * 1000}`);
             if (successOnly) {
-                query.andWhere('success', true);
+                query.andWhere('success', 'true');
             }
             query.groupByRaw('created_at / (60 * 1000)');
             return query;
@@ -306,7 +306,7 @@ class Transfer {
                 .sum('amount as sum')
                 .select(this._db.raw('MIN(((created_at) / (3600 * 1000)) * 3600 * 1000) as timestamp'))  // trunc (milli)seconds
                 .whereRaw(`(${now} - created_at) < ${(opts.hoursPrevious || 10) * 3600 * 1000}`)
-                // .andWhere('success', true)
+                // .andWhere('success', 'true')
                 .groupByRaw('created_at / (3600 * 1000), currency, direction');
         };
 

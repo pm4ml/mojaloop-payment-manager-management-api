@@ -170,7 +170,7 @@ async function syncDB({redisCache, db, logger}) {
 
 async function init(config) {
     const knexConfig = {
-        client: 'sqlite3',
+        client: 'better-sqlite3',
         connection: {
             filename: ':memory:',
         },

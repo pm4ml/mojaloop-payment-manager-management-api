@@ -56,9 +56,9 @@ describe('Database', () => {
         await db.sync();
         const rows = await db('transfer').select('id', 'success', 'amount');
         expect(rows).toMatchObject([
-            {'id': 'tr1', 'success': 1, amount: '100'},
+            {'id': 'tr1', 'success': 'true', amount: '100'},
             {'id': 'tr2', 'success': null, amount: '50'},
-            {'id': 'tr3', 'success': 0, amount: '70'},
+            {'id': 'tr3', 'success': 'false', amount: '70'},
         ]);
 
         // Modify transfers
@@ -91,9 +91,9 @@ describe('Database', () => {
         const updatedRows = await db('transfer').select('id', 'success', 'amount');
         // Fulfilled transfers shouldn't be refreshed in the cache
         expect(updatedRows).toMatchObject([
-            {'id': 'tr1', 'success': 1, amount: '100'},
-            {'id': 'tr2', 'success': 1, amount: '200'},
-            {'id': 'tr3', 'success': 0, amount: '70'},
+            {'id': 'tr1', 'success': 'true', amount: '100'},
+            {'id': 'tr2', 'success': 'true', amount: '200'},
+            {'id': 'tr3', 'success': 'false', amount: '70'},
         ]);
     });
 });
