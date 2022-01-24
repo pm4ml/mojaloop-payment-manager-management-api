@@ -12,8 +12,8 @@ const redisMock = require('redis-mock');
 
 // redis-mock currently ignores callback arguments, the following class fixes that
 class RedisClient extends redisMock.RedisClient {
-    constructor() {
-        super();
+    constructor(opts) {
+        super(opts);
     }
 
     _executeCallback(...args) {
@@ -43,5 +43,5 @@ class RedisClient extends redisMock.RedisClient {
 
 
 module.exports = {
-    createClient: () => new RedisClient(),
+    createClient: (opts) => new RedisClient(opts),
 };
