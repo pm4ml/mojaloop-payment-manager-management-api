@@ -241,7 +241,7 @@ const createClientCSR = async(ctx) => {
         ctx.state.conf.privateKeyLength);
 
     ctx.body = await certModel.uploadClientCSR(createdCSR.csr);
-    this._logger.push(ctx.body).log('uploadClientCSR');
+    ctx.state.logger.push(ctx.body).log('uploadClientCSR');
 
     await ctx.state.vault.setClientCert({
         id: ctx.body.id,
@@ -356,7 +356,7 @@ const generateAllCerts = async(ctx) => {
 const generateDfspServerCerts = async(ctx) => {
     const certModel = certModelFromContext(ctx);
     ctx.body = await certModel.createDfspServerCert(ctx.state.conf.dfspServerCsrParameters, ctx.state.conf.privateKeyLength);
-    this._logger.push(ctx.body).log('createDfspServerCert');
+    ctx.state.logger.push(ctx.body).log('createDfspServerCert');
 };
 
 
