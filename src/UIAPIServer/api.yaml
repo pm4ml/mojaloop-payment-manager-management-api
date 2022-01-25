@@ -440,21 +440,6 @@ paths:
                 items:
                   $ref: '#/components/schemas/Balances'
 
-  /environments:
-    get:
-      tags:
-      - "env-dfsp-config"
-      summary: "Returns all the environments"
-      responses:
-        200:
-          description: "successful operation"
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Environment"
-
   /dfsp/servercerts:
 
     get:
@@ -544,6 +529,26 @@ paths:
       summary: create JWS certificate
       description: TBD
       operationId: createDfspJwsCerts
+      requestBody:
+        description: Certificate
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BaseJWSCert'
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JWSCert"
+    put:
+      tags:
+      - DFSP-jws-certificates-configuration
+      summary: set JWS certificate
+      description: TBD
+      operationId: setDfspJwsCerts
       requestBody:
         description: Certificate
         required: false
@@ -913,7 +918,6 @@ components:
           type: integer
           description: The HTTP status code returned to the caller. This is the same as the actual HTTP status code returned with the response.
         mojaloopError:
-          description: If a transfer process results in an error callback during the asynchronous Mojaloop API exchange, this property will contain the underlying Mojaloop API error object.
           $ref: '#/components/schemas/MojaloopError'
 
     GeneralError:
@@ -933,13 +937,10 @@ components:
       properties:
         errorCode:
           $ref: '#/components/schemas/ErrorCode'
-          description: Specific error number.
         errorDescription:
           $ref: '#/components/schemas/ErrorDescription'
-          description: Error description string.
         extensionList:
           $ref: '#/components/schemas/ExtensionListComplex'
-          description: 'Optional list of extensions, specific to deployment.'
       required:
       - errorCode
       - errorDescription

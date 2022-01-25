@@ -154,18 +154,6 @@ const getAllDfsps = async(ctx) => {
 };
 
 
-const getAllEnvironments = async(ctx) => {
-    const { mcmServerEndpoint } = ctx.state.conf;
-
-    const HubModel = new Hub({
-        mcmServerEndpoint,
-        logger: ctx.state.logger,
-    });
-
-    ctx.response.status = 200;
-    ctx.body = await HubModel.getEnvironments();
-};
-
 const getDFSPSByMonetaryZone = async(ctx) => {
     const { dfspId, mcmServerEndpoint } = ctx.state.conf;
     const dfsp = new DFSP({
@@ -306,19 +294,22 @@ const getJWSCertificates = async(ctx) => {
     ctx.body = await certModel.getDFSPJWSCertificates();
 };
 
-const uploadJWSCertificates = async(ctx) => {
+const createJWSCertificates = async(ctx) => {
     const certModel = certModelFromContext(ctx);
-    let jws = ctx.request.body || {};
-    if (Object.keys(jws).length === 0) {
-        jws = certModel.createJWS();
-    } else {
-        try {
-            certModel.validateJWSKeyPair(jws);
-        } catch (e) {
-            ctx.body = { error: e.message };
-            ctx.status = 400;
-            return;
-        }
+    const jws = certModel.createJWS();
+    await certModel.storeJWS(jws);
+    ctx.body = await certModel.uploadJWS({ publicKey: jws.publicKey });
+};
+
+const setJWSCertificates = async(ctx) => {
+    const certModel = certModelFromContext(ctx);
+    const jws = ctx.request.body;
+    try {
+        certModel.validateJWSKeyPair(jws);
+    } catch (e) {
+        ctx.body = { error: e.message };
+        ctx.status = 400;
+        return;
     }
     await certModel.storeJWS(jws);
     ctx.body = await certModel.uploadJWS({ publicKey: jws.publicKey });
@@ -355,7 +346,7 @@ const getMonetaryZones = async(ctx) => {
 const generateAllCerts = async(ctx) => {
     await createClientCSR(ctx);
     await generateDfspServerCerts(ctx);
-    await uploadJWSCertificates(ctx);
+    await createJWSCertificates(ctx);
 
     //FIXME: return something relevant when doing https://modusbox.atlassian.net/browse/MP-2135
     ctx.body = '';
@@ -407,9 +398,6 @@ module.exports = {
     '/dfsp': {
         get: getDFSPDetails,
     },
-    '/environments': {
-        get: getAllEnvironments,
-    },
     '/dfsp/endpoints': {
         get: getDFSPEndpoints,
         post: createDFSPEndpoints,
@@ -434,7 +422,8 @@ module.exports = {
     },
     '/dfsp/jwscerts': {
         get: getJWSCertificates,
-        post: uploadJWSCertificates,
+        post: createJWSCertificates,
+        put: setJWSCertificates,
         delete: deleteJWSCertificates,
     },
     '/dfsp/clientcerts': {
