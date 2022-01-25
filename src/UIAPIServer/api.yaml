@@ -462,13 +462,6 @@ paths:
       summary: post server certificate
       description: TBD
       operationId: createDfspServerCerts
-      requestBody:
-        description: Certificate
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BaseServerCert'
       responses:
         "200":
           description: successful operation
@@ -529,13 +522,6 @@ paths:
       summary: create JWS certificate
       description: TBD
       operationId: createDfspJwsCerts
-      requestBody:
-        description: Certificate
-        required: false
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BaseJWSCert'
       responses:
         "200":
           description: successful operation
