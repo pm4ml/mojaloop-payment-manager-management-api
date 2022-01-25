@@ -137,11 +137,16 @@ class CertificatesModel {
         if (serverCertData.ca_chain) {
             cert.intermediateChain = serverCertData.ca_chain;
         }
+        if (serverCertData.issuing_ca) {
+            cert.rootCertificate = serverCertData.issuing_ca;
+        }
         cert.serverCertificate = serverCertData.certificate;
         const response = await this.uploadServerCertificates(cert);
         this._logger.push(response).log('uploadServerCertificates');
 
         await this._connectorManager.reconfigureInboundSdk(serverCertData.private_key, serverCertData.certificate, serverCertData.issuing_ca);
+
+        return response;
     }
 
     async exchangeOutboundSdkConfiguration() {
