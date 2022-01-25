@@ -569,7 +569,7 @@ paths:
     post:
       tags:
       - DFSP-client-ca-configuration
-      summary: post client ca
+      summary: create dfsp ca
       description: TBD
       operationId: createDFSPCA
       requestBody:
@@ -578,10 +578,29 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              oneOf:
-              - $ref: "#/components/schemas/DFSPCAInfoInput"
-              - $ref: "#/components/schemas/CAInitialInfo"
+              $ref: "#/components/schemas/CAInitialInfo"
+
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CAInfo"
+      x-swagger-router-controller: DfspCA
+    put:
+      tags:
+      - DFSP-client-ca-configuration
+      summary: set external dfsp ca
+      description: TBD
+      operationId: setDFSPCA
+      requestBody:
+        description: External CA cert
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DFSPCAInfoInput"
       responses:
         "200":
           description: successful operation
@@ -1680,8 +1699,6 @@ components:
           description: CA root certificate parameters
       description: CA initial parameters
     DFSPCAInfoInput:
-      required:
-      - type
       type: object
       properties:
         privateKey:
@@ -1693,10 +1710,6 @@ components:
         intermediateChain:
           type: string
           description: PEM-encoded certificate
-        type:
-          type: string
-          enum:
-          - EXTERNAL
       description: Hub CA Input Body
     CAInfo:
       properties:

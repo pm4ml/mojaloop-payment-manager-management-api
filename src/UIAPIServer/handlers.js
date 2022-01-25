@@ -261,9 +261,12 @@ const getDFSPCA = async(ctx) => {
 
 const createDFSPCA = async(ctx) => {
     const certModel = certModelFromContext(ctx);
-    ctx.body = (ctx.request.body.type === 'EXTERNAL')
-        ? await certModel.createExternalDFSPCA(ctx.request.body)
-        : await certModel.createInternalDFSPCA(ctx.request.body);
+    ctx.body = await certModel.createInternalDFSPCA(ctx.request.body);
+};
+
+const setDFSPCA = async(ctx) => {
+    const certModel = certModelFromContext(ctx);
+    ctx.body = await certModel.createExternalDFSPCA(ctx.request.body);
 };
 
 const getHubCA = async(ctx) => {
@@ -435,6 +438,7 @@ module.exports = {
     '/dfsp/ca': {
         get: getDFSPCA,
         post: createDFSPCA,
+        put: setDFSPCA,
     },
     '/hub/ca': {
         get: getHubCA,
