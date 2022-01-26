@@ -48,13 +48,17 @@ const createLogger = (logger) => async (ctx, next) => {
         path: ctx.path,
         method: ctx.method
     }});
-    await ctx.state.logger.push({ body: ctx.request.body }).log('Request received');
+    if (ctx.path !== '/health') {
+        await ctx.state.logger.push({body: ctx.request.body}).log('Request received');
+    }
     try {
         await next();
     } catch (err) {
         console.log(`Error caught in createLogger: ${err.stack || util.inspect(err, { depth: 10 })}`);
     }
-    await ctx.state.logger.log('Request processed');
+    if (ctx.path !== '/health') {
+        await ctx.state.logger.log('Request processed');
+    }
 };
 
 /**
