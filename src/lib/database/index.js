@@ -122,9 +122,7 @@ async function syncDB({redisCache, db, logger}) {
 
                 success: (data?.fulfil?.body?.transferState === 'COMMITTED') ? true : null,
             };
-        }
-
-        if(data.direction === 'OUTBOUND') {
+        } else if(data.direction === 'OUTBOUND') {
             row = {
                 ...row,
                 sender: getName(data.from),
