@@ -50,10 +50,13 @@ class Vault {
         this._secretMount = mounts.kv;
         this._pkiMount = mounts.pki;
         this._signExpiryHours = signExpiryHours;
+        this._reconnectTimer = null;
     }
 
     async connect() {
         await this._logger.log('Connecting to Vault');
+
+        clearTimeout(this._reconnectTimer);
 
         let creds;
 
@@ -75,7 +78,14 @@ class Vault {
             token: creds.auth.client_token,
         });
 
+        const tokenRefreshMs = (creds.auth.lease_duration - 10) * 1000;
+        this._reconnectTimer = setTimeout(this.connect.bind(this), tokenRefreshMs);
+
         await this._logger.push({ endpoint: this._endpoint }).log('Connected to Vault');
+    }
+
+    disconnect () {
+        clearTimeout(this._reconnectTimer);
     }
 
     mountAll() {
