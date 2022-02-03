@@ -235,7 +235,7 @@ class Vault {
      */
     async signHubCSR(params) {
         const { data } = await this._client.request({
-            path: `${this._pkiMount}/sign/${this._pkiBaseDomain}`,
+            path: `/${this._pkiMount}/sign/${this._pkiBaseDomain}`,
             method: 'POST',
             json: {
                 common_name: params.commonName,
