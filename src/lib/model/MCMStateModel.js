@@ -118,10 +118,9 @@ class MCMStateModel {
     }
 
     async getUnprocessedCerts() {
-        const hubCerts = await this._hubCertificateModel.getCertificates();
+        const hubCerts = await this._hubCertificateModel.getUnprocessedCerts();
 
-        //filter all certs where cert state is CSR_LOADED
-        return hubCerts.filter(cert => (cert.state === 'CSR_LOADED')).map(cert => ({
+        return hubCerts.map(cert => ({
             id: cert.id,
             csr: cert.csr,
             csrInfo: cert.csrInfo,

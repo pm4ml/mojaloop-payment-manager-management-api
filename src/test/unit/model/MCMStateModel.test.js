@@ -71,7 +71,7 @@ describe('MCMState Model:', () => {
                 db: mockDB
             });
 
-            const getCertificatesSpy = jest.spyOn(HubCertificateModel.prototype, 'getCertificates')
+            const getCertificatesSpy = jest.spyOn(HubCertificateModel.prototype, 'getUnprocessedCerts')
                 .mockImplementation(() => []);
 
             const uploadServerCertificateSpy = jest.spyOn(HubCertificateModel.prototype, 'uploadServerCertificate')
@@ -98,7 +98,7 @@ describe('MCMState Model:', () => {
                 db: mockDB
             });
 
-            const getCertificatesSpy = jest.spyOn(HubCertificateModel.prototype, 'getCertificates')
+            const getCertificatesSpy = jest.spyOn(HubCertificateModel.prototype, 'getUnprocessedCerts')
                 .mockImplementation(() => hubCertsResource.signedCertList);
 
             const uploadServerCertificateSpy = jest.spyOn(HubCertificateModel.prototype, 'uploadServerCertificate')
@@ -124,7 +124,7 @@ describe('MCMState Model:', () => {
                 db: mockDB
             });
 
-            const getCertificatesSpy = jest.spyOn(HubCertificateModel.prototype, 'getCertificates')
+            const getCertificatesSpy = jest.spyOn(HubCertificateModel.prototype, 'getUnprocessedCerts')
                 .mockImplementation(() => hubCertsResource.csrLoadedCertList);
 
             await mcmState.hubCSRExchangeProcess();
@@ -145,7 +145,7 @@ describe('MCMState Model:', () => {
                 db: mockDB
             });
 
-            const getCertificatesSpy = jest.spyOn(HubCertificateModel.prototype, 'getCertificates')
+            const getCertificatesSpy = jest.spyOn(HubCertificateModel.prototype, 'getUnprocessedCerts')
                 .mockImplementation(() => hubCertsResource.csrLoadedCertList);
 
             const uploadServerCertificateSpy = jest.spyOn(HubCertificateModel.prototype, 'uploadServerCertificate')
