@@ -6,18 +6,16 @@ EXPOSE 3000
 
 WORKDIR /src/
 
-ARG NPM_TOKEN
-
 # This is super-ugly, but it means we don't have to re-run npm install every time any of the source
 # files change- only when any dependencies change- which is a superior developer experience when
 # relying on docker-compose.
-COPY ./src/package.json ./package.json
-# COPY ./src/package-lock.json ./package-lock.json
-COPY ./src/lib/database/package.json ./lib/database/package.json
-COPY ./src/lib/vault/package.json ./lib/vault/package.json
-COPY ./src/lib/model/package.json ./lib/model/package.json
-COPY ./src/lib/randomphrase/package.json ./lib/randomphrase/package.json
-COPY ./src/lib/requests/package.json ./lib/requests/package.json
+COPY ./package.json ./package.json
+COPY ./package-lock.json ./package-lock.json
+COPY ./src/lib/database/package.json ./src/lib/database/package.json
+COPY ./src/lib/vault/package.json ./src/lib/vault/package.json
+COPY ./src/lib/model/package.json ./src/lib/model/package.json
+COPY ./src/lib/randomphrase/package.json ./src/lib/randomphrase/package.json
+COPY ./src/lib/requests/package.json ./src/lib/requests/package.json
 # for local testing
 # COPY ./src/lib/mcmclient/package.json ./lib/mcmclient/package.json
 # COPY ./src/lib/mcmclient/lib/pkiengine/package.json ./lib/mcmclient/lib/pkiengine/package.json
@@ -28,7 +26,7 @@ RUN npm install --only=production
 FROM node:lts-alpine
 
 # APP
-WORKDIR /
+WORKDIR /src
 
 ARG BUILD_DATE
 ARG VCS_URL
@@ -46,4 +44,4 @@ LABEL org.label-schema.version=$VERSION
 COPY --from=builder /src/ /src
 COPY ./src ./src
 
-CMD ["node", "src/index.js"]
+CMD ["npm", "start"]

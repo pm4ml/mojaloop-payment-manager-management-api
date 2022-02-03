@@ -16,12 +16,11 @@
     "url": "git://github.com/modusintegration/mojaloop-payment-manager-management-api-service.git"
   },
   "scripts": {
-    "start": "node index.js",
-    "vault:init": "node bootstrap/vault.js",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "test": "jest --ci --reporters=default --reporters=jest-junit --env=node test/unit",
-    "test:int": "jest --ci --reporters=default --reporters=jest-junit --env=node test/integration --forceExit"
+    "start": "node src/index.js",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "test": "jest --ci --reporters=default --reporters=jest-junit --env=node src/test/unit",
+    "test:int": "jest --ci --reporters=default --reporters=jest-junit --env=node src/test/integration --forceExit"
   },
   "jest": {
     "setupFiles": [
@@ -30,10 +29,10 @@
   },
   "dependencies": {
     "@babel/eslint-parser": "^7.17.0",
-    "@internal/database": "file:lib/database",
-    "@internal/model": "file:lib/model",
-    "@internal/randomphrase": "file:lib/randomphrase",
-    "@internal/vault": "file:lib/vault",
+    "@internal/database": "file:src/lib/database",
+    "@internal/model": "file:src/lib/model",
+    "@internal/randomphrase": "file:src/lib/randomphrase",
+    "@internal/vault": "file:src/lib/vault",
     "@mojaloop/sdk-standard-components": "^15.13.0",
     "@pm4ml/mcm-client": "^2.0.3",
     "ajv": "^8.9.0",

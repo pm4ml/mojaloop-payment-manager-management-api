@@ -85,7 +85,10 @@ jobs:
             - src/node_modules
       - run:
           name: Execute unit tests
-          command: cd src && npm test
+          command: |
+            ./scripts/run-vault.sh
+            npm test
+            ./scripts/kill-vault.sh
       - store_test_results:
           path: /home/circleci/project/git/src/
       - store_artifacts:
