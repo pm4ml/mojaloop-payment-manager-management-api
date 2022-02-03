@@ -228,11 +228,6 @@ const getHubEndpoints = async(ctx) => {
     ctx.body = await hub.getEndpoints({ direction, state });
 };
 
-const uploadClientCSR = async(ctx) => {
-    const certModel = certModelFromContext(ctx);
-    ctx.body = await certModel.uploadClientCSR(ctx.request.body.clientCSR);
-};
-
 const createClientCSR = async(ctx) => {
     const certModel = certModelFromContext(ctx);
 
@@ -430,7 +425,6 @@ module.exports = {
     },
     '/dfsp/clientcerts': {
         get: getClientCertificates,
-        post: uploadClientCSR,
     },
     '/dfsp/clientcerts/csr': {
         post: createClientCSR,

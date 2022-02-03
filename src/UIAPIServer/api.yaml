@@ -626,28 +626,6 @@ paths:
                 $ref: "#/components/schemas/HubCAInfo"
       x-swagger-router-controller: HubCA
   /dfsp/clientcerts:
-
-    post:
-      tags:
-      - DFSP-client-certificates-configuration
-      summary: post client certificates
-      description: TBD
-      operationId: createDfspClientCerts
-      requestBody:
-        description: Client CSR
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BaseClientCSR'
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ServerCert"
-      x-swagger-router-controller: DfspServerCerts
     get:
       tags:
       - DFSP-client-certificates-configuration
@@ -665,7 +643,6 @@ paths:
                   $ref: "#/components/schemas/ServerCert"
       x-swagger-router-controller: DfspServerCerts
   /dfsp/clientcerts/csr:
-
     post:
       tags:
       - DFSP-client-certificates-configuration
@@ -1472,12 +1449,6 @@ components:
         without a minor currency unit. It also only allows four digits in the
         minor currency unit; a negative value is not allowed. Using more than 18
         digits in the major currency unit is not allowed.
-    BaseClientCSR:
-      type: "object"
-      properties:
-        clientCSR:
-          type: "string"
-          description: "PEM encoded CSR"
     BaseServerCert:
       type: object
       description: The server certificate.
