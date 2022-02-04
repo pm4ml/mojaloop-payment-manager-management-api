@@ -38,7 +38,8 @@ class Vault {
         endpoint,
         mounts,
         auth,
-        pkiBaseDomain,
+        pkiServerRole,
+        pkiClientRole,
         signExpiryHours,
         logger = new Logger.Logger()
     }) {
@@ -46,7 +47,8 @@ class Vault {
         this._auth = auth;
         this._endpoint = endpoint;
         this._vault = vault({ endpoint });
-        this._pkiBaseDomain = pkiBaseDomain;
+        this._pkiServerRole = pkiServerRole;
+        this._pkiClientRole = pkiClientRole;
         this._secretMount = mounts.kv;
         this._pkiMount = mounts.pki;
         this._signExpiryHours = signExpiryHours;
@@ -96,13 +98,13 @@ class Vault {
     }
 
     async createPkiRoles() {
-        return this._client.request({
-            path: `${this._pkiMount}/roles/${this._pkiBaseDomain}`,
-            method: 'POST',
-            json: {
-                allow_any_name: true,
-            }
-        });
+        // return this._client.request({
+        //     path: `${this._pkiMount}/roles/${this._pkiBaseDomain}`,
+        //     method: 'POST',
+        //     json: {
+        //         allow_any_name: true,
+        //     }
+        // });
     }
 
     _setSecret(key, value) {
@@ -221,7 +223,7 @@ class Vault {
             }
         }
         const { data } = await this._client.request({
-            path: `/${this._pkiMount}/issue/${this._pkiBaseDomain}`,
+            path: `/${this._pkiMount}/issue/${this._pkiServerRole}`,
             method: 'POST',
             json: reqJson,
         });
@@ -235,7 +237,7 @@ class Vault {
      */
     async signHubCSR(params) {
         const { data } = await this._client.request({
-            path: `/${this._pkiMount}/sign/${this._pkiBaseDomain}`,
+            path: `/${this._pkiMount}/sign/${this._pkiClientRole}`,
             method: 'POST',
             json: {
                 common_name: params.commonName,
