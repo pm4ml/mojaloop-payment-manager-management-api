@@ -7,7 +7,9 @@ export VAULT_TOKEN=myroot
 TEMP_DIR=.vault
 mkdir -p $TEMP_DIR
 
-./kill-vault.sh
+if [ -f $TEMP_DIR/pid ]; then
+  kill -TERM "$(cat $TEMP_DIR/pid)" || true
+fi
 
 cd $TEMP_DIR
 if [ ! -f vault ]; then
