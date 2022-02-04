@@ -1,6 +1,6 @@
 {
   "name": "mojaloop-payment-manager-management-api-service",
-  "version": "3.0.14",
+  "version": "3.0.15",
   "description": "Mojaloop Payment Manager - Management API Service",
   "main": "index.js",
   "author": "Murthy kakarlamudi, ModusBox Inc.",
@@ -40,6 +40,7 @@
     "co-body": "^6.0.0",
     "dotenv": "^16.0.0",
     "env-var": "^7.1.1",
+    "fast-json-patch": "^3.1.0",
     "json-stringify-deterministic": "^1.0.2",
     "knex": "^1.0.2",
     "koa": "^2.13.4",
@@ -53,7 +54,8 @@
     "node-vault": "^0.9.22",
     "oas-validator": "^5.0.0",
     "redis": "^4.0.3",
-    "uuid": "^8.3.0"
+    "uuid": "^8.3.0",
+    "ws": "^8.4.2"
   },
   "devDependencies": {
     "@types/jest": "^27.4.0",

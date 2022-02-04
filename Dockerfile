@@ -4,7 +4,7 @@ RUN apk add --no-cache git python3 build-base
 
 EXPOSE 3000
 
-WORKDIR /src/
+WORKDIR /app/
 
 # This is super-ugly, but it means we don't have to re-run npm install every time any of the source
 # files change- only when any dependencies change- which is a superior developer experience when
@@ -26,7 +26,7 @@ RUN npm install --only=production
 FROM node:lts-alpine
 
 # APP
-WORKDIR /src
+WORKDIR /app
 
 ARG BUILD_DATE
 ARG VCS_URL
@@ -41,7 +41,7 @@ LABEL org.label-schema.vcs-url=$VCS_URL
 LABEL org.label-schema.vcs-ref=$VCS_REF
 LABEL org.label-schema.version=$VERSION
 
-COPY --from=builder /src/ /src
+COPY --from=builder /app/ /app
 COPY ./src ./src
 
 CMD ["npm", "start"]
