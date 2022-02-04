@@ -66,6 +66,7 @@ describe('MCMState Model:', () => {
                 dfspId: 'dfsptest',
                 hubEndpoint: 'localhost',
                 refreshIntervalSeconds: 1000,
+                mojaloopConnectorFQDN: 'connector.example.com',
                 vault,
                 logger,
                 db: mockDB
@@ -83,32 +84,6 @@ describe('MCMState Model:', () => {
 
             expect(uploadServerCertificateSpy).toHaveBeenCalledTimes(0);
 
-        });
-
-        test('when outbound enrollment list comes with a not CSR_LOADED state from mcm then it does not call upload', async () => {
-
-            const vault = new Vault('MOCK CA', 'MOCK KEY');
-
-            const mcmState = new MCMStateModel({
-                dfspId: 'dfsptest',
-                hubEndpoint: 'localhost',
-                refreshIntervalSeconds: 1000,
-                vault,
-                logger,
-                db: mockDB
-            });
-
-            const getCertificatesSpy = jest.spyOn(HubCertificateModel.prototype, 'getUnprocessedCerts')
-                .mockImplementation(() => hubCertsResource.signedCertList);
-
-            const uploadServerCertificateSpy = jest.spyOn(HubCertificateModel.prototype, 'uploadServerCertificate')
-                .mockImplementation(() => []);
-
-            await mcmState.hubCSRExchangeProcess();
-
-            expect(getCertificatesSpy).toHaveBeenCalledTimes(1);
-
-            expect(uploadServerCertificateSpy).toHaveBeenCalledTimes(0);
         });
 
         test('when outbound enrollment list comes with one csr in CSR_LOADED state and there is no DFSP CA then fails', async () => {
@@ -119,6 +94,7 @@ describe('MCMState Model:', () => {
                 dfspId: 'dfsptest',
                 hubEndpoint: 'localhost',
                 refreshIntervalSeconds: 1000,
+                mojaloopConnectorFQDN: 'connector.example.com',
                 vault,
                 logger,
                 db: mockDB
@@ -140,6 +116,7 @@ describe('MCMState Model:', () => {
                 dfspId: 'dfsptest',
                 hubEndpoint: 'localhost',
                 refreshIntervalSeconds: 1000,
+                mojaloopConnectorFQDN: 'connector.example.com',
                 vault,
                 logger,
                 db: mockDB

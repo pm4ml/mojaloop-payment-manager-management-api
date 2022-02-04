@@ -1,6 +1,6 @@
 {
   "name": "mojaloop-payment-manager-management-api-service",
-  "version": "3.0.13",
+  "version": "3.0.14",
   "description": "Mojaloop Payment Manager - Management API Service",
   "main": "index.js",
   "author": "Murthy kakarlamudi, ModusBox Inc.",
@@ -24,7 +24,7 @@
   },
   "jest": {
     "setupFiles": [
-      "<rootDir>/test/jest/setEnvVars.js"
+      "<rootDir>/src/test/jest/setEnvVars.js"
     ]
   },
   "dependencies": {

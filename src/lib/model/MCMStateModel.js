@@ -20,6 +20,7 @@ class MCMStateModel {
      * @param opts.hubEndpoint {string}
      * @param opts.logger {object}
      * @param opts.dfspId {string}
+     * @param opts.mojaloopConnectorFQDN {string}
      * @param opts.vault {object}
      * @param opts.refreshIntervalSeconds {number}
      * @param opts.tlsServerPrivateKey {String}
@@ -38,6 +39,7 @@ class MCMStateModel {
         this._vault = opts.vault;
         this._dfspId = opts.dfspId;
         this._logger = opts.logger;
+        this._mojaloopConnectorFQDN = opts.mojaloopConnectorFQDN;
         this._authEnabled = opts.authEnabled;
         this._hubEndpoint = opts.hubEndpoint;
 
@@ -92,12 +94,12 @@ class MCMStateModel {
     }
 
     async hubCSRExchangeProcess() {
-        const hubCerts = await this.getUnprocessedCerts();
-        for (const cert of hubCerts) {
+        const hubCerts = await this._hubCertificateModel.getUnprocessedCerts();
+        for await (const cert of hubCerts) {
             try {
                 const hubCertificate = await this._vault.signHubCSR({
                     csr: cert.csr,
-                    commonName: cert.csrInfo.subject.CN,
+                    commonName: this._mojaloopConnectorFQDN,
                 });
                 await this.uploadCertificate(cert.id, hubCertificate.certificate);
             } catch (error) {
@@ -115,16 +117,6 @@ class MCMStateModel {
 
     async stop() {
         clearInterval(this._timer);
-    }
-
-    async getUnprocessedCerts() {
-        const hubCerts = await this._hubCertificateModel.getUnprocessedCerts();
-
-        return hubCerts.map(cert => ({
-            id: cert.id,
-            csr: cert.csr,
-            csrInfo: cert.csrInfo,
-        }));
     }
 
     async uploadCertificate(enrollmentId, hubCertificate) {

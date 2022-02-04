@@ -63,6 +63,7 @@ module.exports = {
 
     mcmServerEndpoint: env.get('MCM_SERVER_ENDPOINT').required().asString(),
     mcmClientRefreshIntervalSeconds: env.get('MCM_CLIENT_REFRESH_INTERVAL_SECONDS').default(60).asIntPositive(),
+    mojaloopConnectorFQDN: env.get('MOJALOOP_CONNECTOR_FQDN').default('connector.fsp.example.com').asString(),
     vault: {
         endpoint: env.get('VAULT_ENDPOINT').required().asString(),
         mounts: {

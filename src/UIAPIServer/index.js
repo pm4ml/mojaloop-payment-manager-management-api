@@ -81,6 +81,7 @@ class UIAPIServer {
             vault: this._vault,
             logger: this._logger,
             auth: this._conf.auth,
+            mojaloopConnectorFQDN: this._conf.mojaloopConnectorFQDN,
             db: this._db
         });
 
