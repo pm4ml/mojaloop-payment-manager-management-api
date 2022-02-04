@@ -74,6 +74,8 @@ module.exports = {
         pkiClientRole: env.get('VAULT_PKI_CLIENT_ROLE').asString(),
         auth: vaultAuth,
         signExpiryHours: env.get('VAULT_SIGN_EXPIRY_HOURS').default('43800').asString(),
+        keyLength: env.get('PRIVATE_KEY_LENGTH').default(4096).asIntPositive(),
+        keyAlgorithm: env.get('PRIVATE_KEY_ALGORITHM').default('rsa').asString(),
     },
     auth: {
         enabled:  env.get('AUTH_ENABLED').asBoolStrict(),
@@ -82,8 +84,7 @@ module.exports = {
             pass: env.get('AUTH_PASS').asString(),
         }
     },
-    privateKeyLength: env.get('PRIVATE_KEY_LENGTH').default(4096).asIntPositive(),
-    privateKeyAlgorithm: env.get('PRIVATE_KEY_ALGORITHM').default('rsa').asString(),
     dfspClientCsrParameters: env.get('DFSP_CLIENT_CSR_PARAMETERS').asJsonConfig(),
     dfspServerCsrParameters: env.get('DFSP_SERVER_CSR_PARAMETERS').asJsonConfig(),
+    // caCsrParameters: env.get('CA_CSR_PARAMETERS').asJsonConfig(),
 };

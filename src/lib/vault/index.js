@@ -41,6 +41,8 @@ class Vault {
         pkiServerRole,
         pkiClientRole,
         signExpiryHours,
+        keyLength,
+        keyAlgorithm,
         logger = new Logger.Logger()
     }) {
         this._logger = logger;
@@ -53,6 +55,8 @@ class Vault {
         this._pkiMount = mounts.pki;
         this._signExpiryHours = signExpiryHours;
         this._reconnectTimer = null;
+        this._keyLength = keyLength;
+        this._keyAlgorithm = keyAlgorithm;
     }
 
     async connect() {
@@ -177,29 +181,23 @@ class Vault {
 
     /**
      * Create root CA
-     * @param {Object} caOptions
+     * @param {Object} csr
      */
-    async createCA (caOptions) {
+    async createCA (csr) {
         // eslint-disable-next-line no-empty
         try { await this.deleteCA(); } catch (e) { }
-
-        const { names } = caOptions.csr;
-        const [,...altNamesObjs] = names;
-        const altNames = altNamesObjs.map((name) => name.CN).join(',');
         const { data } = await this._client.request({
             path: `/${this._pkiMount}/root/generate/exported`,
             method: 'POST',
             json: {
-                common_name: names[0].CN,
-                alt_names: altNames,
-                ou: names.map((name) => name.OU),
-                organization: names.map((name) => name.O),
-                locality: names.map((name) => name.L),
-                country: names.map((name) => name.C),
-                province: names.map((name) => name.ST),
-                key_type: 'rsa',
-                key_bits: '4096',
-                ttl: '43800h',
+                common_name: csr.CN,
+                ou: csr.OU,
+                organization: csr.O,
+                locality: csr.L,
+                country: csr.C,
+                province: csr.ST,
+                key_type: this._keyAlgorithm,
+                key_bits: this._keyLength,
             },
         });
 
@@ -207,6 +205,13 @@ class Vault {
             cert: data.certificate,
             key: data.private_key,
         };
+    }
+
+    async getCA () {
+        return this._client.request({
+            path: `/${this._pkiMount}/ca/pem`,
+            method: 'GET',
+        });
     }
 
     async createDFSPServerCert (csrParameters) {

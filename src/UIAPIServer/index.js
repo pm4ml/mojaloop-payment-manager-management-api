@@ -57,6 +57,11 @@ class UIAPIServer {
         });
         await this._vault.connect();
 
+        // const ca = await this._vault.getCA();
+        // if (!ca) {
+        //     await this._vault.createCA(this._conf.caCsrParameters);
+        // }
+
         this._api.use(async (ctx, next) => {
             ctx.state = {
                 conf: this._conf,

@@ -12,8 +12,8 @@ describe('create dfsp csr and upload to mcm', () => {
     test('when creating a csr it calls one time to certificates model csr creation and upload csr', async () => {
 
         const csrParameters = {
-            privateKeyAlgorithm: 'rsa',
-            privateKeyLength: 4096,
+            keyAlgorithm: 'rsa',
+            keyLength: 4096,
             parameters: 'mocked'
         };
 
@@ -23,8 +23,8 @@ describe('create dfsp csr and upload to mcm', () => {
             'state': {
                 'conf': {
                     dfspId: 'pm4mltest',
-                    privateKeyAlgorithm: csrParameters.privateKeyAlgorithm,
-                    privateKeyLength : csrParameters.privateKeyLength,
+                    keyAlgorithm: csrParameters.keyAlgorithm,
+                    keyLength : csrParameters.keyLength,
                     dfspClientCsrParameters: csrParameters.parameters,
                     dfspServerCsrParameters: csrParameters.parameters,
                 },
@@ -66,8 +66,8 @@ describe('create dfsp csr and upload to mcm', () => {
     test('generate all certs calls to exchange server certificates with sdk', async () => {
 
         const csrParameters = {
-            privateKeyAlgorithm: 'rsa',
-            privateKeyLength: 4096,
+            keyAlgorithm: 'rsa',
+            keyLength: 4096,
             parameters: 'mocked'
         };
 
@@ -77,8 +77,8 @@ describe('create dfsp csr and upload to mcm', () => {
             'state': {
                 'conf': {
                     dfspId: 'pm4mltest',
-                    privateKeyAlgorithm: csrParameters.privateKeyAlgorithm,
-                    privateKeyLength : csrParameters.privateKeyLength,
+                    keyAlgorithm: csrParameters.keyAlgorithm,
+                    keyLength : csrParameters.keyLength,
                     dfspServerCsrParameters: csrParameters.parameters,
                 },
                 logger: {
