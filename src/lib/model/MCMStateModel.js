@@ -46,11 +46,13 @@ class MCMStateModel {
         this._authModel = new AuthModel(opts);
         this._connectorModel = new ConnectorModel(opts);
         this._db = opts.db;
+        this._refreshTimer = null;
     }
 
     async _refresh() {
         try {
             this._logger.log('starting mcm client refresh');
+            clearTimeout(this._refreshTimer);
 
             await this.exchangeJWS();
 
@@ -60,9 +62,10 @@ class MCMStateModel {
             // Check if Client certificates are available in Hub
             await this.dfspClientCertificateExchangeProcess();
 
-
             //const hubEndpoints = await this._hubEndpointModel.findAll({ state: 'CONFIRMED' });
             // await this._vault.setSecret('hubEndpoints', JSON.stringify(hubEndpoints));
+
+            this._refreshTimer = setTimeout(this._refresh.bind(this), this._refreshIntervalSeconds * 1000);
         }
         catch(err) {
             this._logger.push({ err }).log('Error refreshing MCM state model');
@@ -112,11 +115,10 @@ class MCMStateModel {
         await this._authModel.login();
         await this._refresh();
         this._logger.push({ interval: this._refreshIntervalSeconds }).log('Beginning MCM client refresh interval');
-        this._timer = setInterval(this._refresh.bind(this), this._refreshIntervalSeconds * 10e3);
     }
 
     async stop() {
-        clearInterval(this._timer);
+        clearInterval(this._refreshTimer);
     }
 
     async uploadCertificate(enrollmentId, hubCertificate) {
