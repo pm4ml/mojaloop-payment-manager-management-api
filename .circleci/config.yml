@@ -20,6 +20,7 @@ defaults_Dependencies: &defaults_Dependencies |
     git \
     ca-certificates \
     curl \
+    wget \
     openssh-client \
     -t build-dependencies make gcc g++ python3 libtool autoconf automake
   npm config set unsafe-perm true
