@@ -152,19 +152,21 @@ class CertificatesModel {
     async exchangeOutboundSdkConfiguration() {
         const cert = await this._vault.getClientCert();
 
-        if (cert?.certificate || !cert?.id) return;
+        if (!cert?.id) return;
 
         const inboundEnrollment = await this.getClientCertificate(cert.id);
-        if(inboundEnrollment.state === 'CERT_SIGNED'){
-            const objHubCA = await this._certificateModel.getHubCA();
-            const caChain = `${objHubCA.intermediateChain}${objHubCA.rootCertificate}`.trim();
-            this._logger.push({cert: caChain }).log('hubCA');
 
-            cert.certificate = inboundEnrollment.certificate;
-            await this._vault.setClientCert(cert);
-
-            await this._connectorManager.reconfigureOutboundSdk(caChain, cert.privateKey, inboundEnrollment.certificate);
+        if(inboundEnrollment.state !== 'CERT_SIGNED' && cert.certificate === inboundEnrollment.certificate) {
+            return;
         }
+
+        const objHubCA = await this._certificateModel.getHubCA();
+        const caChain = `${objHubCA.intermediateChain}${objHubCA.rootCertificate}`.trim();
+        this._logger.push({cert: caChain }).log('hubCA');
+        await this._connectorManager.reconfigureOutboundSdk(caChain, cert.privateKey, inboundEnrollment.certificate);
+
+        cert.certificate = inboundEnrollment.certificate;
+        await this._vault.setClientCert(cert);
     }
 
     async exchangeJWSConfiguration(jwsCerts) {
