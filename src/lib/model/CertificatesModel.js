@@ -18,6 +18,7 @@ class CertificatesModel {
         this._logger = opts.logger;
         this._vault = opts.vault;
         this._db = opts.db;
+        this._outboundCert = null;
 
         this._mcmClientDFSPCertModel = new DFSPCertificateModel({
             dfspId: opts.dfspId,
@@ -40,12 +41,14 @@ class CertificatesModel {
         });
     }
 
-    async createCSR(csrParameters, keyBits) {
+    async createCSR(keyBits, csrParameters) {
         const keys = forge.pki.rsa.generateKeyPair(keyBits);
         const csr = forge.pki.createCertificationRequest();
         csr.publicKey = keys.publicKey;
-        csr.setSubject(Object.entries(csrParameters.subject).map(([shortName, value]) => ({ shortName, value })));
-        if (csrParameters.extensions && csrParameters.extensions.subjectAltName) {
+        if (csrParameters?.subject) {
+            csr.setSubject(Object.entries(csrParameters.subject).map(([shortName, value]) => ({shortName, value})));
+        }
+        if (csrParameters?.extensions?.subjectAltName) {
             const DNS_TYPE = 2;
             const IP_TYPE = 7;
             const { dns, ips } = csrParameters.extensions.subjectAltName;
@@ -149,24 +152,34 @@ class CertificatesModel {
         return response;
     }
 
-    async exchangeOutboundSdkConfiguration() {
+    async getOutboundTlsConfig() {
         const cert = await this._vault.getClientCert();
 
         if (!cert?.id) return;
 
         const inboundEnrollment = await this.getClientCertificate(cert.id);
 
-        if(inboundEnrollment.state !== 'CERT_SIGNED' && cert.certificate === inboundEnrollment.certificate) {
+        if(inboundEnrollment.state !== 'CERT_SIGNED') {
             return;
         }
 
         const objHubCA = await this._certificateModel.getHubCA();
-        const caChain = `${objHubCA.intermediateChain}${objHubCA.rootCertificate}`.trim();
-        this._logger.push({cert: caChain }).log('hubCA');
-        await this._connectorManager.reconfigureOutboundSdk(caChain, cert.privateKey, inboundEnrollment.certificate);
+        const caChain = `${objHubCA.intermediateChain || ''}\n${objHubCA.rootCertificate}`.trim();
 
-        cert.certificate = inboundEnrollment.certificate;
-        await this._vault.setClientCert(cert);
+        return {
+            ca: caChain,
+            cert: inboundEnrollment.certificate,
+            key: cert.privateKey,
+        };
+    }
+
+    async exchangeOutboundSdkConfiguration() {
+        const config = await this.getOutboundTlsConfig();
+        if (!config || this._outboundCert === config.cert) {
+            return;
+        }
+        await this._connectorManager.reconfigureOutboundSdk(config.ca, config.key, config.cert);
+        this._outboundCert = config.cert;
     }
 
     async exchangeJWSConfiguration(jwsCerts) {

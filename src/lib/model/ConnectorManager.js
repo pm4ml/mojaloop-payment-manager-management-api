@@ -28,9 +28,9 @@ class ConnectorManager {
             inbound: {
                 tls: {
                     creds: {
-                        ca: [Buffer.from(dfspCA)],
-                        cert: Buffer.from(inServerCert),
-                        key: Buffer.from(csrPrivateKey),
+                        ca: dfspCA,
+                        cert: inServerCert,
+                        key: csrPrivateKey,
                     },
                 },
             },
@@ -44,9 +44,9 @@ class ConnectorManager {
             outbound: {
                 tls: {
                     creds: {
-                        ca: Buffer.from(rootHubCA, 'utf8'),
-                        cert: Buffer.from(certificate, 'utf8'),
-                        key: Buffer.from(key, 'utf8'),
+                        ca: rootHubCA,
+                        cert: certificate,
+                        key: key,
                     },
                 },
             },

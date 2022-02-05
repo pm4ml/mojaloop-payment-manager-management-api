@@ -232,8 +232,9 @@ const createClientCSR = async(ctx) => {
     const certModel = certModelFromContext(ctx);
 
     const createdCSR = await certModel.createCSR(
-        ctx.state.conf.dfspClientCsrParameters,
-        ctx.state.conf.keyLength);
+        ctx.state.conf.vault.keyLength,
+        // ctx.state.conf.dfspClientCsrParameters
+    );
 
     ctx.body = await certModel.uploadClientCSR(createdCSR.csr);
     ctx.state.logger.push(ctx.body).log('uploadClientCSR');
@@ -353,7 +354,7 @@ const generateAllCerts = async(ctx) => {
 
 const generateDfspServerCerts = async(ctx) => {
     const certModel = certModelFromContext(ctx);
-    ctx.body = await certModel.createDfspServerCert(ctx.state.conf.dfspServerCsrParameters, ctx.state.conf.keyLength);
+    ctx.body = await certModel.createDfspServerCert(ctx.state.conf.dfspServerCsrParameters, ctx.state.conf.vault.keyLength);
     ctx.state.logger.push(ctx.body).log('createDfspServerCert');
 };
 

@@ -184,8 +184,8 @@ class Server extends ws.Server {
                     switch (msg.verb) {
                         case VERB.READ:
                             (async () => {
-                                const jwsCerts = await this.populateConfig();
-                                client.send(build.CONFIGURATION.NOTIFY(jwsCerts , msg.id));
+                                const cfg = await this.populateConfig();
+                                client.send(build.CONFIGURATION.NOTIFY(cfg , msg.id));
                             })();
                             break;
                         default:
@@ -203,11 +203,8 @@ class Server extends ws.Server {
     /*
     * Function that extracts Peer JWS data, Outbound & Inbound TLS details
     */
-    async populateConfig(){
-
-        const updatedConfig = {};
-
-        // Section to populate Peer JWS Config
+    async populateConfig() {
+        // populate Peer JWS Config
         let allJWSCerts = await this._certificatesModel.getAllJWSCertificates();
         let peerKeys = {};
         allJWSCerts
@@ -216,13 +213,22 @@ class Server extends ws.Server {
                 peerKeys[jwsCert.dfspId] = jwsCert.publicKey;
             });
 
-        updatedConfig.peerJWSKeys = peerKeys;
-
-        //TODO Section to populate Outbund TLS details
+        const outboundCfg = await this._certificatesModel.getOutboundTlsConfig();
 
         //TODO Section to populate Inbound TLS details
 
-        return updatedConfig;
+        return {
+            peerJWSKeys: peerKeys,
+            outbound: {
+                tls: {
+                    creds: {
+                        ca: outboundCfg.ca,
+                        cert: outboundCfg.cert,
+                        key: outboundCfg.key,
+                    },
+                },
+            },
+        };
     }
 
     /**
