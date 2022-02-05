@@ -23,8 +23,10 @@ describe('create dfsp csr and upload to mcm', () => {
             'state': {
                 'conf': {
                     dfspId: 'pm4mltest',
-                    keyAlgorithm: csrParameters.keyAlgorithm,
-                    keyLength : csrParameters.keyLength,
+                    vault: {
+                        keyAlgorithm: csrParameters.keyAlgorithm,
+                        keyLength: csrParameters.keyLength,
+                    },
                     dfspClientCsrParameters: csrParameters.parameters,
                     dfspServerCsrParameters: csrParameters.parameters,
                 },
@@ -77,8 +79,10 @@ describe('create dfsp csr and upload to mcm', () => {
             'state': {
                 'conf': {
                     dfspId: 'pm4mltest',
-                    keyAlgorithm: csrParameters.keyAlgorithm,
-                    keyLength : csrParameters.keyLength,
+                    vault: {
+                        keyAlgorithm: csrParameters.keyAlgorithm,
+                        keyLength: csrParameters.keyLength,
+                    },
                     dfspServerCsrParameters: csrParameters.parameters,
                 },
                 logger: {
