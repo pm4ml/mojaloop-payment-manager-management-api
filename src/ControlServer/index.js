@@ -222,9 +222,9 @@ class Server extends ws.Server {
             outbound: {
                 tls: {
                     creds: {
-                        ca: outboundCfg.ca,
-                        cert: outboundCfg.cert,
-                        key: outboundCfg.key,
+                        ca: outboundCfg?.ca,
+                        cert: outboundCfg?.cert,
+                        key: outboundCfg?.key,
                     },
                 },
             },
