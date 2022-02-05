@@ -32,31 +32,26 @@ class Vault {
      * @param opts.endpoint {string}
      * @param opts.mounts {object}
      * @param opts.auth {object}
+     * @param opts.pkiServerRole {object}
+     * @param opts.pkiClientRole {object}
+     * @param opts.keyLength {object}
+     * @param opts.keyAlgorithm {object}
+     * @param opts.signExpiryHours {object}
      * @param opts.logger {Logger}
      */
-    constructor({
-        endpoint,
-        mounts,
-        auth,
-        pkiServerRole,
-        pkiClientRole,
-        signExpiryHours,
-        keyLength,
-        keyAlgorithm,
-        logger = new Logger.Logger()
-    }) {
-        this._logger = logger;
-        this._auth = auth;
-        this._endpoint = endpoint;
-        this._vault = vault({ endpoint });
-        this._pkiServerRole = pkiServerRole;
-        this._pkiClientRole = pkiClientRole;
-        this._secretMount = mounts.kv;
-        this._pkiMount = mounts.pki;
-        this._signExpiryHours = signExpiryHours;
+    constructor(opts) {
+        this._logger = opts.logger;
+        this._auth = opts.auth;
+        this._endpoint = opts.endpoint;
+        this._vault = vault({ endpoint: opts.endpoint });
+        this._pkiServerRole = opts.pkiServerRole;
+        this._pkiClientRole = opts.pkiClientRole;
+        this._secretMount = opts.mounts.kv;
+        this._pkiMount = opts.mounts.pki;
+        this._signExpiryHours = opts.signExpiryHours;
         this._reconnectTimer = null;
-        this._keyLength = keyLength;
-        this._keyAlgorithm = keyAlgorithm;
+        this._keyLength = opts.keyLength;
+        this._keyAlgorithm = opts.keyAlgorithm;
     }
 
     async connect() {

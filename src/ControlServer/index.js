@@ -126,7 +126,7 @@ const build = {
  * server    - optional HTTP/S server on which to serve the websocket
  *************************************************************************/
 class Server extends ws.Server {
-    constructor({ logger, appConfig = {} }) {
+    constructor({ logger, appConfig = {}, vault }) {
         super({ clientTracking: true, port: appConfig.control.port });
 
         this._logger = logger;
@@ -134,7 +134,7 @@ class Server extends ws.Server {
         this._appConfig = appConfig;
         this._clientData = new Map();
 
-        this._certificatesModel = new CertificatesModel({ ...appConfig, logger });
+        this._certificatesModel = new CertificatesModel({ ...appConfig, logger, vault });
 
         this.on('error', err => {
             this._logger.push({ err })

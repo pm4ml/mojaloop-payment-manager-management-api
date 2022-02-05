@@ -24,11 +24,12 @@ const handlers = require('./handlers');
 const middlewares = require('./middlewares');
 
 class UIAPIServer {
-    constructor(conf) {
+    constructor(conf, vault) {
         this._conf = conf;
         this._api = null;
         this._server = null;
         this._logger = null;
+        this._vault = vault;
     }
 
     async setupApi() {
@@ -50,12 +51,6 @@ class UIAPIServer {
             syncInterval: this._conf.cacheSyncInterval,
             logger: this._logger,
         });
-
-        this._vault = new Vault({
-            ...this._conf.vault,
-            logger: this._logger,
-        });
-        await this._vault.connect();
 
         // const ca = await this._vault.getCA();
         // if (!ca) {

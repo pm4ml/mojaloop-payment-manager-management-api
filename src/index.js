@@ -15,6 +15,7 @@ const config = require('./config');
 const UIAPIServer = require('./UIAPIServer');
 const ControlServer = require('./ControlServer');
 const { Logger } = require('@mojaloop/sdk-standard-components');
+const Vault = require('@internal/vault');
 
 const LOG_ID = {
     CONTROL:   { app: 'mojaloop-payment-manager-management-api-service-control-server' },
@@ -25,11 +26,12 @@ const LOG_ID = {
  * Class that creates and manages http servers that expose the scheme adapter APIs.
  */
 class Server {
-    constructor(conf, logger) {
+    constructor(conf, logger, vault) {
         this.conf = conf;
         this.logger = logger;
-        this.uiApiServer = new UIAPIServer(this.conf);
+        this.uiApiServer = new UIAPIServer(this.conf, vault);
         this.controlServer = null;
+        this.vault = vault;
     }
 
     async start() {
@@ -40,6 +42,7 @@ class Server {
         this.controlServer = new ControlServer.Server({
             appConfig: this.conf,
             logger: this.logger.push(LOG_ID.CONTROL),
+            vault: this.vault,
         });
         this.controlServer.registerInternalEvents();
         await Promise.all([
@@ -74,18 +77,27 @@ if(require.main === module) {
             },
             stringify: Logger.buildStringify({ space: config.logIndent }),
         });
-        const svr = new Server(config, logger);
+
+        const vault = new Vault({
+            ...config.vault,
+            logger,
+        });
+        await vault.connect();
+
+        const svr = new Server(config, logger, vault);
 
         // handle SIGTERM to exit gracefully
         process.on('SIGTERM', async () => {
             console.log('SIGTERM received. Shutting down APIs...');
 
             await svr.stop();
+            vault.disconnect();
             process.exit(0);
         });
 
         svr.start().catch(err => {
             console.log(err);
+            vault.disconnect();
             process.exit(1);
         });
     })();
