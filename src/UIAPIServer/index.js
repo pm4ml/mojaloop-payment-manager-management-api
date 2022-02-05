@@ -15,7 +15,6 @@ const { oas } = require('koa-oas3');
 const http = require('http');
 const path = require('path');
 const { MCMStateModel } = require('@internal/model');
-const Vault = require('@internal/vault');
 
 const { Logger } = require('@mojaloop/sdk-standard-components');
 

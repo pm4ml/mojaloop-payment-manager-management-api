@@ -11,7 +11,6 @@
 const assert = require('assert').strict;
 // TODO: Use hashi-vault-js package
 const vault = require('node-vault');
-const { Logger } = require('@mojaloop/sdk-standard-components');
 
 // TODO: find and link document containing rules on allowable paths
 const vaultPaths = {
