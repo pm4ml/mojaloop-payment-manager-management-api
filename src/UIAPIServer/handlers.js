@@ -15,7 +15,6 @@ const {
     Hub,
     CertificatesModel,
     MonetaryZone,
-    CertManager,
 } = require('@internal/model');
 
 const certModelFromContext = (ctx, overrides) => new CertificatesModel({
