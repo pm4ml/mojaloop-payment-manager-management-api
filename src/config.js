@@ -96,5 +96,5 @@ module.exports = {
     },
     dfspClientCsrParameters: env.get('DFSP_CLIENT_CSR_PARAMETERS').asJsonConfig(),
     dfspServerCsrParameters: env.get('DFSP_SERVER_CSR_PARAMETERS').asJsonConfig(),
-    // caCsrParameters: env.get('CA_CSR_PARAMETERS').asJsonConfig(),
+    caCsrParameters: env.get('CA_CSR_PARAMETERS').asJsonConfig(),
 };

@@ -59,10 +59,21 @@ class UIAPIServer {
             });
         }
 
-        // const ca = await this._vault.getCA();
-        // if (!ca) {
-        //     await this._vault.createCA(this._conf.caCsrParameters);
-        // }
+        let ca;
+        try {
+            ca = await this._vault.getCA();
+        } catch (e) {
+            if (!e.response || e.response.statusCode !== 404) {
+                throw e;
+            }
+        }
+
+        if (!ca) {
+            await this._vault.createCA(this._conf.caCsrParameters);
+            if (certManager) {
+                await certManager.renewServerCert();
+            }
+        }
 
         this._api.use(async (ctx, next) => {
             ctx.state = {
