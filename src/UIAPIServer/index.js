@@ -14,7 +14,7 @@ const { oas } = require('koa-oas3');
 
 const http = require('http');
 const path = require('path');
-const { MCMStateModel } = require('@internal/model');
+const { MCMStateModel, CertManager} = require('@internal/model');
 
 const { Logger } = require('@mojaloop/sdk-standard-components');
 
@@ -51,6 +51,14 @@ class UIAPIServer {
             logger: this._logger,
         });
 
+        let certManager;
+        if (this._conf.certManager.enabled) {
+            certManager = new CertManager({
+                ...this._conf.certManager,
+                logger: this._logger,
+            });
+        }
+
         // const ca = await this._vault.getCA();
         // if (!ca) {
         //     await this._vault.createCA(this._conf.caCsrParameters);
@@ -60,7 +68,8 @@ class UIAPIServer {
             ctx.state = {
                 conf: this._conf,
                 db: this._db,
-                vault: this._vault
+                vault: this._vault,
+                certManager,
             };
             await next();
         });

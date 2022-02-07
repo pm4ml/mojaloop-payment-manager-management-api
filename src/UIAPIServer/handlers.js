@@ -15,6 +15,7 @@ const {
     Hub,
     CertificatesModel,
     MonetaryZone,
+    CertManager,
 } = require('@internal/model');
 
 const certModelFromContext = (ctx, overrides) => new CertificatesModel({
@@ -258,11 +259,17 @@ const getDFSPCA = async(ctx) => {
 const createDFSPCA = async(ctx) => {
     const certModel = certModelFromContext(ctx);
     ctx.body = await certModel.createInternalDFSPCA(ctx.request.body);
+    if (ctx.certManager) {
+        await ctx.certManager.renewServerCert();
+    }
 };
 
 const setDFSPCA = async(ctx) => {
     const certModel = certModelFromContext(ctx);
     ctx.body = await certModel.createExternalDFSPCA(ctx.request.body);
+    if (ctx.certManager) {
+        await ctx.certManager.renewServerCert();
+    }
 };
 
 const getHubCA = async(ctx) => {

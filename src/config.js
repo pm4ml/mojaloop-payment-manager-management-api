@@ -49,6 +49,15 @@ if (vaultAuthMethod === 'K8S') {
     };
 }
 
+const certManager = {
+    enabled: env.get('CERT_MANAGER_ENABLED').default('false').asBool(),
+};
+
+if (certManager.enabled) {
+    certManager.serverCertSecretName = env.get('CERT_MANAGER_SERVER_CERT_SECRET_NAME').asString();
+    certManager.serverCertSecretNamespace = env.get('CERT_MANAGER_SERVER_CERT_SECRET_NAMESPACE').asString();
+}
+
 module.exports = {
     dfspId: env.get('DFSP_ID').required().asString(),
     control: {
@@ -64,6 +73,7 @@ module.exports = {
     mcmServerEndpoint: env.get('MCM_SERVER_ENDPOINT').required().asString(),
     mcmClientRefreshIntervalSeconds: env.get('MCM_CLIENT_REFRESH_INTERVAL_SECONDS').default(60).asIntPositive(),
     mojaloopConnectorFQDN: env.get('MOJALOOP_CONNECTOR_FQDN').default('connector.fsp.example.com').asString(),
+    certManager,
     vault: {
         endpoint: env.get('VAULT_ENDPOINT').required().asString(),
         mounts: {

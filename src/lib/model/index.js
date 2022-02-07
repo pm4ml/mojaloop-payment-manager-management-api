@@ -16,6 +16,7 @@ const CertificatesModel = require('./CertificatesModel');
 const MonetaryZone = require('./MonetaryZone');
 const MCMStateModel = require('./MCMStateModel');
 const ConnectorManager = require('./ConnectorManager');
+const CertManager = require('./CertManager');
 
 module.exports = {
     Transfer,
@@ -26,4 +27,5 @@ module.exports = {
     MonetaryZone,
     MCMStateModel,
     ConnectorManager,
+    CertManager,
 };

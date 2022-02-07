@@ -1,6 +1,6 @@
 {
   "name": "mojaloop-payment-manager-management-api-service",
-  "version": "3.0.21",
+  "version": "3.0.22",
   "description": "Mojaloop Payment Manager - Management API Service",
   "main": "index.js",
   "author": "Murthy kakarlamudi, ModusBox Inc.",
@@ -33,6 +33,7 @@
     "@internal/model": "file:src/lib/model",
     "@internal/randomphrase": "file:src/lib/randomphrase",
     "@internal/vault": "file:src/lib/vault",
+    "@kubernetes/client-node": "^0.16.2",
     "@mojaloop/sdk-standard-components": "^15.13.0",
     "@pm4ml/mcm-client": "^2.0.3",
     "ajv": "^8.9.0",
