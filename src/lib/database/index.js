@@ -57,7 +57,7 @@ const getPartyNameFromQuoteRequest = (qr, partyType) => {
 
 
 async function syncDB({redisCache, db, logger}) {
-    logger.log('Syncing cache to in-memory DB');
+    // logger.log('Syncing cache to in-memory DB');
 
     const asyncForEach = async (array, callback) => {
         for (let index = 0; index < array.length; index++) {
@@ -163,7 +163,7 @@ async function syncDB({redisCache, db, logger}) {
     const keys = await redisCache.keys('transferModel_*');
     const uncachedOrPendingKeys = keys.filter((x) => cachedFulfilledKeys.indexOf(x) === -1);
     await asyncForEach(uncachedOrPendingKeys, cacheKey);
-    logger.log('In-memory DB sync complete');
+    // logger.log('In-memory DB sync complete');
 }
 
 async function init(config) {

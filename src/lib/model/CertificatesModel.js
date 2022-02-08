@@ -8,7 +8,7 @@
  *       Murthy Kakarlamudi - murthy@modusbox.com                   *
  **************************************************************************/
 
-const { DFSPCertificateModel, HubCertificateModel } = require('@pm4ml/mcm-client');
+const { DFSPCertificateModel, HubCertificateModel, HTTPResponseError} = require('@pm4ml/mcm-client');
 const ConnectorManager = require('./ConnectorManager');
 const forge = require('node-forge');
 const assert = require('assert');
@@ -153,24 +153,30 @@ class CertificatesModel {
     }
 
     async getOutboundTlsConfig() {
-        const cert = await this._vault.getClientCert();
+        try {
+            const cert = await this._vault.getClientCert();
 
-        if (!cert?.id) return;
+            if (!cert?.id) return;
 
-        const inboundEnrollment = await this.getClientCertificate(cert.id);
+            const inboundEnrollment = await this.getClientCertificate(cert.id);
 
-        if(inboundEnrollment.state !== 'CERT_SIGNED') {
-            return;
+            if (inboundEnrollment.state !== 'CERT_SIGNED') {
+                return;
+            }
+
+            const objHubCA = await this._certificateModel.getHubCA();
+            const caChain = `${objHubCA.intermediateChain || ''}\n${objHubCA.rootCertificate}`.trim();
+
+            return {
+                ca: caChain,
+                cert: inboundEnrollment.certificate,
+                key: cert.privateKey,
+            };
+        } catch (e) {
+            if (!(e instanceof HTTPResponseError)) {
+                throw e;
+            }
         }
-
-        const objHubCA = await this._certificateModel.getHubCA();
-        const caChain = `${objHubCA.intermediateChain || ''}\n${objHubCA.rootCertificate}`.trim();
-
-        return {
-            ca: caChain,
-            cert: inboundEnrollment.certificate,
-            key: cert.privateKey,
-        };
     }
 
     async exchangeOutboundSdkConfiguration() {
