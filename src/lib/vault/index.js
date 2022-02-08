@@ -241,7 +241,7 @@ class Vault {
             json: {
                 common_name: params.commonName,
                 csr: params.csr,
-                ttl: `${this._signExpiryHours}h`,
+                // ttl: `${this._signExpiryHours}h`,
             }
         });
         return data;

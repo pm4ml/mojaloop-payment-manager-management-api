@@ -351,7 +351,8 @@ const getMonetaryZones = async(ctx) => {
 
 const generateAllCerts = async(ctx) => {
     await createClientCSR(ctx);
-    await generateDfspServerCerts(ctx);
+    // Server certs are managed by CertManager
+    // await generateDfspServerCerts(ctx);
     await createJWSCertificates(ctx);
 
     //FIXME: return something relevant when doing https://modusbox.atlassian.net/browse/MP-2135
