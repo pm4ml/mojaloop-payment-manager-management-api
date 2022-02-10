@@ -29,6 +29,18 @@ const getTransferStatus = (data) => {
     }
 };
 
+const getInboundTransferStatus = (data) => {
+  switch(data.currentState) {
+    case 'COMPLETED':
+      return true;
+    case 'ERROR_OCCURRED':
+    case 'ABORTED':
+      return false;
+    default:
+      return null;
+  }
+};
+
 const getPartyNameFromQuoteRequest = (qr, partyType) => {
     // return display name if we have it
     if(qr.body[partyType].name) {
@@ -120,7 +132,7 @@ async function syncDB({redisCache, db, logger}) {
                 details: data.quoteRequest?.body?.note,
                 dfsp: data.quoteRequest?.body?.payer?.partyIdInfo.fspId,
 
-                success: (data?.fulfil?.body?.transferState === 'COMMITTED') ? true : null,
+                success: getInboundTransferStatus(data),
             };
         } else if(data.direction === 'OUTBOUND') {
             row = {
