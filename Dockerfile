@@ -1,6 +1,6 @@
 FROM node:lts-alpine as builder
 
-RUN apk add --no-cache git python build-base
+RUN apk add --no-cache git build-base
 
 EXPOSE 3000
 
