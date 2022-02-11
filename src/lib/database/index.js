@@ -145,13 +145,13 @@ async function syncDB({redisCache, db, logger}) {
             row = {
                 ...row,
                 sender: getName(data.from),
-                recipient: getName(data.to),
+                recipient: data.to && getName(data.to),
                 amount: data.amount,
                 currency: data.currency,
                 direction: 1,
                 batch_id: '', // TODO: Implement
                 details: data.note,
-                dfsp: data.to.fspId,
+                dfsp: data.to && data.to.fspId,
                 success: getTransferStatus(data),
             };
         }
