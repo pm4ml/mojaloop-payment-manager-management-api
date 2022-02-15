@@ -161,17 +161,16 @@ async function syncDB({redisCache, db, logger}) {
 
         // logger.push({ ...row, raw: ''}).log('Row processed');
 
-        const keyIndex = cachedPendingKeys.indexOf(key);
+        const keyIndex = cachedPendingKeys.indexOf(row.id);
         if (keyIndex === -1) {
             await db('transfer').insert(row);
+            cachedPendingKeys.push(row.id);
         } else {
             await db('transfer').where({ id: row.id }).update(row);
-            cachedPendingKeys.splice(keyIndex, 1);
+            // cachedPendingKeys.splice(keyIndex, 1);
         }
 
-        if (row.success === null) {
-            cachedPendingKeys.push(key);
-        } else {
+        if (row.success !== null) {
             cachedFulfilledKeys.push(key);
         }
 
