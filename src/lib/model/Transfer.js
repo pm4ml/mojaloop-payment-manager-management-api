@@ -120,6 +120,23 @@ class Transfer {
     }
 
     _getPartyFromQuoteRequest(qr, partyType) {
+
+        if(qr == undefined) {
+            return {
+                idType: "",
+                idValue: "",
+                idSubType: "",
+                displayName: "",
+                firstName: "",
+                middleName: "",
+                lastName: "",
+                dateOfBirth: "",
+                merchantClassificationCode: "",
+                fspId: "",
+                extensionList: "",
+            };
+        }
+
         const p = qr.body[partyType];
 
         if(!p) {
