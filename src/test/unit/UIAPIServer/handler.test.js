@@ -109,8 +109,9 @@ describe('create dfsp csr and upload to mcm', () => {
         const uploadCSRSpy = jest.spyOn(CertificatesModel.prototype, 'uploadClientCSR')
             .mockImplementation(() => { return {ctx: {body: 1}};});
 
-        const uploadServerCertificates = jest.spyOn(CertificatesModel.prototype, 'uploadServerCertificates')
-            .mockImplementation(() => { return {ctx: {body: 1}};});
+        //Commenting in alignment with commenting out of generateDFSPServerCerts at https://github.com/pm4ml/mojaloop-payment-manager-management-api/commit/cfb06152f328b77b26f3a0534aea2b73505a3b15#diff-e859df94ac6b901602bf74fcf93a1ac6cf5d09213b54205d60ecd32a07fd4040R355
+        // const uploadServerCertificates = jest.spyOn(CertificatesModel.prototype, 'uploadServerCertificates')
+        //     .mockImplementation(() => { return {ctx: {body: 1}};});
 
         const uploadJWS = jest.spyOn(CertificatesModel.prototype, 'uploadJWS')
             .mockImplementation(() => { return {ctx: {body: 1}};});
@@ -119,7 +120,8 @@ describe('create dfsp csr and upload to mcm', () => {
 
         expect(createCSRSpy).toHaveBeenCalledTimes(1);
         expect(uploadCSRSpy).toHaveBeenCalledTimes(1);
-        expect(uploadServerCertificates).toHaveBeenCalledTimes(1);
+        //Commenting in alignment with commenting out of generateDFSPServerCerts at https://github.com/pm4ml/mojaloop-payment-manager-management-api/commit/cfb06152f328b77b26f3a0534aea2b73505a3b15#diff-e859df94ac6b901602bf74fcf93a1ac6cf5d09213b54205d60ecd32a07fd4040R355        
+        // expect(uploadServerCertificates).toHaveBeenCalledTimes(1);
         expect(uploadJWS).toHaveBeenCalledTimes(1);
     });
 });
