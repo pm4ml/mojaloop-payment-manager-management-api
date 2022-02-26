@@ -30,15 +30,15 @@ const getTransferStatus = (data) => {
 };
 
 const getInboundTransferStatus = (data) => {
-  switch(data.currentState) {
-    case 'COMPLETED':
-      return true;
-    case 'ERROR_OCCURRED':
-    case 'ABORTED':
-      return false;
-    default:
-      return null;
-  }
+    switch(data.currentState) {
+        case 'COMPLETED':
+            return true;
+        case 'ERROR_OCCURRED':
+        case 'ABORTED':
+            return false;
+        default:
+            return null;
+    }
 };
 
 const getPartyNameFromQuoteRequest = (qr, partyType) => {

@@ -123,17 +123,17 @@ class Transfer {
 
         if(qr == undefined) {
             return {
-                idType: "",
-                idValue: "",
-                idSubType: "",
-                displayName: "",
-                firstName: "",
-                middleName: "",
-                lastName: "",
-                dateOfBirth: "",
-                merchantClassificationCode: "",
-                fspId: "",
-                extensionList: "",
+                idType: '',
+                idValue: '',
+                idSubType: '',
+                displayName: '',
+                firstName: '',
+                middleName: '',
+                lastName: '',
+                dateOfBirth: '',
+                merchantClassificationCode: '',
+                fspId: '',
+                extensionList: '',
             };
         }
 
