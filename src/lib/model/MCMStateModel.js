@@ -54,6 +54,10 @@ class MCMStateModel {
             this._logger.log('starting mcm client refresh');
             clearTimeout(this._refreshTimer);
 
+            await this.uploadDFSPCA();
+            await this.uploadClientCSR();
+            await this.uploadJWS();
+
             await this.exchangeJWS();
 
             // Exchange Hub CSR
@@ -70,6 +74,44 @@ class MCMStateModel {
         catch(err) {
             this._logger.push({ err }).log('Error refreshing MCM state model');
             //note: DONT throw at this point or we will crash our parent process!
+        }
+    }
+
+    async uploadDFSPCA() {
+        const cert = await this._vault.getCA();
+        const sent = await this._vault.getSentDFSPCA();
+        if (sent?.cert !== cert) {
+            await this._certificatesModel.uploadDFSPCA(cert);
+            await this._vault.setSentDFSPCA({ cert });
+        }
+    }
+
+    async uploadClientCSR() {
+        const cert = await this._vault.getClientCert();
+        const sent = await this._vault.getSentClientCert();
+        if (!cert || sent?.privateKey !== cert.privateKey) {
+
+            const createdCSR = await this._certificatesModel.createCSR();
+
+            const csr = await this._certificatesModel.uploadClientCSR(createdCSR.csr);
+
+            await this._vault.setClientCert({
+                id: csr.id,
+                privateKey: createdCSR.privateKey,
+            });
+
+            await this._vault.setSentClientCert({ privateKey: createdCSR.privateKey });
+        }
+    }
+
+    async uploadJWS() {
+        const jws = await this._vault.getJWS();
+        const sent = await this._vault.getSentJWS();
+        if (!jws || sent?.publicKey !== jws.publicKey) {
+            const jws = this._certificatesModel.createJWS();
+            await this._certificatesModel.storeJWS(jws);
+            await this._certificatesModel.uploadJWS({ publicKey: jws.publicKey });
+            await this._vault.setSentJWS({ publicKey: jws.publicKey });
         }
     }
 

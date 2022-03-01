@@ -22,6 +22,9 @@ const vaultPaths = {
     SERVER_CERT: 'server-cert',
     CLIENT_CERT: 'client-cert',
     SERVER_PKEY: 'server-pkey',
+    DFSP_CA_SENT: 'dfsp-ca-sent',
+    CLIENT_CERT_SENT: 'client-cert-sent',
+    JWS_SENT: 'jws-sent',
 };
 
 class Vault {
@@ -275,6 +278,31 @@ class Vault {
     async getHubEndpoints() {
         return this._getSecret(vaultPaths.HUB_ENDPOINTS);
     }
+
+    async setSentDFSPCA(pem) {
+        return this._setSecret(vaultPaths.DFSP_CA_SENT, pem);
+    }
+
+    async getSentDFSPCA() {
+        return this._getSecret(vaultPaths.DFSP_CA_SENT);
+    }
+
+    async setSentClientCert(value) {
+        return this._setSecret(vaultPaths.CLIENT_CERT_SENT, value);
+    }
+
+    async getSentClientCert() {
+        return this._getSecret(vaultPaths.CLIENT_CERT_SENT);
+    }
+
+    async setSentJWS(value) {
+        return this._setSecret(vaultPaths.JWS_SENT, value);
+    }
+
+    async getSentJWS() {
+        return this._getSecret(vaultPaths.JWS_SENT);
+    }
+
 }
 
 module.exports = Vault;
