@@ -215,10 +215,14 @@ class Server extends ws.Server {
 
         const outboundCfg = await this._certificatesModel.getOutboundTlsConfig();
 
+        const jws = await this._certificatesModel.getJWSKeypair();
+
+
         //TODO Section to populate Inbound TLS details
 
         return {
             peerJWSKeys: peerKeys,
+            jwsSigningKey: jws?.privateKey,
             outbound: {
                 tls: {
                     creds: {

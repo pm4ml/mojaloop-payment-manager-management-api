@@ -216,6 +216,10 @@ class CertificatesModel {
         await this._connectorManager.reconfigureOutboundSdkForJWS(keypair.privateKey);
     }
 
+    getJWSKeypair() {
+        return this._vault.getJWS();
+    }
+
     validateJWSKeyPair(jwsKeyPair) {
         forge.pki.publicKeyFromPem(jwsKeyPair.publicKey);
         forge.pki.privateKeyFromPem(jwsKeyPair.privateKey);
