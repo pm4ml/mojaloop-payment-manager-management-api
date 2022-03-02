@@ -41,7 +41,7 @@ class CertificatesModel {
         });
     }
 
-    async createCSR(keyBits = 4096, csrParameters = {}) {
+    async createCSR(keyBits, csrParameters = {}) {
         const keys = forge.pki.rsa.generateKeyPair(keyBits);
         const csr = forge.pki.createCertificationRequest();
         csr.publicKey = keys.publicKey;

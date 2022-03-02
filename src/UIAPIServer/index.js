@@ -82,6 +82,7 @@ class UIAPIServer {
             hubEndpoint: this._conf.mcmServerEndpoint,
             refreshIntervalSeconds: this._conf.mcmClientRefreshIntervalSeconds,
             vault: this._vault,
+            keyLength: this._conf.vault.keyLength,
             logger: this._logger,
             auth: this._conf.auth,
             mojaloopConnectorFQDN: this._conf.mojaloopConnectorFQDN,

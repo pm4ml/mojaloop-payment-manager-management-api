@@ -22,6 +22,7 @@ class MCMStateModel {
      * @param opts.dfspId {string}
      * @param opts.mojaloopConnectorFQDN {string}
      * @param opts.vault {object}
+     * @param opts.keyLength {number}
      * @param opts.refreshIntervalSeconds {number}
      * @param opts.tlsServerPrivateKey {String}
      * @param opts.controlServer {ConnectorManager.Server}
@@ -37,6 +38,7 @@ class MCMStateModel {
         });
         this._refreshIntervalSeconds = opts.refreshIntervalSeconds;
         this._vault = opts.vault;
+        this._keyLength = opts.keyLength;
         this._dfspId = opts.dfspId;
         this._logger = opts.logger;
         this._mojaloopConnectorFQDN = opts.mojaloopConnectorFQDN;
@@ -91,7 +93,7 @@ class MCMStateModel {
         const sent = await this._vault.getSentClientCert();
         if (!cert || sent?.privateKey !== cert.privateKey) {
 
-            const createdCSR = await this._certificatesModel.createCSR();
+            const createdCSR = await this._certificatesModel.createCSR(this._keyLength);
 
             const csr = await this._certificatesModel.uploadClientCSR(createdCSR.csr);
 
