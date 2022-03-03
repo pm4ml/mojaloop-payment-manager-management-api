@@ -52,10 +52,9 @@ class MCMStateModel {
     }
 
     async _refresh() {
+        this._logger.log('starting mcm client refresh');
+        clearTimeout(this._refreshTimer);
         try {
-            this._logger.log('starting mcm client refresh');
-            clearTimeout(this._refreshTimer);
-
             await this.uploadDFSPCA();
             await this.uploadClientCSR();
             await this.uploadJWS();
@@ -70,13 +69,12 @@ class MCMStateModel {
 
             //const hubEndpoints = await this._hubEndpointModel.findAll({ state: 'CONFIRMED' });
             // await this._vault.setSecret('hubEndpoints', JSON.stringify(hubEndpoints));
-
-            this._refreshTimer = setTimeout(this._refresh.bind(this), this._refreshIntervalSeconds * 1000);
         }
         catch(err) {
             this._logger.push({ err }).log('Error refreshing MCM state model');
             //note: DONT throw at this point or we will crash our parent process!
         }
+        this._refreshTimer = setTimeout(this._refresh.bind(this), this._refreshIntervalSeconds * 1000);
     }
 
     async uploadDFSPCA() {
