@@ -22,6 +22,7 @@ class MCMStateModel {
      * @param opts.dfspId {string}
      * @param opts.mojaloopConnectorFQDN {string}
      * @param opts.vault {object}
+     * @param opts.keyLength {number}
      * @param opts.refreshIntervalSeconds {number}
      * @param opts.tlsServerPrivateKey {String}
      * @param opts.controlServer {ConnectorManager.Server}
@@ -37,6 +38,7 @@ class MCMStateModel {
         });
         this._refreshIntervalSeconds = opts.refreshIntervalSeconds;
         this._vault = opts.vault;
+        this._keyLength = opts.keyLength;
         this._dfspId = opts.dfspId;
         this._logger = opts.logger;
         this._mojaloopConnectorFQDN = opts.mojaloopConnectorFQDN;
@@ -50,9 +52,12 @@ class MCMStateModel {
     }
 
     async _refresh() {
+        this._logger.log('starting mcm client refresh');
+        clearTimeout(this._refreshTimer);
         try {
-            this._logger.log('starting mcm client refresh');
-            clearTimeout(this._refreshTimer);
+            await this.uploadDFSPCA();
+            await this.uploadClientCSR();
+            await this.uploadJWS();
 
             await this.exchangeJWS();
 
@@ -64,12 +69,49 @@ class MCMStateModel {
 
             //const hubEndpoints = await this._hubEndpointModel.findAll({ state: 'CONFIRMED' });
             // await this._vault.setSecret('hubEndpoints', JSON.stringify(hubEndpoints));
-
-            this._refreshTimer = setTimeout(this._refresh.bind(this), this._refreshIntervalSeconds * 1000);
         }
         catch(err) {
             this._logger.push({ err }).log('Error refreshing MCM state model');
             //note: DONT throw at this point or we will crash our parent process!
+        }
+        this._refreshTimer = setTimeout(this._refresh.bind(this), this._refreshIntervalSeconds * 1000);
+    }
+
+    async uploadDFSPCA() {
+        const cert = await this._vault.getCA();
+        const sent = await this._vault.getSentDFSPCA();
+        if (sent?.cert !== cert) {
+            await this._certificatesModel.uploadDFSPCA(cert);
+            await this._vault.setSentDFSPCA({ cert });
+        }
+    }
+
+    async uploadClientCSR() {
+        const cert = await this._vault.getClientCert();
+        const sent = await this._vault.getSentClientCert();
+        if (!cert || sent?.privateKey !== cert.privateKey) {
+
+            const createdCSR = await this._certificatesModel.createCSR(this._keyLength);
+
+            const csr = await this._certificatesModel.uploadClientCSR(createdCSR.csr);
+
+            await this._vault.setClientCert({
+                id: csr.id,
+                privateKey: createdCSR.privateKey,
+            });
+
+            await this._vault.setSentClientCert({ privateKey: createdCSR.privateKey });
+        }
+    }
+
+    async uploadJWS() {
+        const jws = await this._vault.getJWS();
+        const sent = await this._vault.getSentJWS();
+        if (!jws || sent?.publicKey !== jws.publicKey) {
+            const jws = this._certificatesModel.createJWS();
+            await this._certificatesModel.storeJWS(jws);
+            await this._certificatesModel.uploadJWS({ publicKey: jws.publicKey });
+            await this._vault.setSentJWS({ publicKey: jws.publicKey });
         }
     }
 

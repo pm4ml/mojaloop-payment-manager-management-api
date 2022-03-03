@@ -41,7 +41,7 @@ class CertificatesModel {
         });
     }
 
-    async createCSR(keyBits, csrParameters) {
+    async createCSR(keyBits, csrParameters = {}) {
         const keys = forge.pki.rsa.generateKeyPair(keyBits);
         const csr = forge.pki.createCertificationRequest();
         csr.publicKey = keys.publicKey;
@@ -214,6 +214,10 @@ class CertificatesModel {
     async storeJWS(keypair) {
         await this._vault.setJWS(keypair);
         await this._connectorManager.reconfigureOutboundSdkForJWS(keypair.privateKey);
+    }
+
+    getJWSKeypair() {
+        return this._vault.getJWS();
     }
 
     validateJWSKeyPair(jwsKeyPair) {
