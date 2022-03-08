@@ -162,7 +162,8 @@ class Transfer {
         if(!p) {
             return;
         }
-        return `${p.firstName}${p.middleName ? ' ' + p.middleName : ''} ${p.lastName}`;
+        // Since any of the firstName/middleName/lastName can be undefined/null we need to concatenate conditionally and then trim
+        return `${p.firstName ? p.firstName : ''}${p.middleName ? ' ' + p.middleName : ''} ${p.lastName ? p.lastName : ''}`.trim();
     }
 
     _convertToTransferParty(party) {
@@ -171,7 +172,7 @@ class Transfer {
             idType: party.idType,
             idValue: party.idValue,
             idSubType: party.idSubType,
-            displayName: party.displayName || `${party.firstName}${party.middleName ? ' ' + party.middleName : ''} ${party.lastName}`,
+            displayName: party.displayName || `${party.firstName ? party.firstName : ''}${party.middleName ? ' ' + party.middleName : ''} ${party.lastName ? party.lastName : ''}`.trim(),
             firstName: party.firstName,
             middleName: party.middleName,
             lastName: party.lastName,
