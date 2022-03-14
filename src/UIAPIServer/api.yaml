@@ -44,7 +44,7 @@ paths:
         schema:
           type: string
       - in: query
-        name: payeeAlias
+        name: recipient
         required: false
         schema:
             type: string
