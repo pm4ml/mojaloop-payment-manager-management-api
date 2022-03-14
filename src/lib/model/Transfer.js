@@ -188,6 +188,8 @@ class Transfer {
      * @param opts {Object}
      * @param [opts.startTimestamp] {string}
      * @param [opts.endTimestamp] {string}
+     * @param [opts.payeeAlias] {string}
+     * @param [opts.direction] {string}     
      * @param [opts.institution] {string}
      * @param [opts.batchId] {number}
      * @param [opts.status] {string}
@@ -206,6 +208,12 @@ class Transfer {
         }
         if (opts.endTimestamp) {
             query.andWhere('created_at', '<', new Date(opts.endTimestamp).getTime());
+        }
+        if (opts.payeeAlias) {
+            query.andWhere('recipient', 'LIKE', `%${opts.payeeAlias}%`);
+        }
+        if (opts.direction) {
+            query.andWhere('direction', 'LIKE', `%${opts.direction}%`);
         }
         if (opts.institution) {
             query.andWhere('dfsp', 'LIKE', `%${opts.institution}%`);
