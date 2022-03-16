@@ -124,13 +124,13 @@ async function syncDB({redisCache, db, logger}) {
             row = {
                 ...row,
                 sender: getPartyNameFromQuoteRequest(data.quoteRequest, 'payer'),
-                sender_id_type: data.from.idType,
+                sender_id_type: data.from?.idType,
                 sender_sub_id_type: data.from?.idSubType,
-                sender_id_value: data.from.idValue,
+                sender_id_value: data.from?.idValue,
                 recipient: getPartyNameFromQuoteRequest(data.quoteRequest, 'payee'),
-                recipient_id_type: data.to.idType,
+                recipient_id_type: data.to?.idType,
                 recipient_sub_id_type: data.to?.idSubType,
-                recipient_id_value: data.to.idValue,
+                recipient_id_value: data.to?.idValue,
                 amount: data.quoteResponse?.body?.transferAmount.amount,
                 currency: data.quoteResponse?.body?.transferAmount.currency,
                 direction: -1,
@@ -144,19 +144,19 @@ async function syncDB({redisCache, db, logger}) {
             row = {
                 ...row,
                 sender: getName(data.from),
-                sender_id_type: data.from.idType,
+                sender_id_type: data.from?.idType,
                 sender_sub_id_type: data.from?.idSubType,
-                sender_id_value: data.from.idValue,
+                sender_id_value: data.from?.idValue,
                 recipient: getName(data.to),
-                recipient_id_type: data.to.idType,
+                recipient_id_type: data.to?.idType,
                 recipient_sub_id_type: data.to?.idSubType,
-                recipient_id_value: data.to.idValue,
+                recipient_id_value: data.to?.idValue,
                 amount: data.amount,
                 currency: data.currency,
                 direction: 1,
                 batch_id: '', // TODO: Implement
                 details: data.note,
-                dfsp: data.to.fspId,
+                dfsp: data.to?.fspId,
                 success: getTransferStatus(data),
             };
         }
@@ -166,18 +166,17 @@ async function syncDB({redisCache, db, logger}) {
 
         // logger.push({ ...row, raw: ''}).log('Row processed');
 
-        const keyIndex = cachedPendingKeys.indexOf(key);
+        const keyIndex = cachedPendingKeys.indexOf(row.id);
         if (keyIndex === -1) {
             await db('transfer').insert(row);
+            cachedPendingKeys.push(row.id);
         } else {
             await db('transfer').where({ id: row.id }).update(row);
-            cachedPendingKeys.splice(keyIndex, 1);
+            // cachedPendingKeys.splice(keyIndex, 1);
         }
 
-        if (row.success === null) {
-            cachedPendingKeys.push(key);
-        } else {
-            cachedFulfilledKeys.push(key);
+        if (row.success !== null) {
+          cachedFulfilledKeys.push(key);
         }
 
         // const sqlRaw = db('transfer').insert(row).toString();
