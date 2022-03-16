@@ -45,12 +45,12 @@ const getDfspStatus = async (ctx) => {
 };
 
 const getTransfers = async (ctx) => {
-    const { id, startTimestamp, endTimestamp, recipient, direction, institution, status, batchId, limit, offset } = ctx.query;
+    const { id, startTimestamp, endTimestamp, senderIdType, senderIdValue, senderIdSubValue, recipientIdType, recipientIdValue, recipientIdSubValue, direction, institution, status, batchId, limit, offset } = ctx.query;
     const transfer = new Transfer({
         db: ctx.state.db,
         logger: ctx.state.logger,
     });
-    ctx.body = await transfer.findAll({ id, startTimestamp, endTimestamp, recipient, direction, institution, status, batchId, limit, offset });
+    ctx.body = await transfer.findAll({ id, startTimestamp, endTimestamp, senderIdType, senderIdValue, senderIdSubValue, recipientIdType, recipientIdValue, recipientIdSubValue, direction, institution, status, batchId, limit, offset });
 };
 
 const getTransfer = async (ctx) => {

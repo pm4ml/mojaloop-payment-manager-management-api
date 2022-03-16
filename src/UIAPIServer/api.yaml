@@ -44,7 +44,32 @@ paths:
         schema:
           type: string
       - in: query
-        name: recipient
+        name: senderIdType
+        required: false
+        schema:
+            type: string
+      - in: query
+        name: senderIdValue
+        required: false
+        schema:
+            type: string
+      - in: query
+        name: senderIdSubValue
+        required: false
+        schema:
+            type: string
+      - in: query
+        name: recipientIdType
+        required: false
+        schema:
+            type: string
+      - in: query
+        name: recipientIdValue
+        required: false
+        schema:
+            type: string
+      - in: query
+        name: recipientIdSubValue
         required: false
         schema:
             type: string

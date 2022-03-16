@@ -38,7 +38,13 @@ class Transfer {
             initiatedTimestamp: new Date(transfer.created_at).toISOString(),
             confirmationNumber: 0, // TODO: Implement
             sender: transfer.sender,
+            sender_id_type: transfer.sender_id_type,
+            sender_sub_id_type: transfer.sender_sub_id_type,
+            sender_id_value: transfer.sender_id_value,
             recipient: transfer.recipient,
+            recipient_id_type: transfer.recipient_id_type,
+            recipient_sub_id_type: transfer.recipient_sub_id_type,
+            recipient_id_value: transfer.recipient_id_value,
             details: transfer.details,
             errorType: transfer.success === 0 ? Transfer._transferLastErrorToErrorType(raw.lastError) : null,
         };
@@ -188,7 +194,12 @@ class Transfer {
      * @param opts {Object}
      * @param [opts.startTimestamp] {string}
      * @param [opts.endTimestamp] {string}
-     * @param [opts.recipient] {string}
+     * @param [opts.senderIdType] {string}
+     * @param [opts.senderIdValue] {string}
+     * @param [opts.senderIdSubValue] {string}
+     * @param [opts.recipientIdType] {string}
+     * @param [opts.recipientIdValue] {string}
+     * @param [opts.recipientIdSubValue] {string}
      * @param [opts.direction] {string}     
      * @param [opts.institution] {string}
      * @param [opts.batchId] {number}
@@ -209,11 +220,30 @@ class Transfer {
         if (opts.endTimestamp) {
             query.andWhere('created_at', '<', new Date(opts.endTimestamp).getTime());
         }
-        if (opts.recipient) {
-            query.andWhere('recipient', 'LIKE', `%${opts.recipient}%`);
+        if (opts.senderIdType) {
+            query.andWhere('sender_id_type', 'LIKE', `%${opts.senderIdType}%`);
+        }
+        if (opts.senderIdValue) {
+            query.andWhere('sender_id_value', 'LIKE', `%${opts.senderIdValue}%`);
+        }
+        if (opts.senderIdSubValue) {
+            query.andWhere('sender_sub_id_type', 'LIKE', `%${opts.senderIdSubValue}%`);
+        }
+        if (opts.recipientIdType) {
+            query.andWhere('recipient_id_type', 'LIKE', `%${opts.recipientIdType}%`);
+        }
+        if (opts.recipientIdValue) {
+            query.andWhere('recipient_id_value', 'LIKE', `%${opts.recipientIdValue}%`);
+        }
+        if (opts.recipientIdSubValue) {
+            query.andWhere('recipient_sub_id_type', 'LIKE', `%${opts.recipientIdSubValue}%`);
         }
         if (opts.direction) {
-            query.andWhere('direction', 'LIKE', `%${opts.direction}%`);
+            if (opts.direction === 'INBOUND'){
+                query.andWhere('direction', '=', '-1');
+            } else if (opts.direction === 'OUTBOUND') {
+                query.andWhere('direction', '=', '1');
+            }
         }
         if (opts.institution) {
             query.andWhere('dfsp', 'LIKE', `%${opts.institution}%`);
