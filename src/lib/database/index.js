@@ -176,7 +176,7 @@ async function syncDB({redisCache, db, logger}) {
         }
 
         if (row.success !== null) {
-          cachedFulfilledKeys.push(key);
+            cachedFulfilledKeys.push(key);
         }
 
         // const sqlRaw = db('transfer').insert(row).toString();
