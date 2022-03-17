@@ -12,6 +12,7 @@ const { Logger } = require('@mojaloop/sdk-standard-components');
 const database = require('@internal/database');
 
 const transferTemplate = require('./data/transferTemplate');
+const lastError = require('./data/lastError');
 
 const createTestDb = async () => {
     const logger = new Logger.Logger({ buildStringify: () => '' });
@@ -31,6 +32,9 @@ const addTransferToCache = async (db, opts) => {
     transfer.amount = opts.amount || transfer.amount;
     transfer.transactionType = opts.transactionType || transfer.transactionType;
     transfer.currentState = opts.currentState || transfer.currentState;
+    if (opts.currentState === 'errored') {
+        transfer.lastError = JSON.parse(JSON.stringify(lastError));
+    }
     transfer.initiatedTimestamp = opts.initiatedTimestamp || transfer.initiatedTimestamp;
     if (opts.isPending) {
         delete transfer.fulfil;
