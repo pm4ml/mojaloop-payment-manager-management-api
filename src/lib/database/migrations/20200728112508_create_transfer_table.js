@@ -15,7 +15,13 @@ exports.up = (knex) => knex.schema.createTable(TABLE_NAME, (table) => {
     table.string('redis_key').primary();
     table.boolean('success');   // TRUE - Fulfill, FALSE - Error, NULL - Pending
     table.string('sender');
+    table.string('sender_id_type');
+    table.string('sender_id_sub_value');
+    table.string('sender_id_value');
     table.string('recipient');
+    table.string('recipient_id_type');
+    table.string('recipient_id_sub_value');
+    table.string('recipient_id_value');
     table.string('amount');
     table.string('currency');
     table.integer('direction');

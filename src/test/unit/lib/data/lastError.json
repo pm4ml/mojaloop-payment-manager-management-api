@@ -1,0 +1,11 @@
+{
+    "lastError": {
+        "httpStatusCode": 500,
+        "mojaloopError": {
+            "errorInformation": {
+                "errorCode": "3204",
+                "errorDescription": "Party not found"
+            }
+        }
+    }
+}

@@ -124,6 +124,61 @@ describe('Transfer', () => {
         expect(result).toMatchObject(expected);
     });
 
+    test('/transfers by direction outbound', async () => {
+        const now = Date.now();
+        await populateByMinutes(now, 5);
+
+        await db.sync();
+        const result = await transfer.findAll({
+            direction: 'OUTBOUND',
+        });
+
+        expect(result.length).toBe(50);
+        result.forEach(element => expect(element.direction).toBe('OUTBOUND'));
+    });
+
+    test('/transfers by direction inbound', async () => {
+        const now = Date.now();
+        await populateByMinutes(now, 5);
+
+        await db.sync();
+        const result = await transfer.findAll({
+            direction: 'INBOUND',
+        });
+
+        expect(result.length).toBe(0);
+    });
+
+    test('/transfers by payee alias MSISDN', async () => {
+        const now = Date.now();
+        await populateByMinutes(now, 5);
+
+        await db.sync();
+        const result = await transfer.findAll({
+            recipientIdType: 'MSISDN',
+            recipientIdValue: '987654321',
+        });
+
+        expect(result.length).toBe(50);
+
+        result.forEach(element => expect(element.recipientIdType).toBe('MSISDN'));
+        result.forEach(element => expect(element.recipientIdValue).toBe('987654321'));
+
+    });
+
+    test('/transfers by payee alias ACCOUNT_ID', async () => {
+        const now = Date.now();
+        await populateByMinutes(now, 5);
+
+        await db.sync();
+        const result = await transfer.findAll({
+            recipientIdType: 'ACCOUNT_ID',
+            recipientIdValue: '1298765432',
+        });
+
+        expect(result.length).toBe(0);
+    });
+
     test('/hourlyFlow', async () => {
         const now = Date.now();
         await populateByHours(now, 5);
