@@ -38,13 +38,14 @@ class Transfer {
             initiatedTimestamp: new Date(transfer.created_at).toISOString(),
             confirmationNumber: 0, // TODO: Implement
             sender: transfer.sender,
-            sender_id_type: transfer.sender_id_type,
-            sender_sub_id_type: transfer.sender_sub_id_type,
-            sender_id_value: transfer.sender_id_value,
+            senderIdType: transfer.sender_id_type,
+            senderIdSubValue: transfer.sender_id_sub_value,
+            senderIdValue: transfer.sender_id_value,
             recipient: transfer.recipient,
-            recipient_id_type: transfer.recipient_id_type,
-            recipient_sub_id_type: transfer.recipient_sub_id_type,
-            recipient_id_value: transfer.recipient_id_value,
+            recipientIdType: transfer.recipient_id_type,
+            recipientIdSubValue: transfer.recipient_id_sub_value,
+            recipientIdValue: transfer.recipient_id_value,
+            homeTransferId: raw.homeTransactionId,
             details: transfer.details,
             errorType: transfer.success === 0 ? Transfer._transferLastErrorToErrorType(raw.lastError) : null,
         };
@@ -227,7 +228,7 @@ class Transfer {
             query.andWhere('sender_id_value', 'LIKE', `%${opts.senderIdValue}%`);
         }
         if (opts.senderIdSubValue) {
-            query.andWhere('sender_sub_id_type', 'LIKE', `%${opts.senderIdSubValue}%`);
+            query.andWhere('sender_id_sub_value', 'LIKE', `%${opts.senderIdSubValue}%`);
         }
         if (opts.recipientIdType) {
             query.andWhere('recipient_id_type', 'LIKE', `%${opts.recipientIdType}%`);
@@ -236,7 +237,7 @@ class Transfer {
             query.andWhere('recipient_id_value', 'LIKE', `%${opts.recipientIdValue}%`);
         }
         if (opts.recipientIdSubValue) {
-            query.andWhere('recipient_sub_id_type', 'LIKE', `%${opts.recipientIdSubValue}%`);
+            query.andWhere('recipient_id_sub_value', 'LIKE', `%${opts.recipientIdSubValue}%`);
         }
         if (opts.direction) {
             if (opts.direction === 'INBOUND'){

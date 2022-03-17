@@ -861,6 +861,20 @@ components:
           type: string
         recipient:
           type: string
+        senderIdType:
+            $ref: '#/components/schemas/idType'
+        senderIdValue:
+            $ref: '#/components/schemas/idValue'
+        senderIdSubValue:
+            $ref: '#/components/schemas/idSubValue'
+        recipientIdType:
+            $ref: '#/components/schemas/idType'
+        recipientIdValue:
+            $ref: '#/components/schemas/idValue'
+        recipientIdSubValue:
+            $ref: '#/components/schemas/idSubValue'
+        homeTransferId:
+            type: string
         details:
           type: string
 

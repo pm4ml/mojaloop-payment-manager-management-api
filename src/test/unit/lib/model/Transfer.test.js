@@ -161,8 +161,8 @@ describe('Transfer', () => {
 
         expect(result.length).toBe(50);
 
-        result.forEach(element => expect(element.recipient_id_type).toBe('MSISDN'));
-        result.forEach(element => expect(element.recipient_id_value).toBe('987654321'));
+        result.forEach(element => expect(element.recipientIdType).toBe('MSISDN'));
+        result.forEach(element => expect(element.recipientIdValue).toBe('987654321'));
 
     });
 
