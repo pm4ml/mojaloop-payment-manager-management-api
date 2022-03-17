@@ -46,5 +46,27 @@
       "transferState": "COMMITTED",
       "fulfilment": "tNfy-SfxCLKuBCcCAqh8Pb1lGrXQqpUQtAeMsMXKUFg"
     }
-  }
+  },
+  "quoteRequest": {
+    "body" : {
+      "transferAmount": {
+        "amount": "100",
+        "currency": "USD"
+      },
+      "expiration": "2020-08-03T21:13:52.404Z",
+      "payer": {
+        "partyIdInfo": {
+          "partyIdType": "MSISDN",
+          "partyIdentifier": "123456789"
+        }
+      },
+      "payee": {
+        "partyIdInfo": {
+          "partyIdType": "MSISDN",
+          "partyIdentifier": "987654321"
+        }
+      }
+    }
+  },
+  "lastError": null
 }

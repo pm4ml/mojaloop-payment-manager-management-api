@@ -24,8 +24,10 @@ class Transfer {
     };
 
     _convertToApiFormat(transfer) {
-        const raw = JSON.parse(transfer.raw);
-
+        let raw = JSON.parse(transfer.raw);
+        raw = this._parseRawTransferRequestBodies(raw);
+        const payerParty = this._getPartyFromQuoteRequest(raw.quoteRequest, 'payer');
+        const payeeParty = this._getPartyFromQuoteRequest(raw.quoteRequest, 'payee');
         return {
             id: transfer.id,
             batchId: transfer.batch_id,
@@ -41,6 +43,11 @@ class Transfer {
             recipient: transfer.recipient,
             details: transfer.details,
             errorType: transfer.success === 0 ? Transfer._transferLastErrorToErrorType(raw.lastError) : null,
+            payerIdType: payerParty.idType,
+            payerIdValue: payerParty.idValue,
+            payeeIdType: payeeParty.idType,
+            payeeIdValue: payeeParty.idValue,
+            homeTransferId: raw.homeTransactionId,
         };
     }
 

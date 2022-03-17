@@ -38,6 +38,9 @@ const addTransferToCache = async (db, opts) => {
         transfer.fulfil.body.completedTimestamp = opts.completedTimestamp || transfer.fulfil.body.completedTimestamp;
     }
 
+    transfer.homeTransactionId = opts.homeTransactionId || transfer.homeTransactionId;
+    transfer.lastError = opts.lastError || transfer.lastError;
+
     await db.redisCache.set(`transferModel_${opts.transferId}`, JSON.stringify(transfer));
 
     return transfer;

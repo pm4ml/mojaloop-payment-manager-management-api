@@ -838,6 +838,16 @@ components:
           type: string
         details:
           type: string
+        payerIdType:
+          $ref: '#/components/schemas/idType'
+        payerIdValue:
+          $ref: '#/components/schemas/idValue'
+        payeeIdType:
+          $ref: '#/components/schemas/idType'
+        payeeIdValue:
+          $ref: '#/components/schemas/idValue'
+        homeTransferId:
+          type: string
 
     TransferDetails:
       type: object
