@@ -48,7 +48,8 @@ describe('Transfer', () => {
                 transferId: uuid.v4(),
                 currentState: 'succeeded',
                 initiatedTimestamp: createTimestamp(20),
-                completedTimestamp: createTimestamp(22)
+                completedTimestamp: createTimestamp(22),
+                homeTransactionId: 'XYZ789'
             }),
             addTransferToCache(db, {
                 currency: currency,
@@ -57,6 +58,7 @@ describe('Transfer', () => {
                 currentState: 'errored',
                 initiatedTimestamp: createTimestamp(30),
                 completedTimestamp: createTimestamp(32),
+                lastError: { httpStatusCode: 500}
             }),
             addTransferToCache(db, {
                 currency: currency,
@@ -101,7 +103,7 @@ describe('Transfer', () => {
         return result;
     };
 
-    test.skip('/transfers', async () => {
+    test('/transfers', async () => {
         const now = Date.now();
         const MINUTE = 60 * 1000;
         const populated = await populateByMinutes(now, 5);
@@ -179,6 +181,33 @@ describe('Transfer', () => {
             { status: 'ERROR', count: 2 * 3},
         ].sort((a, b) => a.status.localeCompare(b.status));
 
+        expect(result).toMatchObject(expected);
+    });
+
+    test('/transfers with additional fields homeTransferId And idType, idValue for payer and payee', async () => {
+        const now = Date.now();
+        const MINUTE = 60 * 1000;
+        const populated = await populateByMinutes(now, 5);
+        await db.sync();
+        const result = await transfer.findAll({
+            startTimestamp: new Date(now - 4 * MINUTE).toISOString(),
+            endTimestamp: new Date(now - MINUTE).toISOString(),
+        });
+
+        expect(result.length).toBe(30);
+
+        populated.splice(0, 10);
+        populated.splice(30, 10);
+
+        const expected = populated.map((item) => ({
+            currency: item.currency,
+            amount: item.amount,
+            payerIdType: item.from.idType,
+            payerIdValue: item.from.idValue,
+            payeeIdType: item.to.idType,
+            payeeIdValue: item.to.idValue,
+            homeTransferId: item.homeTransactionId,
+        }));
         expect(result).toMatchObject(expected);
     });
 });
