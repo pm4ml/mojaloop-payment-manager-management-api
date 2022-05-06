@@ -12,10 +12,9 @@ import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import { oas } from 'koa-oas3';
 
-
 import http from 'http';
 import path from 'path';
-import { CertManager, MCMStateModel } from '@internal/model';
+import CertManager from '@app/lib/model/CertManager';
 
 import { Logger } from '@mojaloop/sdk-standard-components';
 
@@ -29,8 +28,9 @@ class UIAPIServer {
   private api?: Koa;
   private logger?: Logger.Logger;
   private db?: MemoryCache;
+  private server?: http.Server;
+
   constructor(private conf: IConfig, private vault: Vault) {
-    this.server = null;
   }
 
   async setupApi() {
@@ -78,18 +78,18 @@ class UIAPIServer {
 
     this.server = http.createServer(this.api.callback());
 
-    // Code to setup mcm client
-    this.mcmState = new MCMStateModel({
-      dfspId: this.conf.dfspId,
-      hubEndpoint: this.conf.mcmServerEndpoint,
-      refreshIntervalSeconds: this.conf.mcmClientRefreshIntervalSeconds,
-      vault: this.vault,
-      keyLength: this.conf.vault.keyLength,
-      logger: this.logger,
-      auth: this.conf.auth,
-      mojaloopConnectorFQDN: this.conf.mojaloopConnectorFQDN,
-      db: this.db,
-    });
+    // // Code to setup mcm client
+    // this.mcmState = new MCMStateModel({
+    //   dfspId: this.conf.dfspId,
+    //   hubEndpoint: this.conf.mcmServerEndpoint,
+    //   refreshIntervalSeconds: this.conf.mcmClientRefreshIntervalSeconds,
+    //   vault: this.vault,
+    //   keyLength: this.conf.vault.keyLength,
+    //   logger: this.logger,
+    //   auth: this.conf.auth,
+    //   mojaloopConnectorFQDN: this.conf.mojaloopConnectorFQDN,
+    //   db: this.db,
+    // });
 
     return this.server;
   }

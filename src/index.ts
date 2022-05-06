@@ -33,8 +33,8 @@ const LOG_ID = {
 /**
  * Class that creates and manages http servers that expose the scheme adapter APIs.
  */
-@Service
 class Server {
+  private controlServer?: ControlServer.Server;
   constructor(
     private conf: IConfig,
     private logger: Logger.Logger,
@@ -90,13 +90,14 @@ if (require.main === module) {
     await vault.connect();
 
     const opts = {
-      dfspCertificateModel: new DFSPCertificateModel({ logger, config.hubEndpoint, dfspId });
-      hubCertificateModel = new HubCertificateModel(opts);
-      hubEndpointModel = new HubEndpointModel(opts);
-      certificatesModel = new CertificatesModel({
-        ...opts,
-        mcmServerEndpoint: opts.hubEndpoint,
-      });
+      logger,
+      ...config,
+    };
+    const ctx = {
+      dfspCertificateModel: new DFSPCertificateModel(opts),
+      hubCertificateModel: new HubCertificateModel(opts),
+      hubEndpointModel: new HubEndpointModel(opts),
+      certificatesModel: new CertificatesModel(opts),
     };
     const service = interpret(createStateMachine());
 
