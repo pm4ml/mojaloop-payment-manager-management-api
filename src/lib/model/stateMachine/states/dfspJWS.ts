@@ -1,17 +1,9 @@
-import { assign, createMachine, sendParent } from 'xstate';
+import { createMachine, sendParent } from 'xstate';
 import { MachineOpts } from './MachineOpts';
 
-type TContext = {
-  // stream: Maybe<MediaStream>
-  // streamError: Maybe<Error>
-  // streamActor: Maybe<Actor<TEvents>>
-};
+type TContext = {};
 
 type TEvent = { type: 'CREATE_JWS' };
-// | { type: 'RETRY' }
-// | { type: 'STOP' }
-// | { type: 'GOT_STREAM'; stream: MediaStream }
-// | { type: 'GOT_ERROR'; error: Error }
 
 export const createDFSPJWSGeneratorMachine = (opts: MachineOpts) =>
   createMachine<TContext, TEvent>({
