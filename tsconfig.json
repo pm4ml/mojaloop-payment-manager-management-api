@@ -1,0 +1,39 @@
+{
+  "include": [
+    "src/**/*",
+    "test/**/*",
+    ".eslintrc.js",
+    "typings.d.ts",
+  ],
+  "exclude": [
+    "node_modules"
+  ],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@app/*": ["./src/*"],
+      "@internal/database": ["./src/lib/database"],
+      "@internal/model": ["./src/lib/model"],
+      "@internal/randomphrase": ["./src/lib/randomphrase"],
+      "@internal/vault": ["./src/lib/vault"]
+    },
+    "sourceMap": true,
+    "module": "commonjs",
+    "target": "es2020",
+    "noEmit": false,
+    "outDir": "dist",
+    "lib": ["es2020"],
+    "strict": true,
+    "noImplicitAny": false,
+    "noImplicitThis": false,
+    "alwaysStrict": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "skipLibCheck": true,
+    "noUnusedParameters": false,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true
+  }
+}
