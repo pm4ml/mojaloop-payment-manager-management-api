@@ -8,11 +8,11 @@
  *       Yevhen Kyriukha - yevhen.kyriukha@modusbox.com                   *
  **************************************************************************/
 
-import config from '@app/config';
+import config from './config';
 import path from 'path';
 
 export default {
-  connection: config.database,
+  connection: config,
   client: 'mysql2',
   migrations: {
     tableName: 'knex_migrations',

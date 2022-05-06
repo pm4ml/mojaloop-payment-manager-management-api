@@ -14,10 +14,10 @@ const TABLE_NAME = 'events';
 exports.up = (knex: Knex) =>
   knex.schema.createTable(TABLE_NAME, (table) => {
     table.string('id').primary();
-    table.date('created_at').defaultTo('now');
+    table.timestamp('created_at').defaultTo(knex.fn.now());
     table.integer('created_by');
     table.string('type');
     table.json('data');
-});
+  });
 
 exports.down = (knex: Knex) => knex.schema.dropTableIfExists(TABLE_NAME);

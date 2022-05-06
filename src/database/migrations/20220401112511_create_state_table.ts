@@ -9,13 +9,13 @@
  **************************************************************************/
 import { Knex } from 'knex';
 
-const TABLE_NAME = 'events';
+const TABLE_NAME = 'state';
 
 exports.up = (knex: Knex) =>
   knex.schema.createTable(TABLE_NAME, (table) => {
     table.string('id').primary();
     // table.date('created_at').defaultTo('now');
     table.json('data');
-});
+  });
 
 exports.down = (knex: Knex) => knex.schema.dropTableIfExists(TABLE_NAME);

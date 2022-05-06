@@ -8,7 +8,7 @@
  *       James Bush - james.bush@modusbox.com                             *
  **************************************************************************/
 
-import redis from 'redis';
+import * as redis from 'redis';
 import assert from 'assert';
 import SDK from '@mojaloop/sdk-standard-components';
 

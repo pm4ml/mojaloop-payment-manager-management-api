@@ -16,6 +16,7 @@ import { getInternalEventEmitter, INTERNAL_EVENTS } from './events';
 import { Logger } from '@mojaloop/sdk-standard-components';
 import Vault from '@internal/vault';
 import { IConfig } from '@app/config';
+import { Knex } from 'knex';
 
 const ControlServerEventEmitter = getInternalEventEmitter();
 
@@ -116,6 +117,7 @@ export interface ServerOpts {
   logger: Logger.Logger;
   appConfig: IConfig;
   vault: Vault;
+  db: Knex;
 }
 
 class Server extends ws.Server {
@@ -123,6 +125,7 @@ class Server extends ws.Server {
   private _port: number;
   private _appConfig: IConfig;
   private _clientData: Map<any, any>;
+  private _certificatesModel: CertificatesModel;
 
   constructor(opts: ServerOpts) {
     super({ clientTracking: true, port: opts.appConfig.control.port });
@@ -132,7 +135,10 @@ class Server extends ws.Server {
     this._appConfig = opts.appConfig;
     this._clientData = new Map();
 
-    this._certificatesModel = new CertificatesModel({ ...opts.appConfig, logger, vault });
+    this._certificatesModel = new CertificatesModel({
+      dfspId: opts.appConfig.dfspId,
+      ...opts,
+    });
 
     this.on('error', (err) => {
       this._logger.push({ err }).log('Unhandled websocket error occurred. Shutting down.');

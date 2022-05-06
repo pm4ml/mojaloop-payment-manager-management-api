@@ -97,7 +97,15 @@ if (require.main === module) {
       certificatesModel: new CertificatesModel(opts),
     };
 
-    const stateMachine = new ConnectionStateMachine();
+    const stateMachine = new ConnectionStateMachine({
+      port: config.stateMachineDebugPort,
+      ...ctx,
+      ...config,
+      logger,
+      db,
+    });
+    // await stateMachine.start();
+    stateMachine.serve();
 
     const svr = new Server(config, logger, vault);
 

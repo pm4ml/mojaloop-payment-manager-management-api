@@ -11,6 +11,7 @@
 import fs from 'fs';
 import { from } from 'env-var';
 import yaml from 'js-yaml';
+import dbConfig from './database/config';
 
 require('dotenv').config();
 
@@ -55,8 +56,10 @@ const certManagerEnabled = env.get('CERT_MANAGER_ENABLED').default('false').asBo
 const certManager = {
   enabled: certManagerEnabled,
   ...(certManagerEnabled && {
-    serverCertSecretName: env.get('CERT_MANAGER_SERVER_CERT_SECRET_NAME').asString(),
-    serverCertSecretNamespace: env.get('CERT_MANAGER_SERVER_CERT_SECRET_NAMESPACE').asString(),
+    config: {
+      serverCertSecretName: env.get('CERT_MANAGER_SERVER_CERT_SECRET_NAME').required().asString(),
+      serverCertSecretNamespace: env.get('CERT_MANAGER_SERVER_CERT_SECRET_NAMESPACE').required().asString(),
+    },
   }),
 };
 
@@ -72,14 +75,6 @@ const vault = {
   signExpiryHours: env.get('VAULT_SIGN_EXPIRY_HOURS').default('43800').asString(),
   keyLength: env.get('PRIVATE_KEY_LENGTH').default(4096).asIntPositive(),
   keyAlgorithm: env.get('PRIVATE_KEY_ALGORITHM').default('rsa').asString(),
-};
-
-const database = {
-  host: env.get('DATABASE_HOST').default('localhost').asString(),
-  port: env.get('DATABASE_PORT').default('3306').asPortNumber(),
-  user: env.get('DATABASE_USER').default('root').asString(),
-  password: env.get('DATABASE_PASSWORD').default('test').asString(),
-  database: env.get('DATABASE_DATABASE').default('test').asString(),
 };
 
 const cfg = {
@@ -109,7 +104,8 @@ const cfg = {
   dfspClientCsrParameters: env.get('DFSP_CLIENT_CSR_PARAMETERS').asJsonConfig(),
   dfspServerCsrParameters: env.get('DFSP_SERVER_CSR_PARAMETERS').asJsonConfig(),
   caCsrParameters: env.get('CA_CSR_PARAMETERS').asJsonConfig(),
-  database,
+  database: dbConfig,
+  stateMachineDebugPort: env.get('STATE_MACHINE_DEBUG_PORT').default(8888).asPortNumber(),
 };
 
 export type IConfigVault = typeof vault;

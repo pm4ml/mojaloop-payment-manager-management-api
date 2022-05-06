@@ -44,6 +44,7 @@ class ConnectionStateMachine {
     this.opts = opts;
     const machine = this.createMachine(opts);
     this.service = interpret(machine, { devTools: true }).onTransition((state) => {
+      console.log(state.value);
       this.db('state').update({ data: state });
     });
   }
@@ -66,6 +67,7 @@ class ConnectionStateMachine {
   }
 
   public serve() {
+    console.log(`Serving state machine introspection on port ${this.opts.port}`);
     inspect({
       server: new WebSocket.Server({
         port: this.opts.port,

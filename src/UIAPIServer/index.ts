@@ -23,6 +23,7 @@ import handlers from './handlers';
 import middlewares from './middlewares';
 import { IConfig } from '@app/config';
 import Vault from '@app/lib/vault';
+import assert from 'assert';
 
 class UIAPIServer {
   private api?: Koa;
@@ -56,7 +57,7 @@ class UIAPIServer {
     let certManager;
     if (this.conf.certManager.enabled) {
       certManager = new CertManager({
-        ...this.conf.certManager,
+        ...this.conf.certManager.config!,
         logger: this.logger,
       });
     }
@@ -95,8 +96,9 @@ class UIAPIServer {
   }
 
   async start() {
+    assert(this.server);
     await new Promise((resolve) => this.server.listen(this.conf.inboundPort, resolve));
-    await this.mcmState.start();
+    // await this.mcmState.start();
     this.logger.log(`Serving inbound API on port ${this.conf.inboundPort}`);
   }
 
