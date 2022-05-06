@@ -176,6 +176,10 @@ class CertificatesModel {
     return response;
   }
 
+  async getHubCA() {
+    return this._certificateModel.getHubCA();
+  }
+
   async getOutboundTlsConfig() {
     try {
       const cert = await this._vault.getClientCert();

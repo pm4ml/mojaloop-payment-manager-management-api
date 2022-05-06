@@ -104,8 +104,10 @@ if (require.main === module) {
       logger,
       db,
     });
-    // await stateMachine.start();
+    await stateMachine.start();
     stateMachine.serve();
+
+    console.log('VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV');
 
     const svr = new Server(config, logger, vault);
 

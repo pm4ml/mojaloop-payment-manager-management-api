@@ -40,7 +40,7 @@ export const dfspClientCert = (opts: MachineOpts) =>
           states: {
             getHubCA: {
               invoke: {
-                src: downloadHubCA,
+                src: () => opts.certificatesModel.getHubCA(),
                 onDone: {
                   target: 'downloaded',
                 },

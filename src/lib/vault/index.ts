@@ -14,6 +14,7 @@ import SDK from '@mojaloop/sdk-standard-components';
 // TODO: Use hashi-vault-js package
 // TODO: find and link document containing rules on allowable paths
 const vaultPaths = {
+  STATE_MACHINE_STATE: 'state-machine-state',
   ILP: 'ilp',
   JWS: 'jws',
   PEER_JWS: 'peer-jws',
@@ -160,6 +161,14 @@ class Vault {
 
   async getJWS() {
     return this._getSecret(vaultPaths.JWS);
+  }
+
+  async setStateMachineState(value: any) {
+    return this._setSecret(vaultPaths.STATE_MACHINE_STATE, value);
+  }
+
+  async getStateMachineState() {
+    return this._getSecret(vaultPaths.STATE_MACHINE_STATE);
   }
 
   async setPeerJWS(value: any) {

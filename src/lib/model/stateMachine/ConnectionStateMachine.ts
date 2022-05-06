@@ -43,9 +43,9 @@ class ConnectionStateMachine {
     this.db = opts.db;
     this.opts = opts;
     const machine = this.createMachine(opts);
-    this.service = interpret(machine, { devTools: true }).onTransition((state) => {
+    this.service = interpret(machine, { devTools: true }).onTransition(async(state) => {
       console.log(state.value);
-      this.db('state').update({ data: state });
+      await this.opts.vault.setStateMachineState(state);
     });
   }
 
@@ -55,9 +55,8 @@ class ConnectionStateMachine {
   }
 
   public async start() {
-    const state = await this.db.select('data').from<DBState>('state');
-    assert(state.length > 0);
-    this.service.start(state[0].data);
+    const state = await this.opts.vault.getStateMachineState();
+    this.service.start(state);
 
     this.started = true;
   }
@@ -91,22 +90,27 @@ class ConnectionStateMachine {
       type: 'parallel',
       states: {
         certExchange: {
-          initial: 'creatingDFSPCA',
+          // initial: 'creatingDFSPCA',
+          initial: 'hubCsr',
           states: {
-            creatingDFSPCA: {
-              ...dfspCA,
-              onDone: {
-                target: 'hubCsr',
-              },
-            },
+            // creatingDFSPCA: {
+            //   ...dfspCA,
+            //   onDone: {
+            //     target: 'hubCsr',
+            //   },
+            // },
             hubCsr: {
-              ...hubCsr,
+              invoke: {
+                src: hubCsr(opts),
+              },
               onDone: {
                 target: 'dfspClientCert',
               },
             },
             dfspClientCert: {
-              ...dfspClientCert,
+              invoke: {
+                src: dfspClientCert(opts),
+              },
               onDone: {
                 target: 'completed',
               },

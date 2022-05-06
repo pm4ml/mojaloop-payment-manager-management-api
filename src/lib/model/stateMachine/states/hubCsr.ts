@@ -67,7 +67,7 @@ export const hubCsr = (opts: MachineOpts) =>
         states: {
           getClientCert: {
             invoke: {
-              src: downloadClientCert,
+              src: () => opts.certificatesModel.getCertificates(),
               onDone: {
                 target: 'success',
               },
