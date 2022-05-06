@@ -25,14 +25,14 @@ const vaultPaths = {
 };
 
 export interface VaultAuthK8s {
-  k8s: {
+  k8s?: {
     token: string;
     role: string;
   };
 }
 
 export interface VaultAuthAppRole {
-  appRole: {
+  appRole?: {
     roleId: string;
     roleSecretId: string;
   };

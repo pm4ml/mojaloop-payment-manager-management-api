@@ -10,7 +10,11 @@
 
 import knex from 'knex';
 import { IConfigDatabase } from '@app/config';
+import knexfile from './knexfile';
 
 export default (config: IConfigDatabase) => {
-  return knex(config);
+  return knex({
+    ...config,
+    ...knexfile,
+  });
 };

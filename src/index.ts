@@ -8,9 +8,6 @@
  *       Murthy Kakarlamudi - murthy@modusbox.com                             *
  **************************************************************************/
 
-
-
-import 'reflect-metadata';
 import 'tsconfig-paths/register';
 
 import Vault from '@internal/vault';
@@ -21,7 +18,7 @@ import initDatabase from '@app/database';
 import { hostname } from 'os';
 import config, { IConfig } from '@app/config';
 import { interpret } from 'xstate';
-import { createStateMachine } from '@app/lib/model/stateMachine/StateMachine';
+import ConnectionStateMachine from '@app/lib/model/stateMachine/ConnectionStateMachine';
 import { DFSPCertificateModel, HubCertificateModel, HubEndpointModel } from '@pm4ml/mcm-client';
 import CertificatesModel from '@app/lib/model/CertificatesModel';
 
@@ -99,7 +96,8 @@ if (require.main === module) {
       hubEndpointModel: new HubEndpointModel(opts),
       certificatesModel: new CertificatesModel(opts),
     };
-    const service = interpret(createStateMachine());
+
+    const stateMachine = new ConnectionStateMachine();
 
     const svr = new Server(config, logger, vault);
 

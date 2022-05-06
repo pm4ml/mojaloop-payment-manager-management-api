@@ -38,6 +38,7 @@
     "@kubernetes/client-node": "^0.16.2",
     "@mojaloop/sdk-standard-components": "^16.0.1",
     "@pm4ml/mcm-client": "^2.0.3",
+    "@xstate/inspect": "^0.7.0",
     "ajv": "^8.11.0",
     "async-injection": "^1.5.0",
     "better-sqlite3": "^7.5.1",

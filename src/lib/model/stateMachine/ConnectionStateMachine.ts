@@ -3,13 +3,10 @@ import { inspect } from '@xstate/inspect/lib/server';
 
 import {
   dfspCA,
-  getPeerJWS,
-  createJWS,
   dfspClientCert,
   hubCsr,
   createPeerJWSExchangeMachine,
   createDFSPJWSGeneratorMachine,
-  db,
 } from './states';
 
 import { MachineOpts } from './states/MachineOpts';
@@ -155,3 +152,5 @@ class ConnectionStateMachine {
     });
   }
 }
+
+export default ConnectionStateMachine;

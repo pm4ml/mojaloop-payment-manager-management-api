@@ -100,10 +100,10 @@ const cfg = {
   certManager,
   vault,
   auth: {
-    enabled: env.get('AUTH_ENABLED').required().asBoolStrict(),
+    enabled: env.get('AUTH_ENABLED').default('false').asBoolStrict(),
     creds: {
-      user: env.get('AUTH_USER').required().asString(),
-      pass: env.get('AUTH_PASS').required().asString(),
+      user: env.get('AUTH_USER').asString(),
+      pass: env.get('AUTH_PASS').asString(),
     },
   },
   dfspClientCsrParameters: env.get('DFSP_CLIENT_CSR_PARAMETERS').asJsonConfig(),
