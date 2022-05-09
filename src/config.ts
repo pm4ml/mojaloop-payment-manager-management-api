@@ -11,7 +11,6 @@
 import fs from 'fs';
 import { from } from 'env-var';
 import yaml from 'js-yaml';
-import dbConfig from './database/config';
 
 require('dotenv').config();
 
@@ -104,7 +103,6 @@ const cfg = {
   dfspClientCsrParameters: env.get('DFSP_CLIENT_CSR_PARAMETERS').asJsonConfig(),
   dfspServerCsrParameters: env.get('DFSP_SERVER_CSR_PARAMETERS').asJsonConfig(),
   caCsrParameters: env.get('CA_CSR_PARAMETERS').asJsonConfig(),
-  database: dbConfig,
   stateMachineDebugPort: env.get('STATE_MACHINE_DEBUG_PORT').default(8888).asPortNumber(),
 };
 

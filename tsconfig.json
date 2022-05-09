@@ -33,7 +33,7 @@
     "noUnusedParameters": false,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
+//    "emitDecoratorMetadata": true,
+//    "experimentalDecorators": true
   }
 }

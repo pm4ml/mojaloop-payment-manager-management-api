@@ -1,12 +1,22 @@
-import { createMachine, sendParent } from 'xstate';
+import { assign, sendParent, MachineConfig, DoneEventObject } from 'xstate';
 import { MachineOpts } from './MachineOpts';
+import { invokeRetry } from './invokeRetry';
 
-type TContext = {};
+export namespace DfspJWS {
+  export type Context = {
+    dfspJWS?: {
+      publicKey: string;
+      privateKey: string;
+    };
+  };
 
-type TEvent = { type: 'CREATE_JWS' };
+  export enum EventOut {
+    COMPLETED = 'DFSP_JWS_PROPAGATED',
+  }
 
-export const createDFSPJWSGeneratorMachine = (opts: MachineOpts) =>
-  createMachine<TContext, TEvent>({
+  type EventIn = { type: 'CREATE_JWS' } | DoneEventObject;
+
+  export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, EventIn> => ({
     id: 'createJWS',
     initial: 'idle',
     states: {
@@ -16,52 +26,48 @@ export const createDFSPJWSGeneratorMachine = (opts: MachineOpts) =>
         },
       },
       creating: {
-        initial: 'creating',
-        states: {
-          creating: {
-            invoke: {
-              src: () => opts.certificatesModel.createJWS(),
-              onDone: 'success',
-              onError: 'failure',
-            },
-          },
-          success: {
-            type: 'final',
-          },
-          failure: {
-            after: {
-              60000: 'creating',
-            },
+        invoke: {
+          src: () =>
+            invokeRetry({
+              id: 'dfspJWSCreate',
+              service: () => opts.certificatesModel.createJWS(),
+            }),
+          onDone: {
+            target: 'propagate',
+            actions: assign({ dfspJWS: (context, event) => event.data }),
           },
         },
-        onDone: 'uploading',
       },
-      uploading: {
-        initial: 'upload',
+      propagate: {
+        type: 'parallel',
         states: {
-          upload: {
+          populatingSDK: {
             invoke: {
-              src: () => opts.certificatesModel.uploadJWS(),
-              onDone: 'success',
-              onError: 'failure',
+              src: (ctx) =>
+                invokeRetry({
+                  id: 'dfspJWSUpload',
+                  service: () => opts.connectorManager.reconfigureOutboundSdkForJWS(ctx.dfspJWS!.privateKey),
+                }),
             },
           },
-          success: {
-            type: 'final',
-          },
-          failure: {
-            after: {
-              60000: 'upload',
+          uploadingToHub: {
+            invoke: {
+              src: (ctx) =>
+                invokeRetry({
+                  id: 'dfspJWSUpload',
+                  service: () => opts.certificatesModel.uploadJWS(ctx.dfspJWS!.publicKey),
+                }),
             },
           },
-        },
-        onDone: {
-          target: 'idle',
-          actions: [sendParent('DFSP_JWS_CREATED')],
         },
         on: {
           CREATE_JWS: 'creating',
         },
+        onDone: {
+          target: 'idle',
+          actions: sendParent(EventOut.COMPLETED),
+        },
       },
     },
   });
+}

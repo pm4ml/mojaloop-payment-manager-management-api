@@ -3,6 +3,7 @@ import Vault from '@app/lib/vault';
 import { AuthModel, DFSPCertificateModel, HubCertificateModel, HubEndpointModel } from '@pm4ml/mcm-client';
 import CertificatesModel from '@app/lib/model/CertificatesModel';
 import { Knex } from 'knex';
+import ConnectorManager from '@app/lib/model/ConnectorManager';
 
 export interface MachineOpts {
   logger: SDK.Logger.Logger;
@@ -17,7 +18,7 @@ export interface MachineOpts {
   hubCertificateModel: HubCertificateModel;
   hubEndpointModel: HubEndpointModel;
   authModel: AuthModel;
+  connectorManager: ConnectorManager;
   certificatesModel: CertificatesModel;
-  db: Knex;
   port: number;
 }

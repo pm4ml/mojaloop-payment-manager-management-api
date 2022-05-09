@@ -121,4 +121,4 @@ class UIAPIServer {
   }
 }
 
-module.exports = UIAPIServer;
+export default UIAPIServer;

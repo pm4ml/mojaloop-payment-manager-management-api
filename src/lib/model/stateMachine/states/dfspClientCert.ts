@@ -54,7 +54,7 @@ export const dfspClientCert = (opts: MachineOpts) =>
             },
             changed: {
               invoke: {
-                src: setHubCA,
+                src: () => setHubCA,
                 onDone: {
                   target: 'completed',
                 },

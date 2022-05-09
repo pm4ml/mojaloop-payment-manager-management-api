@@ -12,15 +12,13 @@ import 'tsconfig-paths/register';
 
 import Vault from '@internal/vault';
 import { Logger } from '@mojaloop/sdk-standard-components';
-import ControlServer from './ControlServer';
 import UIAPIServer from './UIAPIServer';
-import initDatabase from '@app/database';
 import { hostname } from 'os';
 import config, { IConfig } from '@app/config';
-import { interpret } from 'xstate';
 import ConnectionStateMachine from '@app/lib/model/stateMachine/ConnectionStateMachine';
 import { DFSPCertificateModel, HubCertificateModel, HubEndpointModel } from '@pm4ml/mcm-client';
 import CertificatesModel from '@app/lib/model/CertificatesModel';
+import ControlServer from './ControlServer';
 
 const LOG_ID = {
   CONTROL: { app: 'mojaloop-payment-manager-management-api-service-control-server' },
@@ -32,6 +30,7 @@ const LOG_ID = {
  */
 class Server {
   private controlServer?: ControlServer.Server;
+  private uiApiServer: UIAPIServer;
   constructor(
     private conf: IConfig,
     private logger: Logger.Logger,
@@ -78,8 +77,6 @@ if (require.main === module) {
       stringify: Logger.buildStringify({ space: config.logIndent }),
     });
 
-    const db = await initDatabase(config.database);
-
     const vault = new Vault({
       ...config.vault,
       logger,
@@ -95,19 +92,16 @@ if (require.main === module) {
       hubCertificateModel: new HubCertificateModel(opts),
       hubEndpointModel: new HubEndpointModel(opts),
       certificatesModel: new CertificatesModel(opts),
+      vault,
     };
 
     const stateMachine = new ConnectionStateMachine({
+      ...config,
       port: config.stateMachineDebugPort,
       ...ctx,
-      ...config,
       logger,
-      db,
     });
     await stateMachine.start();
-    stateMachine.serve();
-
-    console.log('VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV');
 
     const svr = new Server(config, logger, vault);
 

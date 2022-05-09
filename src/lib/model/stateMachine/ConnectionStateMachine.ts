@@ -1,35 +1,31 @@
-import { createMachine, StateMachine, interpret, toSCXMLEvent, Interpreter, assign } from 'xstate';
+import { createMachine, StateMachine, interpret, toSCXMLEvent, Interpreter, assign, sendParent } from 'xstate';
 import { inspect } from '@xstate/inspect/lib/server';
 
-import {
-  dfspCA,
-  dfspClientCert,
-  hubCsr,
-  createPeerJWSExchangeMachine,
-  createDFSPJWSGeneratorMachine,
-} from './states';
+import { DfspJWS, PeerJWS, DfspCA, hubCsr, dfspClientCert } from './states';
 
 import { MachineOpts } from './states/MachineOpts';
 import { Knex } from 'knex';
-import assert from 'assert';
 import WebSocket from 'ws';
 
 export interface Event {
   type: 'CREATE_JWS' | 'CREATE_CA';
 }
 
-interface DBState {
-  data: Record<string, any>;
-}
+// interface DBState {
+//   data: Record<string, any>;
+// }
 
 interface PendingStates {
   PEER_JWS?: boolean;
   DFSP_JWS?: boolean;
+  DFSP_CA?: boolean;
 }
 
-interface TContext {
+interface MachineContext {
   pendingStates: PendingStates;
 }
+
+type Context = MachineContext & PeerJWS.Context & DfspJWS.Context & DfspCA.Context;
 
 class ConnectionStateMachine {
   private db: Knex;
@@ -42,9 +38,10 @@ class ConnectionStateMachine {
   constructor(opts: MachineOpts) {
     this.db = opts.db;
     this.opts = opts;
+    this.serve();
     const machine = this.createMachine(opts);
-    this.service = interpret(machine, { devTools: true }).onTransition(async(state) => {
-      console.log(state.value);
+    this.service = interpret(machine, { devTools: true }).onTransition(async (state) => {
+      console.log('Transition -> ', state.value);
       await this.opts.vault.setStateMachineState(state);
     });
   }
@@ -65,8 +62,11 @@ class ConnectionStateMachine {
     this.service.stop();
   }
 
-  public serve() {
-    console.log(`Serving state machine introspection on port ${this.opts.port}`);
+  private serve() {
+    console.log(
+      `Serving state machine introspection on port ${this.opts.port}\n` +
+        `Access URL: https://stately.ai/viz?inspect&server=ws://localhost:${this.opts.port}`
+    );
     inspect({
       server: new WebSocket.Server({
         port: this.opts.port,
@@ -74,88 +74,96 @@ class ConnectionStateMachine {
     });
   }
 
-  private updateRemainingStates(states: PendingStates) {
-    this.pendingStates = states;
-    if (Object.keys(this.pendingStates).length) {
+  private addPendingState(state: keyof PendingStates) {
+    this.pendingStates[state] = true;
+  }
+
+  private removePendingState(state: keyof PendingStates) {
+    this.pendingStates[state] = false;
+    const pending = Object.values(this.pendingStates).every((s) => s);
+    if (!pending) {
       // send notification about onboarding completion
     }
   }
 
   private createMachine(opts: MachineOpts) {
-    return createMachine<TContext>({
-      id: 'machine',
-      context: {
-        pendingStates: {},
-      },
-      type: 'parallel',
-      states: {
-        certExchange: {
-          // initial: 'creatingDFSPCA',
-          initial: 'hubCsr',
-          states: {
-            // creatingDFSPCA: {
-            //   ...dfspCA,
-            //   onDone: {
-            //     target: 'hubCsr',
-            //   },
-            // },
-            hubCsr: {
-              invoke: {
-                src: hubCsr(opts),
-              },
-              onDone: {
-                target: 'dfspClientCert',
-              },
-            },
-            dfspClientCert: {
-              invoke: {
-                src: dfspClientCert(opts),
-              },
-              onDone: {
-                target: 'completed',
-              },
-            },
-            completed: {
-              type: 'final',
-            },
-          },
+    return createMachine<Context>(
+      {
+        id: 'machine',
+        context: {
+          pendingStates: {},
+          peerJWS: [],
         },
-        pullingPeerJWS: {
-          invoke: {
-            src: createPeerJWSExchangeMachine(opts),
-          },
-          on: {
-            PEED_JWS_PULLED: {
-              // target: 'success',
-              actions: assign({
-                pendingStates: (ctx) => {
-                  const { PEER_JWS, ...states } = ctx.pendingStates;
-                  this.updateRemainingStates(states);
-                  return states;
+        type: 'parallel',
+        states: {
+          certExchange: {
+            initial: 'creatingDFSPCA',
+            // initial: 'hubCsr',
+            states: {
+              creatingDFSPCA: {
+                ...DfspCA.createState<Context>(opts),
+                entry: [assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_CA: true } }) })],
+                on: {
+                  [DfspJWS.EventOut.COMPLETED]: 'hubCsr',
                 },
-              }),
+              },
+              hubCsr: {
+                invoke: {
+                  src: hubCsr(opts),
+                },
+                onDone: {
+                  target: 'dfspClientCert',
+                },
+              },
+              dfspClientCert: {
+                invoke: {
+                  src: dfspClientCert(opts),
+                },
+                onDone: {
+                  target: 'completed',
+                },
+              },
+              completed: {
+                type: 'final',
+              },
             },
           },
-        },
-        creatingJWS: {
-          invoke: {
-            src: createDFSPJWSGeneratorMachine(opts),
+          pullingPeerJWS: {
+            ...PeerJWS.createState<Context>(opts),
+            entry: [assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ PEER_JWS: true } }) })],
+            on: {
+              [PeerJWS.EventOut.COMPLETED]: [
+                { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ PEER_JWS: false } }) }) },
+                { actions: 'notifyCompleted', cond: 'completedStates' },
+              ],
+            },
           },
-          on: {
-            DFSP_JWS_CREATED: {
-              // target: 'success',
-              actions: assign({
-                pendingStates: (ctx) => {
-                  const { DFSP_JWS, ...states } = ctx.pendingStates;
-                  this.updateRemainingStates(states);
-                  return states;
-                },
-              }),
+          creatingJWS: {
+            ...DfspJWS.createState<Context>(opts),
+            entry: [assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_JWS: true } }) })],
+            on: {
+              [DfspJWS.EventOut.COMPLETED]: [
+                { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_JWS: false } }) }) },
+                { actions: 'notifyCompleted', cond: 'completedStates' },
+              ],
             },
           },
         },
       },
-    });
+      {
+        guards: {
+          completedStates: (ctx) => Object.values(ctx.pendingStates).every((s) => s),
+          ...PeerJWS.createGuards<Context>(),
+        },
+        actions: {
+          // completeStep: (ctx) => assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ PEER_JWS: false } }) }),
+          notifyCompleted: () => {
+            // TODO: notify onboard completed
+            console.log('Onboarding completed');
+          },
+        },
+      }
+    );
   }
 }
 

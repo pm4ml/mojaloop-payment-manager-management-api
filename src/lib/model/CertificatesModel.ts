@@ -12,7 +12,7 @@ import Vault from '../vault';
 import { DFSPCertificateModel, HTTPResponseError, HubCertificateModel } from '@pm4ml/mcm-client';
 
 import assert from 'assert';
-import * as forge from 'node-forge';
+import forge from 'node-forge';
 import ConnectorManager from './ConnectorManager';
 import { Logger } from '@mojaloop/sdk-standard-components';
 import { Knex } from 'knex';
@@ -22,6 +22,7 @@ export interface CertificatesModelOpts {
   vault: Vault;
   db: Knex;
   dfspId: string;
+  mcmServerEndpoint: string;
 }
 
 class CertificatesModel {
@@ -30,6 +31,8 @@ class CertificatesModel {
   private _db: Knex;
   private _outboundCert?: string;
   private _connectorManager: ConnectorManager;
+  private _mcmClientDFSPCertModel: DFSPCertificateModel;
+  private _certificateModel: HubCertificateModel;
 
   constructor(opts: CertificatesModelOpts) {
     this._logger = opts.logger;
@@ -57,7 +60,7 @@ class CertificatesModel {
     });
   }
 
-  async createCSR(keyBits, csrParameters = {}) {
+  async createCSR(keyBits, csrParameters: any = {}) {
     const keys = forge.pki.rsa.generateKeyPair(keyBits);
     const csr = forge.pki.createCertificationRequest();
     csr.publicKey = keys.publicKey;
@@ -235,8 +238,8 @@ class CertificatesModel {
   /**
    * Upload DFSP JWS
    */
-  async uploadJWS() {
-    const { publicKey } = await this.getJWSKeypair();
+  async uploadJWS(publicKey: string) {
+    // const { publicKey } = await this.getJWSKeypair();
     return this._mcmClientDFSPCertModel.uploadJWS({ publicKey });
   }
 
@@ -258,13 +261,13 @@ class CertificatesModel {
    * Upload DFSP JWS
    */
   async createJWS() {
-    const keypair = forge.rsa.generateKeyPair({ bits: 2048 });
-    const keypairPem = {
+    const keypair = forge.pki.rsa.generateKeyPair({ bits: 2048 });
+    return {
       publicKey: forge.pki.publicKeyToPem(keypair.publicKey, 72),
       privateKey: forge.pki.privateKeyToPem(keypair.privateKey, 72),
     };
 
-    await this.storeJWS(keypairPem);
+    // await this.storeJWS(keypairPem);
   }
 
   /**

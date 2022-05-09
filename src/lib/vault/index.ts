@@ -25,6 +25,15 @@ const vaultPaths = {
   SERVER_PKEY: 'server-pkey',
 };
 
+export interface CSR {
+  CN: string;
+  OU: string;
+  O: string;
+  L: string;
+  C: string;
+  ST: string;
+}
+
 export interface VaultAuthK8s {
   k8s?: {
     token: string;
@@ -204,7 +213,7 @@ class Vault {
    * Create root CA
    * @param {Object} csr
    */
-  async createCA(csr: Record<string, any>) {
+  async createCA(csr: CSR) {
     // eslint-disable-next-line no-empty
     try {
       await this.deleteCA();
