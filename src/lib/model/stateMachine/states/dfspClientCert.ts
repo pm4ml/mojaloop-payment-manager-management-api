@@ -1,89 +1,125 @@
-import { createMachine } from 'xstate';
+import { AnyEventObject, assign, DoneEventObject, DoneInvokeEvent, MachineConfig, sendParent } from 'xstate';
 import { MachineOpts } from './MachineOpts';
+import { invokeRetry } from './invokeRetry';
 
-export const dfspClientCert = (opts: MachineOpts) =>
-  createMachine(
-    {
-      id: 'dfspClientCert',
-      type: 'parallel',
-      states: {
-        getClientCert: {
-          initial: 'getClientCert',
-          states: {
-            downloadClientCert: {
-              invoke: {
-                // src: () => opts.certificatesModel.downloadClientCert(),
-                src: () => opts.certificatesModel.getOutboundTlsConfig(),
-                onDone: {
-                  target: 'success',
-                },
-                onError: {
-                  target: 'failure',
-                },
-              },
-            },
-            success: {
-              type: 'final',
-            },
-            failure: {
-              after: {
-                60000: { target: 'downloadClientCert' },
-              },
-            },
+export namespace DfspCert {
+  export interface Context {
+    dfspClientCert?: {
+      id?: number;
+      csr?: string;
+      cert?: string;
+      privateKey?: string;
+    };
+  }
+
+  export enum EventOut {
+    COMPLETED = 'DFSP_CLIENT_CERT_CONFIGURED',
+  }
+
+  type EventIn = DoneEventObject;
+
+  export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, any> => ({
+    id: 'dfspClientCert',
+    initial: 'creatingDfspCsr',
+    states: {
+      creatingDfspCsr: {
+        invoke: {
+          src: () =>
+            invokeRetry({
+              id: 'createCsr',
+              logger: opts.logger,
+              service: async () => opts.vault.createCSR(opts.keyLength),
+            }),
+          onDone: {
+            actions: assign({
+              dfspClientCert: (ctx, { data }) => data,
+            }),
+            target: 'uploadingDfspCsr',
           },
+        },
+      },
+      uploadingDfspCsr: {
+        invoke: {
+          src: (ctx) =>
+            invokeRetry({
+              id: 'uploadCsr',
+              logger: opts.logger,
+              service: () => opts.dfspCertificateModel.uploadCSR({ csr: ctx.dfspClientCert!.csr! }),
+            }),
+          onDone: {
+            actions: assign({
+              dfspClientCert: (ctx, { data }): any => ({
+                ...ctx.dfspClientCert,
+                id: data.id,
+              }),
+            }),
+            target: 'getDfspClientCert',
+          },
+        },
+      },
+      getDfspClientCert: {
+        invoke: {
+          src: (ctx) =>
+            invokeRetry({
+              id: 'getDfspClientCertificate',
+              logger: opts.logger,
+              service: () =>
+                opts.dfspCertificateModel.getClientCertificate({ inboundEnrollmentId: ctx.dfspClientCert!.id! }),
+            }),
+        },
+        onDone: [
+          {
+            target: 'populatingDfspCert',
+            actions: assign({
+              dfspClientCert: (context, { data }): any => ({
+                ...context.dfspClientCert,
+                certificate: data.certificate,
+              }),
+            }),
+            cond: 'hasNewDfspClientCert',
+          },
+          { target: 'completed' },
+        ],
+      },
+      populatingDfspCert: {
+        invoke: {
+          src: (ctx) =>
+            invokeRetry({
+              id: 'populateOutboundCertSDK',
+              logger: opts.logger,
+              service: async () =>
+                opts.ControlServer.changeConfig({
+                  outbound: {
+                    tls: {
+                      creds: {
+                        cert: ctx.dfspClientCert!.cert,
+                        key: ctx.dfspClientCert!.privateKey,
+                      },
+                    },
+                  },
+                }),
+            }),
           onDone: {
             target: 'completed',
           },
         },
-        getHubCA: {
-          initial: 'getHubCA',
-          states: {
-            getHubCA: {
-              invoke: {
-                src: () => opts.certificatesModel.getHubCA(),
-                onDone: {
-                  target: 'downloaded',
-                },
-                onError: {
-                  target: 'failure',
-                },
-              },
-            },
-            downloaded: {
-              always: [{ target: 'changed', cond: 'isHubCAChanged' }, { target: 'completed' }],
-            },
-            changed: {
-              invoke: {
-                src: () => setHubCA,
-                onDone: {
-                  target: 'completed',
-                },
-              },
-            },
-            completed: {
-              type: 'final',
-            },
-            failure: {
-              after: {
-                60000: { target: 'getHubCA' },
-              },
-            },
-          },
-          onDone: {
-            target: 'completed',
-          },
+      },
+      completed: {
+        always: {
+          target: 'retry',
+          actions: sendParent(EventOut.COMPLETED),
         },
-        completed: {
-          type: 'final',
+      },
+      retry: {
+        after: {
+          [opts.refreshIntervalSeconds * 1000]: { target: 'getDfspClientCert' },
         },
       },
     },
-    {
-      guards: {
-        isHubCAChanged: (context, event, { cond }) => {
+  });
 
-          return true;
-        },
-      },
-    }
-  );
+  export const createGuards = <TContext extends Context>() => ({
+    hasNewDfspClientCert: (ctx: TContext, event: AnyEventObject) =>
+      event.data.state === 'CERT_SIGNED' && event.data.certificate !== ctx.dfspClientCert!.cert,
+  });
+}

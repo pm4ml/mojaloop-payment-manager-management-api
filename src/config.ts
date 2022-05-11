@@ -76,6 +76,8 @@ const vault = {
   keyAlgorithm: env.get('PRIVATE_KEY_ALGORITHM').default('rsa').asString(),
 };
 
+const authEnabled = env.get('AUTH_ENABLED').default('false').asBoolStrict();
+
 const cfg = {
   dfspId: env.get('DFSP_ID').required().asString(),
   control: {
@@ -94,11 +96,13 @@ const cfg = {
   certManager,
   vault,
   auth: {
-    enabled: env.get('AUTH_ENABLED').default('false').asBoolStrict(),
-    creds: {
-      user: env.get('AUTH_USER').asString(),
-      pass: env.get('AUTH_PASS').asString(),
-    },
+    enabled: authEnabled,
+    ...(authEnabled && {
+      creds: {
+        user: env.get('AUTH_USER').required().asString(),
+        pass: env.get('AUTH_PASS').required().asString(),
+      },
+    }),
   },
   dfspClientCsrParameters: env.get('DFSP_CLIENT_CSR_PARAMETERS').asJsonConfig(),
   dfspServerCsrParameters: env.get('DFSP_SERVER_CSR_PARAMETERS').asJsonConfig(),

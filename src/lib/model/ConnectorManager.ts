@@ -10,7 +10,7 @@
  *  ORIGINAL AUTHOR:                                                      *
  *       Murthy Kakarlamudi - murthy@modusbox.com                   *
  ************************************************************************* */
-import { getInternalEventEmitter, INTERNAL_EVENTS } from '@app/ControlServer/events';
+import { getInternalEventEmitter, INTERNAL_EVENTS } from '@app/ControlServer';
 import Vault from '@app/lib/vault';
 import { Logger } from '@mojaloop/sdk-standard-components';
 

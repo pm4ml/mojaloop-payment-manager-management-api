@@ -22,9 +22,10 @@ export namespace DfspCA {
   // type EventIn = { type: 'CREATE_CA'; csr: CSR } | DoneEventObject;
   type EventIn = CreateIntCAEvent | CreateExtCAEvent | DoneEventObject;
 
-  export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, EventIn> => ({
+  export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, any> => ({
     id: 'createCA',
-    initial: 'idle',
+    // initial: 'idle',
+    initial: 'gettingPrebuiltCA',
     states: {
       idle: {
         on: {
@@ -32,15 +33,30 @@ export namespace DfspCA {
           CREATE_EXT_CA: 'creatingExtCA',
         },
       },
+      gettingPrebuiltCA: {
+        invoke: {
+          src: () =>
+            invokeRetry({
+              id: 'getPrebuiltCA',
+              logger: opts.logger,
+              service: () => opts.vault.getCA(),
+            }),
+          onDone: {
+            target: 'uploadingToHub',
+            actions: assign({ dfspCA: (context, { data }): any => ({ cert: data }) }),
+          },
+        },
+      },
       creatingIntCA: {
         invoke: {
           src: (ctx, event) =>
             invokeRetry({
               id: 'dfspIntCACreate',
+              logger: opts.logger,
               service: () => opts.vault.createCA((event as CreateIntCAEvent).csr),
             }),
           onDone: {
-            target: 'propagate',
+            target: 'uploadingToHub',
             actions: assign({ dfspCA: (context, event) => event.data }),
           },
         },
@@ -50,6 +66,7 @@ export namespace DfspCA {
           src: (ctx, event) =>
             invokeRetry({
               id: 'dfspExtCACreate',
+              logger: opts.logger,
               service: async () => {
                 const ev = event as CreateExtCAEvent;
                 const cert = ev.rootCert || '';
@@ -60,23 +77,23 @@ export namespace DfspCA {
               },
             }),
           onDone: {
-            target: 'propagate',
+            target: 'uploadingToHub',
             actions: assign({ dfspCA: (context, event) => event.data }),
           },
         },
       },
-      propagate: {
-        type: 'parallel',
-        states: {
-          uploadingToHub: {
-            invoke: {
-              src: (ctx) =>
-                invokeRetry({
-                  id: 'dfspJWSUpload',
-                  service: () => opts.certificatesModel.uploadDFSPCA(ctx.dfspCA!.cert, ctx.dfspCA!.chain),
+      uploadingToHub: {
+        invoke: {
+          src: (ctx) =>
+            invokeRetry({
+              id: 'dfspCAUpload',
+              logger: opts.logger,
+              service: () =>
+                opts.dfspCertificateModel.uploadDFSPCA({
+                  rootCertificate: ctx.dfspCA!.cert,
+                  intermediateChain: ctx.dfspCA!.chain,
                 }),
-            },
-          },
+            }),
         },
         on: {
           CREATE_EXT_CA: 'creatingExtCA',

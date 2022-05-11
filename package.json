@@ -28,11 +28,6 @@
     "new-migration": "DOTENV_CONFIG_PATH=$(pwd)/.env npx knex --knexfile src/database/knexfile.ts migrate:make",
     "rollback": "DOTENV_CONFIG_PATH=$(pwd)/.env npx knex --knexfile src/database/knexfile.ts migrate:rollback"
   },
-  "jest": {
-    "setupFiles": [
-      "<rootDir>/src/test/jest/setEnvVars.js"
-    ]
-  },
   "dependencies": {
     "@babel/eslint-parser": "^7.17.0",
     "@kubernetes/client-node": "^0.16.2",
@@ -90,7 +85,7 @@
     "openapi-response-validator": "^11.0.0",
     "redis-mock": "^0.56.3",
     "supertest": "^6.2.3",
-    "ts-jest": "^28.0.1",
+    "ts-jest": "^28.0.2",
     "ts-node-dev": "1.1.8"
   }
 }

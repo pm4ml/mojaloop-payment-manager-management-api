@@ -30,7 +30,8 @@ export namespace DfspJWS {
           src: () =>
             invokeRetry({
               id: 'dfspJWSCreate',
-              service: () => opts.certificatesModel.createJWS(),
+              logger: opts.logger,
+              service: async () => opts.vault.createJWS(),
             }),
           onDone: {
             target: 'propagate',
@@ -45,8 +46,9 @@ export namespace DfspJWS {
             invoke: {
               src: (ctx) =>
                 invokeRetry({
-                  id: 'dfspJWSUpload',
-                  service: () => opts.connectorManager.reconfigureOutboundSdkForJWS(ctx.dfspJWS!.privateKey),
+                  id: 'dfspJWSPopulateSDK',
+                  logger: opts.logger,
+                  service: async () => opts.ControlServer.changeConfig({ jwsSigningKey: ctx.dfspJWS!.privateKey }),
                 }),
             },
           },
@@ -55,7 +57,8 @@ export namespace DfspJWS {
               src: (ctx) =>
                 invokeRetry({
                   id: 'dfspJWSUpload',
-                  service: () => opts.certificatesModel.uploadJWS(ctx.dfspJWS!.publicKey),
+                  logger: opts.logger,
+                  service: () => opts.dfspCertificateModel.uploadJWS({ publicKey: ctx.dfspJWS!.publicKey }),
                 }),
             },
           },

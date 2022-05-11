@@ -79,19 +79,6 @@ class UIAPIServer {
 
     this.server = http.createServer(this.api.callback());
 
-    // // Code to setup mcm client
-    // this.mcmState = new MCMStateModel({
-    //   dfspId: this.conf.dfspId,
-    //   hubEndpoint: this.conf.mcmServerEndpoint,
-    //   refreshIntervalSeconds: this.conf.mcmClientRefreshIntervalSeconds,
-    //   vault: this.vault,
-    //   keyLength: this.conf.vault.keyLength,
-    //   logger: this.logger,
-    //   auth: this.conf.auth,
-    //   mojaloopConnectorFQDN: this.conf.mojaloopConnectorFQDN,
-    //   db: this.db,
-    // });
-
     return this.server;
   }
 

@@ -14,18 +14,7 @@ import DFSP from './DFSP';
 import Hub from './Hub';
 import CertificatesModel from './CertificatesModel';
 import MonetaryZone from './MonetaryZone';
-import MCMStateModel from './MCMStateModel';
 import ConnectorManager from './ConnectorManager';
 import CertManager from './CertManager';
 
-export default {
-  Transfer,
-  Balances,
-  DFSP,
-  Hub,
-  CertificatesModel,
-  MonetaryZone,
-  MCMStateModel,
-  ConnectorManager,
-  CertManager,
-};
+export { Transfer, Balances, DFSP, Hub, CertificatesModel, MonetaryZone, ConnectorManager, CertManager };

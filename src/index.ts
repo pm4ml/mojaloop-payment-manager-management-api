@@ -16,9 +16,9 @@ import UIAPIServer from './UIAPIServer';
 import { hostname } from 'os';
 import config, { IConfig } from '@app/config';
 import ConnectionStateMachine from '@app/lib/model/stateMachine/ConnectionStateMachine';
-import { DFSPCertificateModel, HubCertificateModel, HubEndpointModel } from '@pm4ml/mcm-client';
-import CertificatesModel from '@app/lib/model/CertificatesModel';
-import ControlServer from './ControlServer';
+import { AuthModel, DFSPCertificateModel, HubCertificateModel, HubEndpointModel } from '@pm4ml/mcm-client';
+import * as ControlServer from './ControlServer';
+import ConnectorManager from '@app/lib/model/ConnectorManager';
 
 const LOG_ID = {
   CONTROL: { app: 'mojaloop-payment-manager-management-api-service-control-server' },
@@ -31,13 +31,9 @@ const LOG_ID = {
 class Server {
   private controlServer?: ControlServer.Server;
   private uiApiServer: UIAPIServer;
-  constructor(
-    private conf: IConfig,
-    private logger: Logger.Logger,
-    private vault: Vault) {
+  constructor(private conf: IConfig, private logger: Logger.Logger, private vault: Vault) {
     this.conf = conf;
     this.uiApiServer = new UIAPIServer(this.conf, vault);
-    this.controlServer = null;
   }
 
   async start() {
@@ -48,7 +44,6 @@ class Server {
     this.controlServer = new ControlServer.Server({
       appConfig: this.conf,
       logger: this.logger.push(LOG_ID.CONTROL),
-      vault: this.vault,
     });
     this.controlServer.registerInternalEvents();
     await Promise.all([this._startUIAPIServer()]);
@@ -60,7 +55,7 @@ class Server {
   }
 
   stop() {
-    return Promise.all([this.uiApiServer.stop(), this.controlServer.stop()]);
+    return Promise.all([this.uiApiServer.stop(), this.controlServer?.stop()]);
   }
 }
 
@@ -77,22 +72,29 @@ if (require.main === module) {
       stringify: Logger.buildStringify({ space: config.logIndent }),
     });
 
+    const authModel = new AuthModel({
+      logger,
+      auth: config.auth,
+      hubEndpoint: config.mcmServerEndpoint,
+    });
+    await authModel.login();
+
     const vault = new Vault({
       ...config.vault,
+      commonName: config.mojaloopConnectorFQDN,
       logger,
     });
     await vault.connect();
 
     const opts = {
+      dfspId: config.dfspId,
+      hubEndpoint: config.mcmServerEndpoint,
       logger,
-      ...config,
     };
     const ctx = {
       dfspCertificateModel: new DFSPCertificateModel(opts),
       hubCertificateModel: new HubCertificateModel(opts),
       hubEndpointModel: new HubEndpointModel(opts),
-      certificatesModel: new CertificatesModel(opts),
-      vault,
     };
 
     const stateMachine = new ConnectionStateMachine({
@@ -100,6 +102,8 @@ if (require.main === module) {
       port: config.stateMachineDebugPort,
       ...ctx,
       logger,
+      vault,
+      ControlServer,
     });
     await stateMachine.start();
 

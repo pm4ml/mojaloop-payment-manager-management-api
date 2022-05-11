@@ -34,3 +34,8 @@ const internalEventEmitter = new EventEmitter();
 export const getInternalEventEmitter = () => {
   return internalEventEmitter;
 };
+
+// TODO: Add connector config type
+export const changeConfig = (config: any) => {
+  internalEventEmitter.emit(INTERNAL_EVENTS.SERVER.BROADCAST_CONFIG_CHANGE, config);
+};

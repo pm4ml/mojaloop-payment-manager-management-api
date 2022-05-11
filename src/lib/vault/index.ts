@@ -10,6 +10,7 @@
 import NodeVault from 'node-vault';
 import { strict as assert } from 'assert';
 import SDK from '@mojaloop/sdk-standard-components';
+import forge from 'node-forge';
 
 // TODO: Use hashi-vault-js package
 // TODO: find and link document containing rules on allowable paths
@@ -61,6 +62,7 @@ export interface VaultOpts {
   keyLength: number;
   keyAlgorithm: string;
   logger: SDK.Logger.Logger;
+  commonName: string;
 }
 
 class Vault {
@@ -275,14 +277,14 @@ class Vault {
    * @param params
    * @returns {Promise<*>}
    */
-  async signHubCSR(params: Record<string, any>) {
+  async signHubCSR(csr: Record<string, any>) {
     assert(this.client);
     const { data } = await this.client.request({
       path: `/${this.cfg.mounts.pki}/sign/${this.cfg.pkiClientRole}`,
       method: 'POST',
       json: {
-        common_name: params.commonName,
-        csr: params.csr,
+        common_name: this.cfg.commonName,
+        csr: csr,
         // ttl: `${this._signExpiryHours}h`,
       },
     });
@@ -317,6 +319,49 @@ class Vault {
 
   async getHubEndpoints() {
     return this._getSecret(vaultPaths.HUB_ENDPOINTS);
+  }
+
+  createCSR(keyBits: number, csrParameters: any = {}) {
+    const keys = forge.pki.rsa.generateKeyPair(keyBits);
+    const csr = forge.pki.createCertificationRequest();
+    csr.publicKey = keys.publicKey;
+    // if (csrParameters?.subject) {
+    //   csr.setSubject(Object.entries(csrParameters.subject).map(([shortName, value]) => ({ shortName, value })));
+    // }
+    // if (csrParameters?.extensions?.subjectAltName) {
+    //   const DNS_TYPE = 2;
+    //   const IP_TYPE = 7;
+    //   const { dns, ips } = csrParameters.extensions.subjectAltName;
+    //   csr.setAttributes([
+    //     {
+    //       name: 'extensionRequest',
+    //       extensions: [
+    //         {
+    //           name: 'subjectAltName',
+    //           altNames: [
+    //             ...(dns?.map?.((value) => ({ type: DNS_TYPE, value })) || []),
+    //             ...(ips?.map?.((value) => ({ type: IP_TYPE, value })) || []),
+    //           ],
+    //         },
+    //       ],
+    //     },
+    //   ]);
+    // }
+
+    csr.sign(keys.privateKey, forge.md.sha256.create());
+
+    return {
+      csr: forge.pki.certificationRequestToPem(csr),
+      privateKey: forge.pki.privateKeyToPem(keys.privateKey, 72),
+    };
+  }
+
+  createJWS() {
+    const keypair = forge.pki.rsa.generateKeyPair({ bits: 2048 });
+    return {
+      publicKey: forge.pki.publicKeyToPem(keypair.publicKey, 72),
+      privateKey: forge.pki.privateKeyToPem(keypair.privateKey, 72),
+    };
   }
 }
 

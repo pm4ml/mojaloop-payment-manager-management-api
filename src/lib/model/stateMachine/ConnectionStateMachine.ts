@@ -1,53 +1,59 @@
-import { createMachine, StateMachine, interpret, toSCXMLEvent, Interpreter, assign, sendParent } from 'xstate';
+import { createMachine, interpret, assign } from 'xstate';
 import { inspect } from '@xstate/inspect/lib/server';
 
-import { DfspJWS, PeerJWS, DfspCA, hubCsr, dfspClientCert } from './states';
+import { DfspJWS, PeerJWS, DfspCA, DfspCert, HubCA, HubCert } from './states';
 
 import { MachineOpts } from './states/MachineOpts';
-import { Knex } from 'knex';
 import WebSocket from 'ws';
 
 export interface Event {
-  type: 'CREATE_JWS' | 'CREATE_CA';
+  type: 'CREATE_EXT_CA' | 'CREATE_INT_CA';
 }
 
-// interface DBState {
-//   data: Record<string, any>;
-// }
-
 interface PendingStates {
-  PEER_JWS?: boolean;
-  DFSP_JWS?: boolean;
-  DFSP_CA?: boolean;
+  PEER_JWS: boolean;
+  DFSP_JWS: boolean;
+  DFSP_CA: boolean;
+  DFSP_CERT: boolean;
+  HUB_CA: boolean;
+  HUB_CERT: boolean;
 }
 
 interface MachineContext {
   pendingStates: PendingStates;
 }
 
-type Context = MachineContext & PeerJWS.Context & DfspJWS.Context & DfspCA.Context;
+type Context = MachineContext &
+  PeerJWS.Context &
+  DfspJWS.Context &
+  DfspCA.Context &
+  DfspCert.Context &
+  HubCert.Context &
+  HubCA.Context;
 
 class ConnectionStateMachine {
-  private db: Knex;
   private started: boolean = false;
   private service: any;
   private opts: MachineOpts;
   private idle: boolean = false;
-  private pendingStates: PendingStates = {};
+  // private pendingStates: PendingStates = {};
 
   constructor(opts: MachineOpts) {
-    this.db = opts.db;
     this.opts = opts;
     this.serve();
     const machine = this.createMachine(opts);
     this.service = interpret(machine, { devTools: true }).onTransition(async (state) => {
-      console.log('Transition -> ', state.value);
+      opts.logger.push({ state: state.value }).log('Transition');
+      // console.log(this.service.getSnapshot());
+      // const snapshot = this.service.getSnapshot();
+      // delete (snapshot as any).actions;
+
+      // await this.opts.vault.setStateMachineState(snapshot);
       await this.opts.vault.setStateMachineState(state);
     });
   }
 
   public sendEvent(event: Event) {
-    this.db('events').insert({ event });
     this.service.send(event);
   }
 
@@ -74,58 +80,60 @@ class ConnectionStateMachine {
     });
   }
 
-  private addPendingState(state: keyof PendingStates) {
-    this.pendingStates[state] = true;
-  }
-
-  private removePendingState(state: keyof PendingStates) {
-    this.pendingStates[state] = false;
-    const pending = Object.values(this.pendingStates).every((s) => s);
-    if (!pending) {
-      // send notification about onboarding completion
-    }
-  }
-
   private createMachine(opts: MachineOpts) {
     return createMachine<Context>(
       {
         id: 'machine',
         context: {
-          pendingStates: {},
-          peerJWS: [],
+          pendingStates: {
+            PEER_JWS: true,
+            DFSP_JWS: true,
+            DFSP_CA: true,
+            DFSP_CERT: true,
+            HUB_CA: true,
+            HUB_CERT: true,
+          },
         },
         type: 'parallel',
         states: {
-          certExchange: {
-            initial: 'creatingDFSPCA',
-            // initial: 'hubCsr',
-            states: {
-              creatingDFSPCA: {
-                ...DfspCA.createState<Context>(opts),
-                entry: [assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_CA: true } }) })],
-                on: {
-                  [DfspJWS.EventOut.COMPLETED]: 'hubCsr',
-                },
-              },
-              hubCsr: {
-                invoke: {
-                  src: hubCsr(opts),
-                },
-                onDone: {
-                  target: 'dfspClientCert',
-                },
-              },
-              dfspClientCert: {
-                invoke: {
-                  src: dfspClientCert(opts),
-                },
-                onDone: {
-                  target: 'completed',
-                },
-              },
-              completed: {
-                type: 'final',
-              },
+          fetchingHubCA: {
+            ...HubCA.createState<Context>(opts),
+            entry: [assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ HUB_CA: true } }) })],
+            on: {
+              [HubCA.EventOut.COMPLETED]: [
+                { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ HUB_CA: false } }) }) },
+                { actions: 'notifyCompleted', cond: 'completedStates' },
+              ],
+            },
+          },
+          creatingDFSPCA: {
+            ...DfspCA.createState<Context>(opts),
+            entry: [assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_CA: true } }) })],
+            on: {
+              [DfspCA.EventOut.COMPLETED]: [
+                { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_CA: false } }) }) },
+                { actions: 'notifyCompleted', cond: 'completedStates' },
+              ],
+            },
+          },
+          creatingDfspClientCert: {
+            ...DfspCert.createState<Context>(opts),
+            entry: [assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_CERT: true } }) })],
+            on: {
+              [DfspCert.EventOut.COMPLETED]: [
+                { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_CERT: false } }) }) },
+                { actions: 'notifyCompleted', cond: 'completedStates' },
+              ],
+            },
+          },
+          creatingHubClientCert: {
+            ...HubCert.createState<Context>(opts),
+            entry: [assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ HUB_CERT: true } }) })],
+            on: {
+              [HubCert.EventOut.COMPLETED]: [
+                { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ HUB_CERT: false } }) }) },
+                { actions: 'notifyCompleted', cond: 'completedStates' },
+              ],
             },
           },
           pullingPeerJWS: {
@@ -152,8 +160,13 @@ class ConnectionStateMachine {
       },
       {
         guards: {
-          completedStates: (ctx) => Object.values(ctx.pendingStates).every((s) => s),
+          completedStates: (ctx) => Object.values(ctx.pendingStates).every((s) => !s),
           ...PeerJWS.createGuards<Context>(),
+          // ...DfspJWS.createGuards<Context>(),
+          ...DfspCert.createGuards<Context>(),
+          // ...DfspCA.createGuards<Context>(),
+          ...HubCert.createGuards<Context>(),
+          ...HubCA.createGuards<Context>(),
         },
         actions: {
           // completeStep: (ctx) => assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ PEER_JWS: false } }) }),

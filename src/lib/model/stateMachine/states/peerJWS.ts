@@ -1,11 +1,16 @@
 import { AnyEventObject, assign, DoneEventObject, DoneInvokeEvent, MachineConfig, sendParent } from 'xstate';
 import stringify from 'json-stringify-deterministic';
 import { MachineOpts } from './MachineOpts';
-import { invokeRetry } from '@app/lib/model/stateMachine/states/invokeRetry';
+import { invokeRetry } from './invokeRetry';
 
 export namespace PeerJWS {
+  type JWS = {
+    dfspId: string;
+    publicKey: string;
+  };
+
   export type Context = {
-    peerJWS: string[];
+    peerJWS?: JWS[];
   };
 
   export enum EventOut {
@@ -23,19 +28,14 @@ export namespace PeerJWS {
           src: () =>
             invokeRetry({
               id: 'getPeerDFSPJWSCertificates',
-              service: () => opts.certificatesModel.getPeerDFSPJWSCertificates(),
+              logger: opts.logger,
+              service: () => opts.dfspCertificateModel.getDFSPJWSCertificates({}),
             }),
           onDone: [
             { actions: assign({ peerJWS: (context, { data }) => data }) },
             { target: 'populatingPeerJWS', cond: 'peerJWSChanged' },
             { target: 'completed' },
-            // target: 'success',
-            // actions: assign({ result: (context, event) => event.data })
           ],
-          // onError: {
-          //   target: 'retry',
-          //   // actions: assign({ error: (context, event) => event.data })
-          // },
         },
       },
       populatingPeerJWS: {
@@ -43,16 +43,15 @@ export namespace PeerJWS {
           src: (ctx) =>
             invokeRetry({
               id: 'getPeerDFSPJWSCertificates',
-              service: () => opts.certificatesModel.exchangeJWSConfiguration(ctx.peerJWS),
+              logger: opts.logger,
+              service: async () => {
+                const peerJWSKeys = Object.fromEntries(ctx.peerJWS!.map((e) => [e.dfspId, e.publicKey]));
+                return opts.ControlServer.changeConfig({ peerJWSKeys });
+              },
             }),
           onDone: {
             target: 'completed',
-            // actions: assign({ peerJWS: (context, event) => event.data })
           },
-          // onError: {
-          //   target: 'retry',
-          //   // actions: assign({ error: (context, event) => event.data })
-          // },
         },
       },
       completed: {
@@ -63,7 +62,7 @@ export namespace PeerJWS {
       },
       retry: {
         after: {
-          60000: { target: 'fetchingPeerJWS' },
+          [opts.refreshIntervalSeconds * 1000]: { target: 'fetchingPeerJWS' },
         },
       },
     },
