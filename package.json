@@ -21,12 +21,7 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "test": "jest --ci --reporters=default --reporters=jest-junit --env=node src/test/unit",
-    "test:int": "jest --ci --reporters=default --reporters=jest-junit --env=node src/test/integration --forceExit",
-    "migrate": "DOTENV_CONFIG_PATH=$(pwd)/.env npx knex --knexfile src/database/knexfile.ts migrate:latest",
-    "seed": "DOTENV_CONFIG_PATH=$(pwd)/.env npx knex --knexfile src/database/knexfile.ts seed:run",
-    "migrate-and-seed": "npm -s run migrate && npm -s run seed",
-    "new-migration": "DOTENV_CONFIG_PATH=$(pwd)/.env npx knex --knexfile src/database/knexfile.ts migrate:make",
-    "rollback": "DOTENV_CONFIG_PATH=$(pwd)/.env npx knex --knexfile src/database/knexfile.ts migrate:rollback"
+    "test:int": "jest --ci --reporters=default --reporters=jest-junit --env=node src/test/integration --forceExit"
   },
   "dependencies": {
     "@babel/eslint-parser": "^7.17.0",
@@ -42,7 +37,6 @@
     "env-var": "^7.1.1",
     "fast-json-patch": "^3.1.1",
     "js-yaml": "^4.1.0",
-    "json-stringify-deterministic": "^1.0.6",
     "knex": "^2.0.0",
     "koa": "^2.13.4",
     "koa-body": "^5.0.0",

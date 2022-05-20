@@ -9,9 +9,9 @@
  **************************************************************************/
 
 import { AnyEventObject, assign, DoneEventObject, MachineConfig, send } from 'xstate';
-import stringify from 'json-stringify-deterministic';
 import { MachineOpts } from './MachineOpts';
 import { invokeRetry } from './invokeRetry';
+import _ from 'lodash';
 
 export namespace PeerJWS {
   type JWS = {
@@ -68,7 +68,7 @@ export namespace PeerJWS {
   });
 
   export const createGuards = <TContext extends Context>() => ({
-    peerJWSChanged: (context: TContext, event: AnyEventObject) => stringify(event.data) !== stringify(context.peerJWS),
+    peerJWSChanged: (context: TContext, event: AnyEventObject) => !_.isEqual(event.data, context.peerJWS),
   });
 
   // export const createActions = <TContext extends Context>() => ({
