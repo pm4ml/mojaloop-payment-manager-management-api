@@ -55,7 +55,7 @@ describe('PeerJWS', () => {
   });
 
   test('should download peer JWS', async () => {
-    opts.dfspCertificateModel.getDFSPJWSCertificates.mockImplementation(async () => [
+    opts.dfspCertificateModel.getAllJWSCertificates.mockImplementation(async () => [
       { dfspId: 'testfsp1', publicKey: 'TEST KEY 1' },
       { dfspId: 'testfsp2', publicKey: 'TEST KEY 2' },
     ]);
@@ -65,7 +65,7 @@ describe('PeerJWS', () => {
 
     await waitFor(service, (state) => state.matches('pullingPeerJWS.retry'));
 
-    expect(opts.dfspCertificateModel.getDFSPJWSCertificates).toHaveBeenCalled();
+    expect(opts.dfspCertificateModel.getAllJWSCertificates).toHaveBeenCalled();
 
     expect(configUpdate).toHaveBeenCalledWith({ peerJWSKeys: { testfsp1: 'TEST KEY 1', testfsp2: 'TEST KEY 2' } });
 
@@ -76,7 +76,7 @@ describe('PeerJWS', () => {
     expect(configUpdate).toHaveBeenCalledTimes(1);
 
     // now change peer jws keys
-    opts.dfspCertificateModel.getDFSPJWSCertificates.mockImplementation(async () => [
+    opts.dfspCertificateModel.getAllJWSCertificates.mockImplementation(async () => [
       { dfspId: 'testfsp1', publicKey: 'TEST KEY 1' },
       { dfspId: 'testfsp3', publicKey: 'TEST KEY 3' },
       { dfspId: 'testfsp4', publicKey: 'TEST KEY 4' },
@@ -85,7 +85,7 @@ describe('PeerJWS', () => {
     await waitFor(service, (state) => state.matches('pullingPeerJWS.fetchingPeerJWS'));
     await waitFor(service, (state) => state.matches('pullingPeerJWS.retry'));
 
-    expect(opts.dfspCertificateModel.getDFSPJWSCertificates).toHaveBeenCalledTimes(3);
+    expect(opts.dfspCertificateModel.getAllJWSCertificates).toHaveBeenCalledTimes(3);
     expect(configUpdate).toHaveBeenCalledWith({
       peerJWSKeys: { testfsp1: 'TEST KEY 1', testfsp3: 'TEST KEY 3', testfsp4: 'TEST KEY 4' },
     });
