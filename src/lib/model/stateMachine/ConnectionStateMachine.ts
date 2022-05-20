@@ -67,6 +67,7 @@ class ConnectionStateMachine {
   private started: boolean = false;
   private service: any;
   private opts: MachineOpts;
+  private context: Context = {};
   // private pendingStates: PendingStates = {};
 
   constructor(opts: MachineOpts) {
@@ -75,6 +76,7 @@ class ConnectionStateMachine {
     const machine = this.createMachine(opts);
     this.service = interpret(machine, { devTools: true }).onTransition(async (state) => {
       opts.logger.push({ state: state.value }).log('Transition');
+      this.context = state.context;
       // console.log(this.service.getSnapshot());
       // const snapshot = this.service.getSnapshot();
       // delete (snapshot as any).actions;
@@ -97,6 +99,10 @@ class ConnectionStateMachine {
 
   public stop() {
     this.service.stop();
+  }
+
+  public getContext() {
+    return this.context;
   }
 
   private serve() {

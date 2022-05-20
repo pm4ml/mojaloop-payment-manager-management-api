@@ -247,6 +247,10 @@ const setDFSPCA = async (ctx) => {
   ctx.stateMachine.sendEvent({ type: 'CREATE_EXT_CA', ...ctx.request.body });
 };
 
+const getStateMachineContext = async (ctx) => {
+  return ctx.stateMachine.getContext();
+};
+
 const getHubCA = async (ctx) => {
   const { dfspId, mcmServerEndpoint } = ctx.state.conf;
   const hub = new Hub({
@@ -393,5 +397,8 @@ export default {
   },
   '/monetaryzones/{monetaryZoneId}/dfsps': {
     get: getDFSPSByMonetaryZone,
+  },
+  '/test/state': {
+    get: getStateMachineContext,
   },
 };

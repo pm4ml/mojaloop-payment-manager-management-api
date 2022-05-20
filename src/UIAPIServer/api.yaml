@@ -764,6 +764,21 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DfspStatus'
+  /test/state:
+    get:
+      tags:
+      - "test"
+      summary: "Returns internal state machine context. For testing purposes only!"
+      operationId: "getStateMachineContext"
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DebugContext"
 components:
   schemas:
     Statuses:
@@ -1934,6 +1949,76 @@ components:
           type: "string"
         dfspId:
           type: "string"
+    DebugContext:
+      properties:
+        dfspCA:
+          properties:
+            cert:
+              type: "string"
+            chain:
+              type: "string"
+            key:
+              type: "string"
+        dfspClientCert:
+          properties:
+            id:
+              type: "integer"
+            csr:
+              type: "string"
+            cert:
+              type: "string"
+            privateKey:
+              type: "string"
+        dfspJWS:
+          properties:
+            publicKey:
+              type: "string"
+            privateKey:
+              type: "string"
+        dfspServerCert:
+          properties:
+            rootCertificate:
+              type: "string"
+            intermediateChain:
+              type: "string"
+            serverCertificate:
+              type: "string"
+            privateKey:
+              type: "string"
+        endpointConfig:
+          properties:
+            ipList:
+              type: "array"
+              items:
+                $ref: "#/components/schemas/IPEntry"
+            callbackHost:
+              type: "string"
+        hubCa:
+          properties:
+            intermediateChain:
+              type: "string"
+            rootCertificate:
+              type: "string"
+        hubClientCerts:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              id:
+                type: "string"
+              csr:
+                type: "string"
+              cert:
+                type: "string"
+        peerJWS:
+          type: "array"
+          items:
+            type: "object"
+            properties:
+              dfspId:
+                type: "string"
+              publicKey:
+                type: "string"
     EndPointIp:
       allOf:
       - $ref: "#/components/schemas/BaseEndpoint"
