@@ -18,7 +18,7 @@ class Balances {
     this._logger = logger;
     this._requests = new MojaloopRequests({
       logger: logger,
-      peerEndpoint: config.peerEndpoint,
+      peerEndpoint: config.mcmServerEndpoint,
       dfspId: config.dfspId,
       tls: config.tls,
       jwsSign: config.jwsSign,

@@ -9,14 +9,20 @@
  **************************************************************************/
 
 import http from 'http';
-import { request } from '@mojaloop/sdk-standard-components';
+import SDKStandardComponents, { request } from '@mojaloop/sdk-standard-components';
 
 import { buildUrl, HTTPResponseError, throwOrJson } from './common';
+import Logger = SDKStandardComponents.Logger.Logger;
 
 /**
  * A class for making requests to DFSP backend API
  */
 class Requests {
+  private logger: Logger;
+  private agent: http.Agent;
+  private transportScheme: string;
+  private endpoint: string;
+
   constructor(config) {
     this.logger = config.logger;
 

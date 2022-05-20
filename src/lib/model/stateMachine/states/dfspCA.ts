@@ -1,7 +1,7 @@
-import { assign, sendParent, MachineConfig, DoneEventObject } from 'xstate';
+import { assign, MachineConfig, send, DoneEventObject } from 'xstate';
 import { MachineOpts } from './MachineOpts';
 import { invokeRetry } from './invokeRetry';
-import { CSR } from '@app/lib/vault';
+import { Subject } from '@app/lib/vault';
 
 export namespace DfspCA {
   export type Context = {
@@ -12,34 +12,30 @@ export namespace DfspCA {
     };
   };
 
-  export enum EventOut {
-    COMPLETED = 'DFSP_CA_PROPAGATED',
-  }
-
-  type CreateIntCAEvent = { type: 'CREATE_INT_CA'; csr: CSR };
+  type CreateIntCAEvent = { type: 'CREATE_INT_CA'; subject: Subject };
   type CreateExtCAEvent = { type: 'CREATE_EXT_CA'; rootCert: string; intermediateChain: string; privateKey: string };
 
   // type EventIn = { type: 'CREATE_CA'; csr: CSR } | DoneEventObject;
-  type EventIn = CreateIntCAEvent | CreateExtCAEvent | DoneEventObject;
+  export type Event = DoneEventObject | CreateIntCAEvent | CreateExtCAEvent | { type: 'DFSP_CA_PROPAGATED' };
 
-  export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, any> => ({
+  export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, Event> => ({
     id: 'createCA',
     // initial: 'idle',
     initial: 'gettingPrebuiltCA',
+    on: {
+      CREATE_INT_CA: { target: '.creatingIntCA', internal: false },
+      CREATE_EXT_CA: { target: '.creatingExtCA', internal: false },
+    },
     states: {
-      idle: {
-        on: {
-          CREATE_INT_CA: 'creatingIntCA',
-          CREATE_EXT_CA: 'creatingExtCA',
-        },
-      },
+      idle: {},
       gettingPrebuiltCA: {
         invoke: {
+          id: 'getPrebuiltCA',
           src: () =>
             invokeRetry({
               id: 'getPrebuiltCA',
               logger: opts.logger,
-              service: () => opts.vault.getCA(),
+              service: async () => opts.vault.getCA(),
             }),
           onDone: {
             target: 'uploadingToHub',
@@ -49,11 +45,12 @@ export namespace DfspCA {
       },
       creatingIntCA: {
         invoke: {
+          id: 'dfspIntCACreate',
           src: (ctx, event) =>
             invokeRetry({
               id: 'dfspIntCACreate',
               logger: opts.logger,
-              service: () => opts.vault.createCA((event as CreateIntCAEvent).csr),
+              service: async () => opts.vault.createCA((event as CreateIntCAEvent).subject),
             }),
           onDone: {
             target: 'uploadingToHub',
@@ -63,6 +60,7 @@ export namespace DfspCA {
       },
       creatingExtCA: {
         invoke: {
+          id: 'dfspExtCACreate',
           src: (ctx, event) =>
             invokeRetry({
               id: 'dfspExtCACreate',
@@ -84,24 +82,21 @@ export namespace DfspCA {
       },
       uploadingToHub: {
         invoke: {
+          id: 'dfspCAUpload',
           src: (ctx) =>
             invokeRetry({
               id: 'dfspCAUpload',
               logger: opts.logger,
-              service: () =>
+              service: async () =>
                 opts.dfspCertificateModel.uploadDFSPCA({
                   rootCertificate: ctx.dfspCA!.cert,
                   intermediateChain: ctx.dfspCA!.chain,
                 }),
             }),
-        },
-        on: {
-          CREATE_EXT_CA: 'creatingExtCA',
-          CREATE_INT_CA: 'creatingIntCA',
-        },
-        onDone: {
-          target: 'idle',
-          actions: sendParent(EventOut.COMPLETED),
+          onDone: {
+            target: 'idle',
+            actions: send('DFSP_CA_PROPAGATED'),
+          },
         },
       },
     },

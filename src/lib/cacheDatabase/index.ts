@@ -195,7 +195,7 @@ async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
 interface MemoryCacheOpts {
   logger: SDK.Logger.Logger;
   cacheUrl: string;
-  manualSync: boolean;
+  manualSync?: boolean;
   syncInterval: number;
 }
 

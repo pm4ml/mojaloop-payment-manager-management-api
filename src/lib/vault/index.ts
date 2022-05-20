@@ -26,13 +26,23 @@ const vaultPaths = {
   SERVER_PKEY: 'server-pkey',
 };
 
-export interface CSR {
+export interface Subject {
   CN: string;
-  OU: string;
-  O: string;
-  L: string;
-  C: string;
-  ST: string;
+  OU?: string;
+  O?: string;
+  L?: string;
+  C?: string;
+  ST?: string;
+}
+
+export interface CsrParams {
+  subject: Subject;
+  extensions?: {
+    subjectAltName?: {
+      dns?: string[];
+      ips?: string[];
+    };
+  };
 }
 
 export interface VaultAuthK8s {
@@ -213,9 +223,8 @@ class Vault {
 
   /**
    * Create root CA
-   * @param {Object} csr
    */
-  async createCA(csr: CSR) {
+  async createCA(subject: Subject) {
     // eslint-disable-next-line no-empty
     try {
       await this.deleteCA();
@@ -225,12 +234,12 @@ class Vault {
       path: `/${this.cfg.mounts.pki}/root/generate/exported`,
       method: 'POST',
       json: {
-        common_name: csr.CN,
-        ou: csr.OU,
-        organization: csr.O,
-        locality: csr.L,
-        country: csr.C,
-        province: csr.ST,
+        common_name: subject.CN,
+        ou: subject.OU,
+        organization: subject.O,
+        locality: subject.L,
+        country: subject.C,
+        province: subject.ST,
         key_type: this.cfg.keyAlgorithm,
         key_bits: this.cfg.keyLength,
       },
@@ -250,7 +259,7 @@ class Vault {
     });
   }
 
-  async createDFSPServerCert(csrParameters: Record<string, any>) {
+  async createDFSPServerCert(csrParameters: CsrParams) {
     const reqJson: Record<string, any> = {
       common_name: csrParameters.subject.CN,
     };
@@ -269,15 +278,18 @@ class Vault {
       method: 'POST',
       json: reqJson,
     });
-    return data;
+    return {
+      intermediateChain: data.ca_chain,
+      rootCertificate: data.issuing_ca,
+      serverCertificate: data.certificate,
+      privateKey: data.private_key,
+    };
   }
 
   /**
    * Sign Hub CSR
-   * @param params
-   * @returns {Promise<*>}
    */
-  async signHubCSR(csr: Record<string, any>) {
+  async signHubCSR(csr: string) {
     assert(this.client);
     const { data } = await this.client.request({
       path: `/${this.cfg.mounts.pki}/sign/${this.cfg.pkiClientRole}`,
@@ -321,32 +333,27 @@ class Vault {
     return this._getSecret(vaultPaths.HUB_ENDPOINTS);
   }
 
-  createCSR(keyBits: number, csrParameters: any = {}) {
-    const keys = forge.pki.rsa.generateKeyPair(keyBits);
+  createCSR(csrParameters?: CsrParams) {
+    const keys = forge.pki.rsa.generateKeyPair(this.cfg.keyLength);
     const csr = forge.pki.createCertificationRequest();
     csr.publicKey = keys.publicKey;
-    // if (csrParameters?.subject) {
-    //   csr.setSubject(Object.entries(csrParameters.subject).map(([shortName, value]) => ({ shortName, value })));
-    // }
-    // if (csrParameters?.extensions?.subjectAltName) {
-    //   const DNS_TYPE = 2;
-    //   const IP_TYPE = 7;
-    //   const { dns, ips } = csrParameters.extensions.subjectAltName;
-    //   csr.setAttributes([
-    //     {
-    //       name: 'extensionRequest',
-    //       extensions: [
-    //         {
-    //           name: 'subjectAltName',
-    //           altNames: [
-    //             ...(dns?.map?.((value) => ({ type: DNS_TYPE, value })) || []),
-    //             ...(ips?.map?.((value) => ({ type: IP_TYPE, value })) || []),
-    //           ],
-    //         },
-    //       ],
-    //     },
-    //   ]);
-    // }
+    if (csrParameters?.subject) {
+      csr.setSubject(Object.entries(csrParameters.subject).map(([shortName, value]) => ({ shortName, value })));
+    }
+    if (csrParameters?.extensions?.subjectAltName) {
+      const DNS_TYPE = 2;
+      const IP_TYPE = 7;
+      const { dns, ips } = csrParameters.extensions.subjectAltName;
+      csr.setExtensions([
+        {
+          name: 'subjectAltName',
+          altNames: [
+            ...(dns?.map?.((value) => ({ type: DNS_TYPE, value })) || []),
+            ...(ips?.map?.((value) => ({ type: IP_TYPE, value })) || []),
+          ],
+        },
+      ]);
+    }
 
     csr.sign(keys.privateKey, forge.md.sha256.create());
 
@@ -357,7 +364,7 @@ class Vault {
   }
 
   createJWS() {
-    const keypair = forge.pki.rsa.generateKeyPair({ bits: 2048 });
+    const keypair = forge.pki.rsa.generateKeyPair({ bits: this.cfg.keyLength });
     return {
       publicKey: forge.pki.publicKeyToPem(keypair.publicKey, 72),
       privateKey: forge.pki.privateKeyToPem(keypair.privateKey, 72),

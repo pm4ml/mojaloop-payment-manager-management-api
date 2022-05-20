@@ -10,7 +10,7 @@
 
 import util from 'util';
 import Router from 'koa-router';
-import randomPhrase from '@internal/randomphrase';
+import randomPhrase from '@app/lib/randomphrase';
 import { HTTPResponseError } from '@pm4ml/mcm-client';
 
 /**
@@ -20,7 +20,7 @@ import { HTTPResponseError } from '@pm4ml/mcm-client';
 const createErrorHandler = () => async (ctx, next) => {
   try {
     await next();
-  } catch (err) {
+  } catch (err: any) {
     // TODO: return a 500 here if the response has not already been sent?
     console.log(`Error caught in catchall: ${err.stack || util.inspect(err, { depth: 10 })}`);
   }
@@ -53,7 +53,7 @@ const createLogger = (logger) => async (ctx, next) => {
   }
   try {
     await next();
-  } catch (err) {
+  } catch (err: any) {
     console.log(`Error caught in createLogger: ${err.stack || util.inspect(err, { depth: 10 })}`);
   }
   if (ctx.path !== '/health') {

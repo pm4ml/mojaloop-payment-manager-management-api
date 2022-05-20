@@ -1,8 +1,8 @@
-import { AnyEventObject, assign, DoneEventObject, DoneInvokeEvent, MachineConfig, sendParent } from 'xstate';
+import { AnyEventObject, assign, DoneEventObject, DoneInvokeEvent, MachineConfig, send, sendParent } from 'xstate';
 import { MachineOpts } from './MachineOpts';
 import { invokeRetry } from './invokeRetry';
 
-export namespace DfspCert {
+export namespace DfspClientCert {
   export interface Context {
     dfspClientCert?: {
       id?: number;
@@ -12,23 +12,20 @@ export namespace DfspCert {
     };
   }
 
-  export enum EventOut {
-    COMPLETED = 'DFSP_CLIENT_CERT_CONFIGURED',
-  }
+  export type Event = DoneEventObject | { type: 'DFSP_CLIENT_CERT_CONFIGURED' };
 
-  type EventIn = DoneEventObject;
-
-  export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, any> => ({
+  export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, Event> => ({
     id: 'dfspClientCert',
     initial: 'creatingDfspCsr',
     states: {
       creatingDfspCsr: {
         invoke: {
+          id: 'createCsr',
           src: () =>
             invokeRetry({
               id: 'createCsr',
               logger: opts.logger,
-              service: async () => opts.vault.createCSR(opts.keyLength),
+              service: async () => opts.vault.createCSR(),
             }),
           onDone: {
             actions: assign({
@@ -40,6 +37,7 @@ export namespace DfspCert {
       },
       uploadingDfspCsr: {
         invoke: {
+          id: 'uploadCsr',
           src: (ctx) =>
             invokeRetry({
               id: 'uploadCsr',
@@ -53,66 +51,59 @@ export namespace DfspCert {
                 id: data.id,
               }),
             }),
-            target: 'getDfspClientCert',
+            target: 'gettingDfspClientCert',
           },
         },
       },
-      getDfspClientCert: {
+      gettingDfspClientCert: {
         invoke: {
+          id: 'getDfspClientCert',
           src: (ctx) =>
             invokeRetry({
-              id: 'getDfspClientCertificate',
+              id: 'getDfspClientCert',
               logger: opts.logger,
               service: () =>
                 opts.dfspCertificateModel.getClientCertificate({ inboundEnrollmentId: ctx.dfspClientCert!.id! }),
             }),
-        },
-        onDone: [
-          {
-            target: 'populatingDfspCert',
-            actions: assign({
-              dfspClientCert: (context, { data }): any => ({
-                ...context.dfspClientCert,
-                certificate: data.certificate,
-              }),
-            }),
-            cond: 'hasNewDfspClientCert',
-          },
-          { target: 'completed' },
-        ],
-      },
-      populatingDfspCert: {
-        invoke: {
-          src: (ctx) =>
-            invokeRetry({
-              id: 'populateOutboundCertSDK',
-              logger: opts.logger,
-              service: async () =>
-                opts.ControlServer.changeConfig({
-                  outbound: {
-                    tls: {
-                      creds: {
-                        cert: ctx.dfspClientCert!.cert,
-                        key: ctx.dfspClientCert!.privateKey,
+          onDone: [
+            {
+              target: 'completed',
+              cond: 'hasNewDfspClientCert',
+              actions: [
+                assign({
+                  dfspClientCert: (context, { data }): any => ({
+                    ...context.dfspClientCert,
+                    cert: data.certificate,
+                  }),
+                }),
+                send((ctx) => ({
+                  type: 'UPDATE_CONNECTOR_CONFIG',
+                  config: {
+                    outbound: {
+                      tls: {
+                        creds: {
+                          cert: ctx.dfspClientCert!.cert,
+                          key: ctx.dfspClientCert!.privateKey,
+                        },
                       },
                     },
                   },
-                }),
-            }),
-          onDone: {
-            target: 'completed',
-          },
+                })),
+              ],
+            },
+            { target: 'completed' },
+          ],
         },
       },
       completed: {
         always: {
           target: 'retry',
-          actions: sendParent(EventOut.COMPLETED),
+          actions: send('DFSP_CLIENT_CERT_CONFIGURED'),
         },
       },
       retry: {
         after: {
-          [opts.refreshIntervalSeconds * 1000]: { target: 'getDfspClientCert' },
+          [opts.refreshIntervalSeconds * 1000]: { target: 'gettingDfspClientCert' },
         },
       },
     },

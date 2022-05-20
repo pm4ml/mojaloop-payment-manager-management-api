@@ -20,12 +20,12 @@
 // and sends a message to all clients notifying them of the new application configuration.
 //
 // It expects new configuration to be supplied as an array of JSON patches. It therefore exposes
-// the current configuration to 
+// the current configuration to
 
 const assert = require('assert').strict;
 const ws = require('ws');
 const jsonPatch = require('fast-json-patch');
-const randomPhrase = require('@internal/randomphrase');
+const randomPhrase = require('@app/lib/randomphrase');
 
 
 /**************************************************************************
@@ -158,7 +158,7 @@ class Client extends ws {
         }));
     }
 
-    // Close connection 
+    // Close connection
     async stop() {
         this._logger.log('Control client shutting down...');
         this.close();

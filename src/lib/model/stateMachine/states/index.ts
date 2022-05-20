@@ -4,3 +4,6 @@ export * from './hubCA';
 export * from './hubClientCert';
 export * from './dfspCA';
 export * from './dfspClientCert';
+export * from './dfspServerCert';
+export * from './connectorConfig';
+export * from './endpointConfig';

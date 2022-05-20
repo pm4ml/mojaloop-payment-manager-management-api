@@ -65,7 +65,7 @@ const throwOrJson = async (res) => {
   return res.data;
 };
 
-export default {
+export {
   HTTPResponseError,
   buildUrl,
   throwOrJson,

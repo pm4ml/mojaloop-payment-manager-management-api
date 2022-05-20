@@ -1,4 +1,4 @@
-import { AnyEventObject, assign, DoneEventObject, DoneInvokeEvent, MachineConfig, sendParent } from 'xstate';
+import { AnyEventObject, assign, DoneEventObject, MachineConfig, send } from 'xstate';
 import { MachineOpts } from './MachineOpts';
 import { invokeRetry } from './invokeRetry';
 
@@ -13,13 +13,9 @@ export namespace HubCert {
     hubClientCerts?: HubClientCert[];
   };
 
-  export enum EventOut {
-    COMPLETED = 'HUB_CLIENT_CERT_SIGNED',
-  }
+  export type Event = DoneEventObject | { type: 'HUB_CLIENT_CERT_SIGNED' };
 
-  type EventIn = DoneEventObject;
-
-  export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, any> => ({
+  export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, Event> => ({
     id: 'hubClientCert',
     initial: 'fetchingHubCSR',
     states: {
@@ -29,7 +25,7 @@ export namespace HubCert {
             invokeRetry({
               id: 'getUnprocessedHubCSRs',
               logger: opts.logger,
-              service: () => opts.hubCertificateModel.getUnprocessedCerts({}),
+              service: async () => opts.hubCertificateModel.getUnprocessedCerts(),
             }),
           onDone: [
             {
@@ -49,16 +45,13 @@ export namespace HubCert {
               logger: opts.logger,
               service: () =>
                 Promise.all(
-                  ctx.hubClientCerts!.map(async (cert) => {
-                    const { certificate } = await opts.vault.signHubCSR({ csr: cert.csr });
-                    return { ...cert, certificate };
+                  ctx.hubClientCerts!.map(async (hubCert) => {
+                    const { certificate } = await opts.vault.signHubCSR(hubCert.csr);
+                    return { ...hubCert, cert: certificate };
                   })
                 ),
             }),
-          onDone: [
-            { actions: assign({ hubClientCerts: (context, { data }) => data }) },
-            { target: 'uploadingHubCert' },
-          ],
+          onDone: { actions: assign({ hubClientCerts: (context, { data }) => data }), target: 'uploadingHubCert' },
         },
       },
       uploadingHubCert: {
@@ -77,15 +70,15 @@ export namespace HubCert {
                   )
                 ),
             }),
-        },
-        onDone: {
-          target: 'completed',
+          onDone: {
+            target: 'completed',
+          },
         },
       },
       completed: {
         always: {
           target: 'retry',
-          actions: sendParent(EventOut.COMPLETED),
+          actions: send('HUB_CLIENT_CERT_SIGNED'),
         },
       },
       retry: {

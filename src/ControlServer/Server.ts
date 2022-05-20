@@ -93,7 +93,7 @@ const build = {
     NOTIFY: {
       UNSUPPORTED_MESSAGE: (id) => buildMsg(VERB.NOTIFY, MESSAGE.ERROR, ERROR.UNSUPPORTED_MESSAGE, id),
       UNSUPPORTED_VERB: (id) => buildMsg(VERB.NOTIFY, MESSAGE.ERROR, ERROR.UNSUPPORTED_VERB, id),
-      JSON_PARSE_ERROR: (id) => buildMsg(VERB.NOTIFY, MESSAGE.ERROR, ERROR.JSON_PARSE_ERROR, id),
+      JSON_PARSE_ERROR: (id?: string) => buildMsg(VERB.NOTIFY, MESSAGE.ERROR, ERROR.JSON_PARSE_ERROR, id),
     },
   },
 };
@@ -114,6 +114,7 @@ const build = {
 export interface ServerOpts {
   logger: Logger.Logger;
   appConfig: IConfig;
+  onRequestConfig: (client: unknown) => void;
 }
 
 class Server extends ws.Server {
@@ -121,7 +122,7 @@ class Server extends ws.Server {
   private _port: number;
   private _appConfig: IConfig;
   private _clientData: Map<any, any>;
-  private _certificatesModel: CertificatesModel;
+  private onRequestConfig: (client: unknown) => void;
 
   constructor(opts: ServerOpts) {
     super({ clientTracking: true, port: opts.appConfig.control.port });
@@ -130,11 +131,7 @@ class Server extends ws.Server {
     this._port = opts.appConfig.control.port;
     this._appConfig = opts.appConfig;
     this._clientData = new Map();
-
-    this._certificatesModel = new CertificatesModel({
-      dfspId: opts.appConfig.dfspId,
-      ...opts,
-    });
+    this.onRequestConfig = opts.onRequestConfig;
 
     this.on('error', (err) => {
       this._logger.push({ err }).log('Unhandled websocket error occurred. Shutting down.');
@@ -182,10 +179,8 @@ class Server extends ws.Server {
         case MESSAGE.CONFIGURATION:
           switch (msg.verb) {
             case VERB.READ:
-              (async () => {
-                const cfg = await this.populateConfig();
-                client.send(build.CONFIGURATION.NOTIFY(cfg, msg.id));
-              })();
+              this.onRequestConfig(client);
+              // client.send(build.CONFIGURATION.NOTIFY(cfg, msg.id));
               break;
             default:
               client.send(build.ERROR.NOTIFY.UNSUPPORTED_VERB(msg.id));
@@ -196,40 +191,6 @@ class Server extends ws.Server {
           client.send(build.ERROR.NOTIFY.UNSUPPORTED_MESSAGE(msg.id));
           break;
       }
-    };
-  }
-
-  /*
-   * Function that extracts Peer JWS data, Outbound & Inbound TLS details
-   */
-  async populateConfig() {
-    // populate Peer JWS Config
-    let allJWSCerts = await this._certificatesModel.getAllJWSCertificates();
-    let peerKeys = {};
-    allJWSCerts
-      .filter((jwsCert) => jwsCert.dfspId !== this._appConfig.dfspId)
-      .forEach((jwsCert) => {
-        peerKeys[jwsCert.dfspId] = jwsCert.publicKey;
-      });
-
-    const outboundCfg = await this._certificatesModel.getOutboundTlsConfig();
-
-    const jws = await this._certificatesModel.getJWSKeypair();
-
-    //TODO Section to populate Inbound TLS details
-
-    return {
-      peerJWSKeys: peerKeys,
-      jwsSigningKey: jws?.privateKey,
-      outbound: {
-        tls: {
-          creds: {
-            ca: outboundCfg?.ca,
-            cert: outboundCfg?.cert,
-            key: outboundCfg?.key,
-          },
-        },
-      },
     };
   }
 

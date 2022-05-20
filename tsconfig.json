@@ -12,10 +12,6 @@
     "baseUrl": ".",
     "paths": {
       "@app/*": ["./src/*"],
-      "@internal/database": ["./src/lib/database"],
-      "@internal/model": ["./src/lib/model"],
-      "@internal/randomphrase": ["./src/lib/randomphrase"],
-      "@internal/vault": ["./src/lib/vault"]
     },
     "sourceMap": true,
     "module": "commonjs",
@@ -32,8 +28,7 @@
     "skipLibCheck": true,
     "noUnusedParameters": false,
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "forceConsistentCasingInFileNames": true,
-//    "emitDecoratorMetadata": true,
-//    "experimentalDecorators": true
   }
 }

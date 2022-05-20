@@ -18,7 +18,7 @@ import CertManager from '@app/lib/model/CertManager';
 
 import { Logger } from '@mojaloop/sdk-standard-components';
 
-import { createMemoryCache, MemoryCache } from '@app/lib/cacheDatabase';
+import { MemoryCache } from '@app/lib/cacheDatabase';
 import handlers from './handlers';
 import middlewares from './middlewares';
 import { IConfig } from '@app/config';
@@ -28,11 +28,9 @@ import assert from 'assert';
 class UIAPIServer {
   private api?: Koa;
   private logger?: Logger.Logger;
-  private db?: MemoryCache;
   private server?: http.Server;
 
-  constructor(private conf: IConfig, private vault: Vault) {
-  }
+  constructor(private conf: IConfig, private vault: Vault, private db: MemoryCache) {}
 
   async setupApi() {
     this.api = new Koa();
@@ -47,12 +45,6 @@ class UIAPIServer {
     } catch (e) {
       throw new Error('Error loading API spec. Please validate it with https://editor.swagger.io/');
     }
-
-    this.db = await createMemoryCache({
-      ...this.conf,
-      syncInterval: this.conf.cacheSyncInterval,
-      logger: this.logger,
-    });
 
     let certManager;
     if (this.conf.certManager.enabled) {
@@ -84,16 +76,16 @@ class UIAPIServer {
 
   async start() {
     assert(this.server);
-    await new Promise((resolve) => this.server.listen(this.conf.inboundPort, resolve));
+    await new Promise((resolve) => this.server!.listen(this.conf.inboundPort, resolve));
     // await this.mcmState.start();
-    this.logger.log(`Serving inbound API on port ${this.conf.inboundPort}`);
+    this.logger!.log(`Serving inbound API on port ${this.conf.inboundPort}`);
   }
 
   async stop() {
     if (!this.server) {
       return;
     }
-    await new Promise((resolve) => this.server.close(resolve));
+    await new Promise((resolve) => this.server!.close(resolve));
     console.log('inbound shut down complete');
   }
 

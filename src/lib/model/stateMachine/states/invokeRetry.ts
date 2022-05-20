@@ -38,6 +38,7 @@ export const invokeRetry = (opts: InvokeRetryOpts) => {
       states: {
         run: {
           invoke: {
+            id: opts.id,
             // src: isPromise(opts.service) ? (ctx) => (opts.service as AsyncFunc)(ctx) : opts.service,
             src: opts.service,
             // data: {

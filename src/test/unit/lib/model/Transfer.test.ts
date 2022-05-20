@@ -8,12 +8,14 @@
  *       Yevhen Kyriukha - yevhen.kyriukha@modusbox.com                   *
  **************************************************************************/
 
+import uuid from 'uuid';
+import MockDate from 'mockdate';
+import { Transfer } from '@app/lib/model';
+import { addTransferToCache, createTestDb } from '../utils';
+
 jest.mock('redis');
 
-const uuid = require('uuid');
-const MockDate = require('mockdate');
-const { Transfer } = require('@internal/model');
-const { createTestDb, addTransferToCache } = require('../utils');
+
 
 describe('Transfer', () => {
     let db;

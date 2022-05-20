@@ -91,7 +91,7 @@ const cfg = {
   cacheSyncInterval: env.get('CACHE_SYNC_INTERVAL_SECONDS').default(30).asIntPositive(),
 
   mcmServerEndpoint: env.get('MCM_SERVER_ENDPOINT').required().asString(),
-  mcmClientRefreshIntervalSeconds: env.get('MCM_CLIENT_REFRESH_INTERVAL_SECONDS').default(60).asIntPositive(),
+  refreshIntervalSeconds: env.get('REFRESH_INTERVAL_SECONDS').default(60).asIntPositive(),
   mojaloopConnectorFQDN: env.get('MOJALOOP_CONNECTOR_FQDN').default('connector.fsp.example.com').asString(),
   certManager,
   vault,
@@ -108,9 +108,10 @@ const cfg = {
   dfspServerCsrParameters: env.get('DFSP_SERVER_CSR_PARAMETERS').asJsonConfig(),
   caCsrParameters: env.get('CA_CSR_PARAMETERS').asJsonConfig(),
   stateMachineDebugPort: env.get('STATE_MACHINE_DEBUG_PORT').default(8888).asPortNumber(),
+  callbackHost: env.get('CALLBACK_HOST').asString(),
+  whitelistIP: env.get('WHITELIST_IP').asJsonArray(),
 };
 
 export type IConfigVault = typeof vault;
-export type IConfigDatabase = typeof database;
 export type IConfig = typeof cfg;
 export default cfg;

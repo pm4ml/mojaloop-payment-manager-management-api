@@ -1,17 +1,18 @@
 import SDK from '@mojaloop/sdk-standard-components';
 import Vault from '@app/lib/vault';
-import { AuthModel, DFSPCertificateModel, HubCertificateModel, HubEndpointModel } from '@pm4ml/mcm-client';
-import ConnectorManager from '@app/lib/model/ConnectorManager';
+import { DFSPCertificateModel, DFSPEndpointModel, HubCertificateModel, HubEndpointModel } from '@pm4ml/mcm-client';
 import * as ControlServer from '@app/ControlServer';
+import { IConfig } from '@app/config';
 
 export interface MachineOpts {
   logger: SDK.Logger.Logger;
   vault: Vault;
-  keyLength: number;
   refreshIntervalSeconds: number;
-  controlServer: string;
   dfspCertificateModel: DFSPCertificateModel;
+  dfspEndpointModel: DFSPEndpointModel;
   hubCertificateModel: HubCertificateModel;
   hubEndpointModel: HubEndpointModel;
   ControlServer: typeof ControlServer;
+  port: number;
+  config: IConfig;
 }

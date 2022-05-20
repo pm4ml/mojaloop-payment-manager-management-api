@@ -1,4 +1,4 @@
-import { AnyEventObject, assign, DoneEventObject, DoneInvokeEvent, MachineConfig, sendParent } from 'xstate';
+import { AnyEventObject, assign, DoneEventObject, MachineConfig, send } from 'xstate';
 import stringify from 'json-stringify-deterministic';
 import { MachineOpts } from './MachineOpts';
 import { invokeRetry } from './invokeRetry';
@@ -13,13 +13,9 @@ export namespace PeerJWS {
     peerJWS?: JWS[];
   };
 
-  export enum EventOut {
-    COMPLETED = 'PEER_JWS_CONFIGURED',
-  }
+  export type Event = DoneEventObject | { type: 'PEER_JWS_CONFIGURED' };
 
-  type EventIn = DoneEventObject;
-
-  export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, EventIn> => ({
+  export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, Event> => ({
     id: 'getPeerJWS',
     initial: 'fetchingPeerJWS',
     states: {
@@ -29,35 +25,28 @@ export namespace PeerJWS {
             invokeRetry({
               id: 'getPeerDFSPJWSCertificates',
               logger: opts.logger,
-              service: () => opts.dfspCertificateModel.getDFSPJWSCertificates({}),
+              service: async () => opts.dfspCertificateModel.getDFSPJWSCertificates(),
             }),
           onDone: [
-            { actions: assign({ peerJWS: (context, { data }) => data }) },
-            { target: 'populatingPeerJWS', cond: 'peerJWSChanged' },
+            {
+              actions: [
+                assign({ peerJWS: (context, { data }) => data }),
+                send((ctx) => {
+                  const peerJWSKeys = Object.fromEntries(ctx.peerJWS!.map((e) => [e.dfspId, e.publicKey]));
+                  return { type: 'UPDATE_CONNECTOR_CONFIG', config: { peerJWSKeys } };
+                }),
+              ],
+              cond: 'peerJWSChanged',
+              target: 'completed',
+            },
             { target: 'completed' },
           ],
-        },
-      },
-      populatingPeerJWS: {
-        invoke: {
-          src: (ctx) =>
-            invokeRetry({
-              id: 'getPeerDFSPJWSCertificates',
-              logger: opts.logger,
-              service: async () => {
-                const peerJWSKeys = Object.fromEntries(ctx.peerJWS!.map((e) => [e.dfspId, e.publicKey]));
-                return opts.ControlServer.changeConfig({ peerJWSKeys });
-              },
-            }),
-          onDone: {
-            target: 'completed',
-          },
         },
       },
       completed: {
         always: {
           target: 'retry',
-          actions: sendParent(EventOut.COMPLETED),
+          actions: send('PEER_JWS_CONFIGURED'),
         },
       },
       retry: {
