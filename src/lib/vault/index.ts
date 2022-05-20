@@ -14,17 +14,9 @@ import forge from 'node-forge';
 
 // TODO: Use hashi-vault-js package
 // TODO: find and link document containing rules on allowable paths
-const vaultPaths = {
-  STATE_MACHINE_STATE: 'state-machine-state',
-  ILP: 'ilp',
-  JWS: 'jws',
-  PEER_JWS: 'peer-jws',
-  HUB_ENDPOINTS: 'hub-endpoints',
-  DFSP_CA_CERT: 'dfsp-ca-cert',
-  SERVER_CERT: 'server-cert',
-  CLIENT_CERT: 'client-cert',
-  SERVER_PKEY: 'server-pkey',
-};
+enum VaultPaths {
+  STATE_MACHINE_STATE = 'state-machine-state',
+}
 
 export interface Subject {
   CN: string;
@@ -168,45 +160,12 @@ class Vault {
     await this.client.delete(path);
   }
 
-  async setClientCert(value: any) {
-    return this._setSecret(vaultPaths.CLIENT_CERT, value);
-  }
-
-  async getClientCert() {
-    return this._getSecret(vaultPaths.CLIENT_CERT);
-  }
-
-  async setJWS(value: any) {
-    return this._setSecret(vaultPaths.JWS, value);
-  }
-
-  async getJWS() {
-    return this._getSecret(vaultPaths.JWS);
-  }
-
   async setStateMachineState(value: any) {
-    return this._setSecret(vaultPaths.STATE_MACHINE_STATE, value);
+    return this._setSecret(VaultPaths.STATE_MACHINE_STATE, value);
   }
 
   async getStateMachineState() {
-    return this._getSecret(vaultPaths.STATE_MACHINE_STATE);
-  }
-
-  async setPeerJWS(value: any) {
-    return this._setSecret(vaultPaths.PEER_JWS, { list: value });
-  }
-
-  async getPeerJWS() {
-    const data = await this._getSecret(vaultPaths.PEER_JWS);
-    return data?.list;
-  }
-
-  async setILP(value: any) {
-    return this._setSecret(vaultPaths.ILP, value);
-  }
-
-  async getILP() {
-    return this._getSecret(vaultPaths.ILP);
+    return this._getSecret(VaultPaths.STATE_MACHINE_STATE);
   }
 
   /**
@@ -323,14 +282,6 @@ class Vault {
       path: `/${this.cfg.mounts.pki}/ca_chain`,
       method: 'GET',
     });
-  }
-
-  async setHubEndpoints(value: any) {
-    return this._setSecret(vaultPaths.HUB_ENDPOINTS, value);
-  }
-
-  async getHubEndpoints() {
-    return this._getSecret(vaultPaths.HUB_ENDPOINTS);
   }
 
   createCSR(csrParameters?: CsrParams) {
