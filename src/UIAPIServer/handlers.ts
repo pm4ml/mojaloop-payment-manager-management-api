@@ -45,7 +45,6 @@ const getTransfers = async (ctx) => {
   } = ctx.query;
   const transfer = new Transfer({
     db: ctx.state.db,
-    logger: ctx.state.logger,
   });
   ctx.body = await transfer.findAll({
     id,
@@ -69,7 +68,6 @@ const getTransfers = async (ctx) => {
 const getTransfer = async (ctx) => {
   const transfer = new Transfer({
     db: ctx.state.db,
-    logger: ctx.state.logger,
   });
   ctx.body = await transfer.findOne(ctx.params.transferId);
 };
@@ -77,7 +75,6 @@ const getTransfer = async (ctx) => {
 const getTransferErrors = async (ctx) => {
   const transfer = new Transfer({
     db: ctx.state.db,
-    logger: ctx.state.logger,
   });
   ctx.body = await transfer.findErrors();
 };
@@ -85,7 +82,6 @@ const getTransferErrors = async (ctx) => {
 const getTransferDetail = async (ctx) => {
   const transfer = new Transfer({
     db: ctx.state.db,
-    logger: ctx.state.logger,
   });
 
   const res = await transfer.findOneDetail(ctx.params.transferId);
@@ -100,7 +96,6 @@ const getTransferStatusSummary = async (ctx) => {
   const { startTimestamp, endTimestamp } = ctx.query;
   const transfer = new Transfer({
     db: ctx.state.db,
-    logger: ctx.state.logger,
   });
   ctx.body = await transfer.statusSummary({ startTimestamp, endTimestamp });
 };
@@ -109,7 +104,6 @@ const getHourlyFlow = async (ctx) => {
   const { hoursPrevious } = ctx.query;
   const transfer = new Transfer({
     db: ctx.state.db,
-    logger: ctx.state.logger,
   });
   ctx.body = await transfer.hourlyFlow({ hoursPrevious });
 };
@@ -118,7 +112,6 @@ const getTransfersSuccessRate = async (ctx) => {
   const { minutePrevious } = ctx.query;
   const transfer = new Transfer({
     db: ctx.state.db,
-    logger: ctx.state.logger,
   });
   ctx.body = await transfer.successRate({ minutePrevious });
 };
@@ -127,7 +120,6 @@ const getTransfersAvgResponseTime = async (ctx) => {
   const { minutePrevious } = ctx.query;
   const transfer = new Transfer({
     db: ctx.state.db,
-    logger: ctx.state.logger,
   });
   ctx.body = await transfer.avgResponseTime({ minutePrevious });
 };
@@ -230,13 +222,13 @@ const getHubEndpoints = async (ctx) => {
 };
 
 const getClientCertificates = async (ctx) => {
-  const certModel = certModelFromContext(ctx);
-  ctx.body = await certModel.getCertificates();
+  // const certModel = certModelFromContext(ctx);
+  // ctx.body = await certModel.getCertificates();
 };
 
 const getDFSPCA = async (ctx) => {
-  const certModel = certModelFromContext(ctx);
-  ctx.body = await certModel.getDFSPCA();
+  // const certModel = certModelFromContext(ctx);
+  // ctx.body = await certModel.getDFSPCA();
 };
 
 const createDFSPCA = async (ctx) => {
@@ -266,22 +258,22 @@ const getHubCA = async (ctx) => {
  * @param {*} ctx
  */
 const getDFSPServerCertificates = async (ctx) => {
-  const certModel = certModelFromContext(ctx);
-  ctx.body = await certModel.getDFSPServerCertificates();
+  // const certModel = certModelFromContext(ctx);
+  // ctx.body = await certModel.getDFSPServerCertificates();
 };
 
 const getAllJWSCertificates = async (ctx) => {
-  const certModel = certModelFromContext(ctx);
-  ctx.body = await certModel.getAllJWSCertificates();
+  // const certModel = certModelFromContext(ctx);
+  // ctx.body = await certModel.getAllJWSCertificates();
 };
 
 const getJWSCertificates = async (ctx) => {
-  const certModel = certModelFromContext(ctx);
-  ctx.body = await certModel.getDFSPJWSCertificates();
+  // const certModel = certModelFromContext(ctx);
+  // ctx.body = await certModel.getDFSPJWSCertificates();
 };
 
 const createJWSCertificates = async (ctx) => {
-  ctx.stateMachine.sendEvent('CREATE_JWS');
+  // ctx.stateMachine.sendEvent('CREATE_JWS');
 };
 
 const getHubServerCertificates = async (ctx) => {
@@ -307,12 +299,7 @@ const getMonetaryZones = async (ctx) => {
 };
 
 const generateDfspServerCerts = async (ctx) => {
-  const certModel = certModelFromContext(ctx);
-  ctx.body = await certModel.createDfspServerCert(
-    ctx.state.conf.dfspServerCsrParameters,
-    ctx.state.conf.vault.keyLength
-  );
-  ctx.state.logger.push(ctx.body).log('createDfspServerCert');
+  ctx.stateMachine.sendEvent({ type: 'CREATE_DFSP_SERVER_CERT', csr: ctx.state.conf.dfspServerCsrParameters });
 };
 
 export default {
@@ -371,16 +358,16 @@ export default {
     // post: uploadServerCertificates,
     post: generateDfspServerCerts,
   },
-  '/dfsp/alljwscerts': {
-    get: getAllJWSCertificates,
-  },
-  '/dfsp/jwscerts': {
-    get: getJWSCertificates,
-    post: createJWSCertificates,
-  },
-  '/dfsp/clientcerts': {
-    get: getClientCertificates,
-  },
+  // '/dfsp/alljwscerts': {
+  //   get: getAllJWSCertificates,
+  // },
+  // '/dfsp/jwscerts': {
+  //   get: getJWSCertificates,
+  //   post: createJWSCertificates,
+  // },
+  // '/dfsp/clientcerts': {
+  //   get: getClientCertificates,
+  // },
   '/dfsp/ca': {
     get: getDFSPCA,
     post: createDFSPCA,
