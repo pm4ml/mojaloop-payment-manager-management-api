@@ -8,7 +8,7 @@
  *       Yevhen Kyriukha <yevhen.kyriukha@modusbox.com>                   *
  ************************************************************************* */
 
-import k8s from '@kubernetes/client-node';
+import * as k8s from '@kubernetes/client-node';
 import { Logger } from '@mojaloop/sdk-standard-components';
 
 export interface CertManagerOpts {
