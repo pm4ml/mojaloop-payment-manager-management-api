@@ -6,20 +6,8 @@ EXPOSE 3000
 
 WORKDIR /app/
 
-# This is super-ugly, but it means we don't have to re-run npm install every time any of the source
-# files change- only when any dependencies change- which is a superior developer experience when
-# relying on docker-compose.
 COPY ./package.json ./package.json
 COPY ./package-lock.json ./package-lock.json
-COPY ./src/lib/database/package.json ./src/lib/database/package.json
-COPY ./src/lib/vault/package.json ./src/lib/vault/package.json
-COPY ./src/lib/model/package.json ./src/lib/model/package.json
-COPY ./src/lib/randomphrase/package.json ./src/lib/randomphrase/package.json
-COPY ./src/lib/requests/package.json ./src/lib/requests/package.json
-# for local testing
-# COPY ./src/lib/mcmclient/package.json ./lib/mcmclient/package.json
-# COPY ./src/lib/mcmclient/lib/pkiengine/package.json ./lib/mcmclient/lib/pkiengine/package.json
-
 
 RUN npm install --only=production
 
@@ -43,5 +31,6 @@ LABEL org.label-schema.version=$VERSION
 
 COPY --from=builder /app/ /app
 COPY ./src ./src
+COPY ./tsconfig.json ./tsconfig.json
 
 CMD ["npm", "start"]
