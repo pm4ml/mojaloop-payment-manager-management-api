@@ -20,29 +20,29 @@ import Logger = SDKStandardComponents.Logger.Logger;
 /** ************************************************************************
  * The message protocol messages, verbs, and errors
  ************************************************************************ */
-const MESSAGE = {
-  CONFIGURATION: 'CONFIGURATION',
-  ERROR: 'ERROR',
-};
+enum MESSAGE {
+  CONFIGURATION = 'CONFIGURATION',
+  ERROR = 'ERROR',
+}
 
-const VERB = {
-  READ: 'READ',
-  NOTIFY: 'NOTIFY',
-  PATCH: 'PATCH',
-};
+enum VERB {
+  READ = 'READ',
+  NOTIFY = 'NOTIFY',
+  PATCH = 'PATCH',
+}
 
-const ERROR = {
-  UNSUPPORTED_MESSAGE: 'UNSUPPORTED_MESSAGE',
-  UNSUPPORTED_VERB: 'UNSUPPORTED_VERB',
-  JSON_PARSE_ERROR: 'JSON_PARSE_ERROR',
-};
+enum ERROR {
+  UNSUPPORTED_MESSAGE = 'UNSUPPORTED_MESSAGE',
+  UNSUPPORTED_VERB = 'UNSUPPORTED_VERB',
+  JSON_PARSE_ERROR = 'JSON_PARSE_ERROR',
+}
 
 /** ************************************************************************
  * Events emitted by the control server
  ************************************************************************ */
-const EVENT = {
-  RECONFIGURE: 'RECONFIGURE',
-};
+enum EVENT {
+  RECONFIGURE = 'RECONFIGURE',
+}
 
 /** ************************************************************************
  * Private convenience functions
