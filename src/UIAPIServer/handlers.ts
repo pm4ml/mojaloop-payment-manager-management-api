@@ -8,7 +8,7 @@
  *       Murthy Kakarlamudi - murthy@modusbox.com                         *
  **************************************************************************/
 
-import { Balances, DFSP, Hub, MonetaryZone, Transfer } from '@app/lib/model';
+import { Balances, DFSP, MonetaryZone, Transfer } from '@app/lib/model';
 
 const healthCheck = async (ctx) => {
   ctx.body = { status: 'ok' };
@@ -159,78 +159,6 @@ const getDFSPSByMonetaryZone = async (ctx) => {
   ctx.body = await dfsp.getDfspsByMonetaryZone({ monetaryZoneId: ctx.params.monetaryZoneId });
 };
 
-const getDFSPEndpoints = async (ctx) => {
-  const { direction, type, state } = ctx.query;
-  const { dfspId, mcmServerEndpoint } = ctx.state.conf;
-  const dfsp = new DFSP({
-    dfspId,
-    mcmServerEndpoint,
-    logger: ctx.state.logger,
-  });
-  ctx.body = await dfsp.getEndpoints({ direction, type, state });
-};
-
-const createDFSPEndpoints = async (ctx) => {
-  const { dfspId, mcmServerEndpoint } = ctx.state.conf;
-  const dfsp = new DFSP({
-    dfspId,
-    mcmServerEndpoint,
-    logger: ctx.state.logger,
-  });
-  ctx.body = await dfsp.createEndpoints(ctx.request.body);
-};
-
-/**
- * Update an existing DFSP endpoint
- * @param {*} ctx
- */
-const updateDFSPEndpoint = async (ctx) => {
-  const { dfspId, mcmServerEndpoint } = ctx.state.conf;
-  const { epId } = ctx.params;
-  const dfsp = new DFSP({
-    dfspId,
-    mcmServerEndpoint,
-    logger: ctx.state.logger,
-  });
-  ctx.body = await dfsp.updateEndpoint({ epId, ...ctx.request.body });
-};
-
-/**
- * Update an existing DFSP endpoint
- * @param {*} ctx
- */
-const deleteDFSPEndpoint = async (ctx) => {
-  const { dfspId, mcmServerEndpoint } = ctx.state.conf;
-  const { epId } = ctx.params;
-  const dfsp = new DFSP({
-    dfspId,
-    mcmServerEndpoint,
-    logger: ctx.state.logger,
-  });
-  ctx.body = await dfsp.deleteEndpoint({ epId });
-};
-
-const getHubEndpoints = async (ctx) => {
-  const { direction, state } = ctx.query;
-  const { dfspId, mcmServerEndpoint } = ctx.state.conf;
-  const hub = new Hub({
-    dfspId,
-    mcmServerEndpoint,
-    logger: ctx.state.logger,
-  });
-  ctx.body = await hub.getEndpoints({ direction, state });
-};
-
-const getClientCertificates = async (ctx) => {
-  // const certModel = certModelFromContext(ctx);
-  // ctx.body = await certModel.getCertificates();
-};
-
-const getDFSPCA = async (ctx) => {
-  // const certModel = certModelFromContext(ctx);
-  // ctx.body = await certModel.getDFSPCA();
-};
-
 const createDFSPCA = async (ctx) => {
   ctx.stateMachine.sendEvent({ type: 'CREATE_INT_CA', subject: ctx.request.body });
 };
@@ -243,48 +171,8 @@ const getStateMachineContext = async (ctx) => {
   return ctx.stateMachine.getContext();
 };
 
-const getHubCA = async (ctx) => {
-  const { dfspId, mcmServerEndpoint } = ctx.state.conf;
-  const hub = new Hub({
-    dfspId,
-    mcmServerEndpoint,
-    logger: ctx.state.logger,
-  });
-  ctx.body = await hub.getHubCA();
-};
-
-/**
- * Get DFSP Server Certificates
- * @param {*} ctx
- */
-const getDFSPServerCertificates = async (ctx) => {
-  // const certModel = certModelFromContext(ctx);
-  // ctx.body = await certModel.getDFSPServerCertificates();
-};
-
-const getAllJWSCertificates = async (ctx) => {
-  // const certModel = certModelFromContext(ctx);
-  // ctx.body = await certModel.getAllJWSCertificates();
-};
-
-const getJWSCertificates = async (ctx) => {
-  // const certModel = certModelFromContext(ctx);
-  // ctx.body = await certModel.getDFSPJWSCertificates();
-};
-
 const createJWSCertificates = async (ctx) => {
-  // ctx.stateMachine.sendEvent('CREATE_JWS');
-};
-
-const getHubServerCertificates = async (ctx) => {
-  const { direction, type, state } = ctx.query;
-  const { dfspId, mcmServerEndpoint } = ctx.state.conf;
-  const hub = new Hub({
-    dfspId,
-    mcmServerEndpoint,
-    logger: ctx.state.logger,
-  });
-  ctx.body = await hub.getServerCertificates({ direction, type, state });
+  ctx.stateMachine.sendEvent('CREATE_JWS');
 };
 
 const getMonetaryZones = async (ctx) => {
@@ -339,45 +227,18 @@ export default {
   '/dfsp': {
     get: getDFSPDetails,
   },
-  '/dfsp/endpoints': {
-    get: getDFSPEndpoints,
-    post: createDFSPEndpoints,
-  },
   '/dfsps': {
     get: getAllDfsps,
   },
-  '/dfsp/endpoints/{epId}': {
-    put: updateDFSPEndpoint,
-    delete: deleteDFSPEndpoint,
-  },
-  '/hub/endpoints': {
-    get: getHubEndpoints,
-  },
   '/dfsp/servercerts': {
-    get: getDFSPServerCertificates,
-    // post: uploadServerCertificates,
     post: generateDfspServerCerts,
   },
-  // '/dfsp/alljwscerts': {
-  //   get: getAllJWSCertificates,
-  // },
-  // '/dfsp/jwscerts': {
-  //   get: getJWSCertificates,
-  //   post: createJWSCertificates,
-  // },
-  // '/dfsp/clientcerts': {
-  //   get: getClientCertificates,
-  // },
+  '/dfsp/jwscerts': {
+    post: createJWSCertificates,
+  },
   '/dfsp/ca': {
-    get: getDFSPCA,
     post: createDFSPCA,
     put: setDFSPCA,
-  },
-  '/hub/ca': {
-    get: getHubCA,
-  },
-  '/hub/servercerts': {
-    get: getHubServerCertificates,
   },
   '/monetaryzones': {
     get: getMonetaryZones,

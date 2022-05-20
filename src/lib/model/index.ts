@@ -11,9 +11,8 @@
 import Transfer from './Transfer';
 import Balances from './Balances';
 import DFSP from './DFSP';
-import Hub from './Hub';
 import MonetaryZone from './MonetaryZone';
 import CertManager from './CertManager';
 import { ConnectionStateMachine } from './stateMachine';
 
-export { Transfer, Balances, DFSP, Hub, MonetaryZone, CertManager, ConnectionStateMachine };
+export { Transfer, Balances, DFSP, MonetaryZone, CertManager, ConnectionStateMachine };

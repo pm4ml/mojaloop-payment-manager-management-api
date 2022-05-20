@@ -77,7 +77,7 @@ describe('Transfer', () => {
 
   const populateByMinutes = async (now, minutes) => {
     const MINUTE = 60 * 1000;
-    const transfers = [];
+    const transfers: Promise<any>[] = [];
     for (let i = 1; i <= minutes; i++) {
       transfers.push(populateCache('EUR', new Date(now - i * MINUTE).getTime(), i));
       transfers.push(populateCache('USD', new Date(now - i * MINUTE).getTime(), 10 * i));
@@ -90,7 +90,7 @@ describe('Transfer', () => {
 
   const populateByHours = async (now, hours) => {
     const HOUR = 3600 * 1000;
-    const transfers = [];
+    const transfers: Promise<any>[] = [];
     for (let i = 1; i <= hours; i++) {
       transfers.push(populateCache('EUR', new Date(now - i * HOUR).getTime(), i));
       transfers.push(populateCache('USD', new Date(now - i * HOUR).getTime(), 10 * i));
@@ -184,7 +184,7 @@ describe('Transfer', () => {
     await db.sync();
     const result = await transfer.hourlyFlow({ hoursPrevious: 3 });
 
-    const expected = [];
+    const expected: { currency: string; outbound: number }[] = [];
     for (let i = 0; i < 3; i++) {
       for (const currency of ['EUR', 'USD']) {
         expected.push({

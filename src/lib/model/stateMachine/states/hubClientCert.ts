@@ -31,6 +31,7 @@ export namespace HubCert {
     states: {
       fetchingHubCSR: {
         invoke: {
+          id: 'getUnprocessedHubCSRs',
           src: () =>
             invokeRetry({
               id: 'getUnprocessedHubCSRs',
@@ -49,6 +50,7 @@ export namespace HubCert {
       },
       signingHubCSR: {
         invoke: {
+          id: 'signHubCSRs',
           src: (ctx) =>
             invokeRetry({
               id: 'signHubCSRs',
@@ -66,6 +68,7 @@ export namespace HubCert {
       },
       uploadingHubCert: {
         invoke: {
+          id: 'uploadHubCert',
           src: (ctx) =>
             invokeRetry({
               id: 'uploadHubCert',

@@ -92,7 +92,8 @@ class ConnectionStateMachine {
 
   public async start() {
     const state = await this.opts.vault.getStateMachineState();
-    this.service.start(state);
+    // this.service.start(state);
+    this.service.start();
 
     this.started = true;
   }

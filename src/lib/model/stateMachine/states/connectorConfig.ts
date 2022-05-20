@@ -40,14 +40,8 @@ export namespace ConnectorConfig {
     id: 'connectorConfig',
     initial: 'idle',
     on: {
-      UPDATE_CONNECTOR_CONFIG: {
-        target: '.updatingConfig',
-        internal: false,
-      },
-      REQUEST_CONNECTOR_CONFIG: {
-        target: '.propagatingConnectorConfig',
-        internal: false,
-      },
+      UPDATE_CONNECTOR_CONFIG: { target: '.updatingConfig', internal: false },
+      REQUEST_CONNECTOR_CONFIG: { target: '.propagatingConnectorConfig', internal: false },
     },
     states: {
       idle: {},

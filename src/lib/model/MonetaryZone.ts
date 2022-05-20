@@ -8,9 +8,13 @@
  *       Damián García - damian.garcia@modusbox.com                       *
  **************************************************************************/
 
-const { MonetaryZoneModel } = require('@pm4ml/mcm-client');
+import { MonetaryZoneModel } from '@pm4ml/mcm-client';
+import SDKStandardComponents from '@mojaloop/sdk-standard-components';
+import Logger = SDKStandardComponents.Logger.Logger;
 
 class MonetaryZone {
+  private _requests: MonetaryZoneModel;
+  private _logger: Logger;
   /**
    *
    * @param props {object}

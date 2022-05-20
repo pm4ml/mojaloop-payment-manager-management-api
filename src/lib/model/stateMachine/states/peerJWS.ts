@@ -31,6 +31,7 @@ export namespace PeerJWS {
     states: {
       fetchingPeerJWS: {
         invoke: {
+          id: 'getPeerDFSPJWSCertificates',
           src: () =>
             invokeRetry({
               id: 'getPeerDFSPJWSCertificates',

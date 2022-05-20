@@ -10,7 +10,6 @@
  *  ORIGINAL AUTHOR:                                                      *
  *       Matt Kingston - matt.kingston@modusbox.com                       *
  ************************************************************************* */
-import { strict as assert } from 'assert';
 import ws from 'ws';
 import jsonPatch from 'fast-json-patch';
 import randomPhrase from '@app/lib/randomphrase';
@@ -114,8 +113,8 @@ class Client extends ws {
     return build;
   }
 
-  static async Create(...args) {
-    const result = new Client(...args);
+  static async Create({ address = 'localhost', port, logger }) {
+    const result = new Client({ address, port, logger });
     await new Promise((resolve, reject) => {
       result.on('open', resolve);
       result.on('error', reject);

@@ -59,7 +59,7 @@ const getPartyNameFromQuoteRequest = (qr: any, partyType: any) => {
   const { complexName } = qr.body[partyType].personalInfo || {};
 
   if (complexName) {
-    const n = [];
+    const n: string[] = [];
     const { firstName, middleName, lastName } = complexName;
     if (firstName) {
       n.push(firstName);
@@ -199,7 +199,7 @@ interface MemoryCacheOpts {
   syncInterval?: number;
 }
 
-export const createMemoryCache = async (config: MemoryCacheOpts): Knex => {
+export const createMemoryCache = async (config: MemoryCacheOpts): Promise<Knex> => {
   const knexConfig = {
     client: 'better-sqlite3',
     connection: {
