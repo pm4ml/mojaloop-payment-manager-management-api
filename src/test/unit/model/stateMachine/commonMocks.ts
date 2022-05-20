@@ -1,3 +1,13 @@
+/**************************************************************************
+ *  (C) Copyright Mojaloop Foundation 2022                                *
+ *                                                                        *
+ *  This file is made available under the terms of the license agreement  *
+ *  specified in the corresponding source code repository.                *
+ *                                                                        *
+ *  ORIGINAL AUTHOR:                                                      *
+ *       Yevhen Kyriukha <yevhen.kyriukha@modusbox.com>                   *
+ **************************************************************************/
+
 import Vault from '@app/lib/vault';
 import config from './config';
 import * as MCMClient from '@pm4ml/mcm-client';
@@ -24,8 +34,6 @@ export const createMachineOpts = () => {
     logger: new SDKStandardComponents.Logger.Logger(),
   };
 
-  // const MCM = jest.mock(MCMClient);
-
   const ctx = {
     dfspCertificateModel: jest.mocked(new MCMClient.DFSPCertificateModel(modelOpts)),
     hubCertificateModel: jest.mocked(new MCMClient.HubCertificateModel(modelOpts)),
@@ -43,6 +51,7 @@ export const createMachineOpts = () => {
     logger: new SDKStandardComponents.Logger.Logger(),
     vault,
     ControlServer: jest.mocked(ControlServer),
+    certManager: undefined,
   };
 };
 
@@ -61,5 +70,3 @@ export const createTestConfigState = (onConfigChange: typeof jest.fn) => ({
     },
   },
 });
-
-export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));

@@ -196,10 +196,10 @@ interface MemoryCacheOpts {
   logger: SDK.Logger.Logger;
   cacheUrl: string;
   manualSync?: boolean;
-  syncInterval: number;
+  syncInterval?: number;
 }
 
-export const createMemoryCache = async (config: MemoryCacheOpts) => {
+export const createMemoryCache = async (config: MemoryCacheOpts): Knex => {
   const knexConfig = {
     client: 'better-sqlite3',
     connection: {
@@ -227,13 +227,13 @@ export const createMemoryCache = async (config: MemoryCacheOpts) => {
   if (!config.manualSync) {
     await doSyncDB();
     const interval = setInterval(doSyncDB, (config.syncInterval || 60) * 1e3);
-    Object.defineProperty(db, 'stopSync', () => clearInterval(interval));
+    (db as any).stopSync = () => clearInterval(interval);
   } else {
-    Object.defineProperty(db, 'sync', doSyncDB);
+    (db as any).sync = doSyncDB;
   }
-  Object.defineProperty(db, 'redisCache', () => redisCache); // for testing purposes
+  (db as any).redisCache = () => redisCache; // for testing purposes
 
   return db;
-}
+};
 
 export type MemoryCache = Knex;

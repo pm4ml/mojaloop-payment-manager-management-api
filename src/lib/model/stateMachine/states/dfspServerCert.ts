@@ -1,3 +1,13 @@
+/** ************************************************************************
+ *  (C) Copyright Mojaloop Foundation 2022                                *
+ *                                                                        *
+ *  This file is made available under the terms of the license agreement  *
+ *  specified in the corresponding source code repository.                *
+ *                                                                        *
+ *  ORIGINAL AUTHOR:                                                      *
+ *       Yevhen Kyriukha <yevhen.kyriukha@modusbox.com>                   *
+ ************************************************************************* */
+
 import { assign, DoneEventObject, MachineConfig, send } from 'xstate';
 import { MachineOpts } from './MachineOpts';
 import { invokeRetry } from './invokeRetry';
@@ -25,11 +35,32 @@ export namespace DfspServerCert {
     id: 'dfspServerCert',
     initial: 'idle',
     on: {
-      CREATE_DFSP_SERVER_CERT: { target: '.creatingDfspServerCert', internal: false },
-      DFSP_CA_PROPAGATED: { target: '.creatingDfspServerCert', internal: false },
+      CREATE_DFSP_SERVER_CERT: { target: '.requestedNewDfspServerCert', internal: false },
+      DFSP_CA_PROPAGATED: { target: '.requestedNewDfspServerCert', internal: false },
     },
     states: {
       idle: {},
+      requestedNewDfspServerCert: {
+        always: [
+          { target: 'renewingManagedDfspServerCert', cond: 'managedByCertManager' },
+          { target: 'creatingDfspServerCert' },
+        ],
+      },
+      renewingManagedDfspServerCert: {
+        invoke: {
+          id: 'renewManagedDfspServerCert',
+          src: () =>
+            invokeRetry({
+              id: 'renewManagedDfspServerCert',
+              logger: opts.logger,
+              service: async () => opts.certManager!.renewServerCert(),
+            }),
+          onDone: {
+            target: 'idle',
+            actions: send('DFSP_SERVER_CERT_CONFIGURED'),
+          },
+        },
+      },
       creatingDfspServerCert: {
         invoke: {
           id: 'createDFSPServerCert',
@@ -85,5 +116,10 @@ export namespace DfspServerCert {
         },
       },
     },
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  export const createGuards = <TContext extends Context>(opts: MachineOpts) => ({
+    managedByCertManager: () => !!opts.certManager,
   });
 }

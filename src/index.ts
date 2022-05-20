@@ -14,8 +14,8 @@ import Vault from '@app/lib/vault';
 import { Logger } from '@mojaloop/sdk-standard-components';
 import UIAPIServer from './UIAPIServer';
 import { hostname } from 'os';
-import config, { IConfig } from '@app/config';
-import ConnectionStateMachine from '@app/lib/model/stateMachine/ConnectionStateMachine';
+import config from '@app/config';
+import { ConnectionStateMachine } from '@app/lib/model';
 import {
   AuthModel,
   DFSPCertificateModel,
@@ -24,8 +24,8 @@ import {
   HubEndpointModel,
 } from '@pm4ml/mcm-client';
 import * as ControlServer from './ControlServer';
-import ConnectorManager from '@app/lib/model/ConnectorManager';
-import { createMemoryCache, MemoryCache } from '@app/lib/cacheDatabase';
+import { createMemoryCache } from '@app/lib/cacheDatabase';
+import CertManager from './lib/model/CertManager';
 
 const LOG_ID = {
   CONTROL: { app: 'mojaloop-payment-manager-management-api-service-control-server' },
@@ -70,6 +70,14 @@ const LOG_ID = {
     dfspEndpointModel: new DFSPEndpointModel(opts),
   };
 
+  let certManager;
+  if (config.certManager.enabled) {
+    certManager = new CertManager({
+      ...config.certManager.config!,
+      logger,
+    });
+  }
+
   const stateMachine = new ConnectionStateMachine({
     ...config,
     config,
@@ -77,6 +85,7 @@ const LOG_ID = {
     ...ctx,
     logger,
     vault,
+    certManager,
     ControlServer,
   });
   await stateMachine.start();
@@ -88,7 +97,7 @@ const LOG_ID = {
   });
 
   const controlServer = new ControlServer.Server({
-    appConfig: config,
+    port: config.control.port,
     logger: logger.push(LOG_ID.CONTROL),
     onRequestConfig: () => stateMachine.sendEvent({ type: 'REQUEST_CONNECTOR_CONFIG' }),
   });

@@ -1,3 +1,13 @@
+/**************************************************************************
+ *  (C) Copyright Mojaloop Foundation 2022                                *
+ *                                                                        *
+ *  This file is made available under the terms of the license agreement  *
+ *  specified in the corresponding source code repository.                *
+ *                                                                        *
+ *  ORIGINAL AUTHOR:                                                      *
+ *       Yevhen Kyriukha <yevhen.kyriukha@modusbox.com>                   *
+ **************************************************************************/
+
 import 'tsconfig-paths/register';
 
 import { PeerJWS } from '@app/lib/model/stateMachine/states';
@@ -31,7 +41,7 @@ const startMachine = (opts: ReturnType<typeof createMachineOpts>, onConfigChange
     }
   );
 
-  const service = interpret(machine).onTransition((state) => console.log(state.changed, state.value));
+  const service = interpret(machine); // .onTransition((state) => console.log(state.changed, state.value));
   service.start();
 
   return service;

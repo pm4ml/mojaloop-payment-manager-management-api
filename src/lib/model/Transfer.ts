@@ -14,18 +14,15 @@ import { Logger } from '@mojaloop/sdk-standard-components';
 
 export interface TransferOpts {
   db: Knex;
-  logger: Logger.Logger;
 }
 
 class Transfer {
   private _db: Knex;
-  private _logger: Logger.Logger;
 
   public static cachedKeys: string[] = [];
 
   constructor(opts: TransferOpts) {
     this._db = opts.db;
-    this._logger = opts.logger;
   }
 
   static STATUSES = {

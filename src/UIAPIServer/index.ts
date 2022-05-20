@@ -14,7 +14,6 @@ import { oas } from 'koa-oas3';
 
 import http from 'http';
 import path from 'path';
-import CertManager from '@app/lib/model/CertManager';
 
 import { Logger } from '@mojaloop/sdk-standard-components';
 
@@ -24,13 +23,19 @@ import middlewares from './middlewares';
 import { IConfig } from '@app/config';
 import Vault from '@app/lib/vault';
 import assert from 'assert';
+import { ConnectionStateMachine } from '@app/lib/model';
 
 class UIAPIServer {
   private api?: Koa;
   private logger?: Logger.Logger;
   private server?: http.Server;
 
-  constructor(private conf: IConfig, private vault: Vault, private db: MemoryCache) {}
+  constructor(
+    private conf: IConfig,
+    private vault: Vault,
+    private db: MemoryCache,
+    private stateMachine: ConnectionStateMachine
+  ) {}
 
   async setupApi() {
     this.api = new Koa();
@@ -46,20 +51,12 @@ class UIAPIServer {
       throw new Error('Error loading API spec. Please validate it with https://editor.swagger.io/');
     }
 
-    let certManager;
-    if (this.conf.certManager.enabled) {
-      certManager = new CertManager({
-        ...this.conf.certManager.config!,
-        logger: this.logger,
-      });
-    }
-
     this.api.use(async (ctx, next) => {
       ctx.state = {
         conf: this.conf,
         db: this.db,
         vault: this.vault,
-        certManager,
+        stateMachine: this.stateMachine,
       };
       await next();
     });

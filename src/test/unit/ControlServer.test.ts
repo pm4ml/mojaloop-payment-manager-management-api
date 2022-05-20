@@ -1,12 +1,11 @@
 import randomPhrase from '@app/lib/randomphrase';
-import ControlServer from '../../ControlServer';
-import { getInternalEventEmitter, INTERNAL_EVENTS } from '../../ControlServer/events';
+import * as ControlServer from '@app/ControlServer';
+import { getInternalEventEmitter, INTERNAL_EVENTS } from '@app/ControlServer';
 
 import TestControlClient from './ControlClient';
 import { Logger } from '@mojaloop/sdk-standard-components';
 
 jest.mock('@app/lib/randomphrase', () => () => 'random-id');
-
 
 const ControlServerEventEmitter = getInternalEventEmitter();
 
@@ -35,7 +34,13 @@ describe('ControlServer', () => {
 
     beforeEach(async () => {
       logger = new Logger.Logger({ stringify: () => '' });
-      server = new ControlServer.Server({ logger, appConfig });
+      server = new ControlServer.Server({
+        logger,
+        port: 4005,
+        onRequestConfig: (cl: any) => {
+          cl.send(ControlServer.build.CONFIGURATION.NOTIFY(appConfig));
+        },
+      });
       server.registerInternalEvents();
       client = await TestControlClient.Client.Create({
         address: 'localhost',

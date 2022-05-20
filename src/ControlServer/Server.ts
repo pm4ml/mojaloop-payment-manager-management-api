@@ -11,7 +11,6 @@
 import ws from 'ws';
 import jsonPatch from 'fast-json-patch';
 import randomPhrase from '@app/lib/randomphrase';
-import CertificatesModel from '@app/lib/model/CertificatesModel';
 import { getInternalEventEmitter, INTERNAL_EVENTS } from './events';
 import { Logger } from '@mojaloop/sdk-standard-components';
 import { IConfig } from '@app/config';
@@ -86,8 +85,8 @@ const getWsIp = (req) => [
 const build = {
   CONFIGURATION: {
     PATCH: buildPatchConfiguration,
-    READ: (id) => buildMsg(VERB.READ, MESSAGE.CONFIGURATION, {}, id),
-    NOTIFY: (config, id) => buildMsg(VERB.NOTIFY, MESSAGE.CONFIGURATION, config, id),
+    READ: (id?: string) => buildMsg(VERB.READ, MESSAGE.CONFIGURATION, {}, id),
+    NOTIFY: (config, id?: string) => buildMsg(VERB.NOTIFY, MESSAGE.CONFIGURATION, config, id),
   },
   ERROR: {
     NOTIFY: {
@@ -113,23 +112,19 @@ const build = {
 
 export interface ServerOpts {
   logger: Logger.Logger;
-  appConfig: IConfig;
+  port: number;
   onRequestConfig: (client: unknown) => void;
 }
 
 class Server extends ws.Server {
   private _logger: Logger.Logger;
-  private _port: number;
-  private _appConfig: IConfig;
   private _clientData: Map<any, any>;
   private onRequestConfig: (client: unknown) => void;
 
   constructor(opts: ServerOpts) {
-    super({ clientTracking: true, port: opts.appConfig.control.port });
+    super({ clientTracking: true, port: opts.port });
 
     this._logger = opts.logger;
-    this._port = opts.appConfig.control.port;
-    this._appConfig = opts.appConfig;
     this._clientData = new Map();
     this.onRequestConfig = opts.onRequestConfig;
 
