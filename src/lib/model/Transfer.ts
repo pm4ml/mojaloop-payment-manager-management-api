@@ -8,9 +8,6 @@
  *       Yevhen Kyriukha - yevhen.kyriukha@modusbox.com                   *
  **************************************************************************/
 import { Knex } from 'knex';
-import { Logger } from '@mojaloop/sdk-standard-components';
-
-// const { Errors } = require('@mojaloop/sdk-standard-components');
 
 export interface TransferOpts {
   db: Knex;

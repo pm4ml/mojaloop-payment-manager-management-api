@@ -67,7 +67,7 @@ class ConnectionStateMachine {
   private started: boolean = false;
   private service: any;
   private opts: MachineOpts;
-  private context: Context = {};
+  private context?: Context;
   // private pendingStates: PendingStates = {};
 
   constructor(opts: MachineOpts) {
