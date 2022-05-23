@@ -59,13 +59,7 @@ export const invokeRetry = (opts: InvokeRetryOpts) => {
             },
             onError: {
               target: 'failure',
-              actions: [
-                assign({ error: (ctx, event) => event.data?.message }),
-                (ctx, event) => {
-                  const error = event.data;
-                  opts.logger.push({ error }).log(`Error invoking service ${opts.id}`);
-                },
-              ],
+              actions: [assign({ error: (ctx, event) => event.data?.message }), 'logError'],
             },
           },
         },
@@ -93,6 +87,9 @@ export const invokeRetry = (opts: InvokeRetryOpts) => {
         maxRetriesReached: (ctx) => {
           return opts.maxRetries ? ctx.retries > opts.maxRetries : false;
         },
+      },
+      actions: {
+        logError: (ctx, event) => opts.logger.push({ error: event.data }).log(`Error invoking service ${opts.id}`),
       },
     }
   );
