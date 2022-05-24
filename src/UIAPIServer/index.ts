@@ -18,28 +18,26 @@ import path from 'path';
 import { Logger } from '@mojaloop/sdk-standard-components';
 
 import { MemoryCache } from '@app/lib/cacheDatabase';
-import handlers from './handlers';
+import { createHandlers } from './handlers';
 import middlewares from './middlewares';
 import { IConfig } from '@app/config';
 import Vault from '@app/lib/vault';
 import assert from 'assert';
 import { ConnectionStateMachine } from '@app/lib/model';
 
+interface UIAPIServerOptions {
+  config: IConfig;
+  vault: Vault;
+  db: MemoryCache;
+  stateMachine: ConnectionStateMachine;
+}
+
 class UIAPIServer {
-  private api?: Koa;
-  private logger?: Logger.Logger;
-  private server?: http.Server;
+  private constructor(private server: http.Server, private logger: Logger.Logger, private port: number) {}
 
-  constructor(
-    private conf: IConfig,
-    private vault: Vault,
-    private db: MemoryCache,
-    private stateMachine: ConnectionStateMachine
-  ) {}
-
-  async setupApi() {
-    this.api = new Koa();
-    this.logger = await this._createLogger();
+  static async create(opts: UIAPIServerOptions) {
+    const api = new Koa();
+    const logger = this._createLogger();
     let validator;
     try {
       validator = await oas({
@@ -51,48 +49,46 @@ class UIAPIServer {
       throw new Error('Error loading API spec. Please validate it with https://editor.swagger.io/');
     }
 
-    this.api.use(async (ctx, next) => {
+    api.use(async (ctx, next) => {
       ctx.state = {
-        conf: this.conf,
-        db: this.db,
-        vault: this.vault,
-        stateMachine: this.stateMachine,
+        conf: opts.config,
+        db: opts.db,
+        vault: opts.vault,
+        stateMachine: opts.stateMachine,
       };
       await next();
     });
-    this.api.use(middlewares.createErrorHandler());
-    this.api.use(middlewares.createLogger(this.logger));
-    this.api.use(bodyParser());
-    this.api.use(validator);
-    this.api.use(middlewares.createRouter(handlers));
+    api.use(middlewares.createErrorHandler());
+    api.use(middlewares.createLogger(logger));
+    api.use(bodyParser());
+    api.use(validator);
+    api.use(middlewares.createRouter(createHandlers({ enableDebugAPI: opts.config.enableDebugAPI })));
 
-    this.server = http.createServer(this.api.callback());
+    const server = http.createServer(api.callback());
 
-    return this.server;
+    return new UIAPIServer(server, logger, opts.config.inboundPort);
   }
 
   async start() {
     assert(this.server);
-    await new Promise((resolve) => this.server!.listen(this.conf.inboundPort, resolve));
-    // await this.mcmState.start();
-    this.logger!.log(`Serving inbound API on port ${this.conf.inboundPort}`);
+    await new Promise<void>((resolve) => this.server.listen(this.port, resolve));
+    this.logger.log(`Serving inbound API on port ${this.port}`);
   }
 
   async stop() {
     if (!this.server) {
       return;
     }
-    await new Promise((resolve) => this.server!.close(resolve));
+    await new Promise((resolve) => this.server.close(resolve));
     console.log('inbound shut down complete');
   }
 
-  async _createLogger() {
+  static _createLogger() {
     // Set up a logger for each running server
     return new Logger.Logger({
-      context: {
+      ctx: {
         app: 'mojaloop-payment-manager-management-api-service',
       },
-      stringify: Logger.buildStringify({ space: this.conf.logIndent }),
     });
   }
 }

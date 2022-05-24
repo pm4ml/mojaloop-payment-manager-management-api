@@ -87,7 +87,7 @@ describe('ConnectorConfig', () => {
 
     service.send({ type: 'UPDATE_CONNECTOR_CONFIG', config: updatedConnectorConfig });
 
-    expect(opts.ControlServer.changeConfig).toHaveBeenLastCalledWith(updatedConnectorConfig)
+    expect(opts.ControlServer.changeConfig).toHaveBeenLastCalledWith(updatedConnectorConfig);
 
     const tlsConfig = {
       outbound: {

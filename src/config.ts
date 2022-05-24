@@ -110,6 +110,7 @@ const cfg = {
   stateMachineDebugPort: env.get('STATE_MACHINE_DEBUG_PORT').default(8888).asPortNumber(),
   callbackHost: env.get('CALLBACK_HOST').asString(),
   whitelistIP: env.get('WHITELIST_IP').asJsonArray(),
+  enableDebugAPI: env.get('ENABLE_DEBUG_API').default('false').asBool(),
 };
 
 export type IConfigVault = typeof vault;

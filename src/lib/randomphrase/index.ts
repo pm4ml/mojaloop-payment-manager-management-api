@@ -21,7 +21,6 @@
  --------------
  ******/
 
-
 const words = require('./words.json');
 
 const randomEl = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];

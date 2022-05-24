@@ -34,12 +34,12 @@ const LOG_ID = {
 
 (async () => {
   const logger = new Logger.Logger({
-    context: {
+    ctx: {
       // If we're running from a Mojaloop helm chart deployment, we'll have a SIM_NAME
       simulator: process.env.SIM_NAME,
       hostname: hostname(),
     },
-    stringify: Logger.buildStringify({ space: config.logIndent }),
+    stringify: Logger.buildStringify({ space: config.logIndent }) as Logger.Stringify,
   });
 
   console.log(JSON.stringify(config));
@@ -103,8 +103,7 @@ const LOG_ID = {
   });
   controlServer.registerInternalEvents();
 
-  const uiApiServer = new UIAPIServer(config, vault, db);
-  await uiApiServer.setupApi();
+  const uiApiServer = await UIAPIServer.create({ config, vault, db, stateMachine });
   await uiApiServer.start();
 
   // handle SIGTERM to exit gracefully

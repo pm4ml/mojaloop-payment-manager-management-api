@@ -91,7 +91,8 @@ class ConnectionStateMachine {
   }
 
   public async start() {
-    const state = await this.opts.vault.getStateMachineState();
+    // TODO: uncomment the following 2 lines when the bug https://github.com/statelyai/xstate/issues/871 is fixed
+    // const state = await this.opts.vault.getStateMachineState();
     // this.service.start(state);
     this.service.start();
 

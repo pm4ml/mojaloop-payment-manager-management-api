@@ -33,6 +33,6 @@ exports.up = (knex: Knex) =>
     table.integer('created_at');
     table.integer('completed_at');
     table.string('raw');
-});
+  });
 
 exports.down = (knex: Knex) => knex.schema.dropTableIfExists(TABLE_NAME);

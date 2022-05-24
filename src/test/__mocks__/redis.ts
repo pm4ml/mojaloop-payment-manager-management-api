@@ -9,41 +9,38 @@
  **************************************************************************/
 
 const redisMock = require('redis-mock');
-const {promisify} = require('util');
+const { promisify } = require('util');
 
 // redis-mock currently ignores callback arguments, the following class fixes that
 class RedisClient extends redisMock.RedisClient {
-    constructor(opts) {
-        super(opts);
-    }
+  // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+  constructor(opts) {
+    super(opts);
+  }
 
-    subscribe(...args) {
-        return promisify(super.set.subscribe(this))(...args);
-    }
+  subscribe(...args) {
+    return promisify(super.set.subscribe(this))(...args);
+  }
 
-    publish(...args) {
-        return promisify(super.set.publish(this))(...args);
-    }
+  publish(...args) {
+    return promisify(super.set.publish(this))(...args);
+  }
 
-    set(...args) {
-        return promisify(super.set.bind(this))(...args);
-    }
+  set(...args) {
+    return promisify(super.set.bind(this))(...args);
+  }
 
-    get(...args) {
-        return promisify(super.get.bind(this))(...args);
-    }
+  get(...args) {
+    return promisify(super.get.bind(this))(...args);
+  }
 
-    keys(...args) {
-        return promisify(super.keys.bind(this))(...args);
-    }
+  keys(...args) {
+    return promisify(super.keys.bind(this))(...args);
+  }
 
-    connect() {
-
-    }
+  connect() {}
 }
 
-
-
 module.exports = {
-    createClient: (opts) => new RedisClient(opts),
+  createClient: (opts) => new RedisClient(opts),
 };

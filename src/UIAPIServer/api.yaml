@@ -537,20 +537,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/DFSPJWSCert"
       x-swagger-router-controller: DfspJWS
-    delete:
-      tags:
-      - DFSP-jws-certificates-configuration
-      summary: delete JWS certificate
-      description: TBD
-      operationId: deleteDfspJwsCerts
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/JWSCert"
-      x-swagger-router-controller: DfspJWSCerts
     post:
       tags:
       - DFSP-jws-certificates-configuration
@@ -677,30 +663,6 @@ paths:
                 items:
                   $ref: "#/components/schemas/ServerCert"
       x-swagger-router-controller: DfspServerCerts
-  /dfsp/clientcerts/csr:
-    post:
-      tags:
-      - DFSP-client-certificates-configuration
-      summary: post client certificates
-      description: Creates inbound CSR and uploads it to MCM
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SuccessfulEnrollment"
-      x-swagger-router-controller: DfspServerCerts
-  /dfsp/allcerts:
-
-    post:
-      tags:
-      - DFSP-all-certificates-configuration
-      summary: autogenerate and configure all certificates
-      description: TBD
-      responses:
-        "201":
-          description: successful operation
   /monetaryzones:
     get:
       tags:
@@ -764,10 +726,10 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DfspStatus'
-  /test/state:
+  /debug/state:
     get:
       tags:
-      - "test"
+      - "debug"
       summary: "Returns internal state machine context. For testing purposes only!"
       operationId: "getStateMachineContext"
       responses:

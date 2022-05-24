@@ -190,7 +190,11 @@ const generateDfspServerCerts = async (ctx) => {
   ctx.stateMachine.sendEvent({ type: 'CREATE_DFSP_SERVER_CERT', csr: ctx.state.conf.dfspServerCsrParameters });
 };
 
-export default {
+export interface HandlersOptions {
+  enableDebugAPI: boolean;
+}
+
+export const createHandlers = (opts: HandlersOptions) => ({
   '/health': {
     get: healthCheck,
   },
@@ -246,7 +250,9 @@ export default {
   '/monetaryzones/{monetaryZoneId}/dfsps': {
     get: getDFSPSByMonetaryZone,
   },
-  '/test/state': {
-    get: getStateMachineContext,
-  },
-};
+  ...(opts.enableDebugAPI && {
+    '/debug/state': {
+      get: getStateMachineContext,
+    },
+  }),
+});

@@ -39,9 +39,7 @@ class DFSP {
   }
 
   async getDfspStatus() {
-    return this._mcmDFSPConfigModel.findStatus({
-      dfspId: this._dfspId,
-    });
+    return this._mcmDFSPConfigModel.findStatus();
   }
 
   /**

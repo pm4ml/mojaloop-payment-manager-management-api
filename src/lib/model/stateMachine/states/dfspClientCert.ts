@@ -24,6 +24,10 @@ export namespace DfspClientCert {
 
   export type Event = DoneEventObject | { type: 'DFSP_CLIENT_CERT_CONFIGURED' };
 
+  enum CertState {
+    CERT_SIGNED = 'CERT_SIGNED',
+  }
+
   export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, Event> => ({
     id: 'dfspClientCert',
     initial: 'creatingDfspCsr',
@@ -121,6 +125,6 @@ export namespace DfspClientCert {
 
   export const createGuards = <TContext extends Context>() => ({
     hasNewDfspClientCert: (ctx: TContext, event: AnyEventObject) =>
-      event.data.state === 'CERT_SIGNED' && event.data.certificate !== ctx.dfspClientCert!.cert,
+      event.data.state === CertState.CERT_SIGNED && event.data.certificate !== ctx.dfspClientCert!.cert,
   });
 }

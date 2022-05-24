@@ -18,6 +18,11 @@ enum VaultPaths {
   STATE_MACHINE_STATE = 'state-machine-state',
 }
 
+enum SubjectAltNameType {
+  DNS = 2,
+  IP = 7,
+}
+
 export interface Subject {
   CN: string;
   OU?: string;
@@ -292,15 +297,13 @@ class Vault {
       csr.setSubject(Object.entries(csrParameters.subject).map(([shortName, value]) => ({ shortName, value })));
     }
     if (csrParameters?.extensions?.subjectAltName) {
-      const DNS_TYPE = 2;
-      const IP_TYPE = 7;
       const { dns, ips } = csrParameters.extensions.subjectAltName;
       csr.setExtensions([
         {
           name: 'subjectAltName',
           altNames: [
-            ...(dns?.map?.((value) => ({ type: DNS_TYPE, value })) || []),
-            ...(ips?.map?.((value) => ({ type: IP_TYPE, value })) || []),
+            ...(dns?.map?.((value) => ({ type: SubjectAltNameType.DNS, value })) || []),
+            ...(ips?.map?.((value) => ({ type: SubjectAltNameType.IP, value })) || []),
           ],
         },
       ]);

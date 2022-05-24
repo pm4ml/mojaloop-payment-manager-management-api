@@ -328,10 +328,10 @@ class Transfer {
     const allStat = await statQuery(false);
     return allStat.map(({ timestamp, count }) => {
       const successRow = successStat.find((row) => row.timestamp === timestamp);
-      const successCount: number = successRow ? successRow.count : 0;
+      const successCount = successRow ? (successRow.count as number) : 0;
       return {
         timestamp,
-        percentage: Math.trunc((successCount / count) * 100),
+        percentage: Math.trunc((successCount / (count as number)) * 100),
       };
     });
   }

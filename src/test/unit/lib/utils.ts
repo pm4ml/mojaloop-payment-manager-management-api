@@ -15,7 +15,7 @@ import transferTemplate from './data/transferTemplate.json';
 import lastError from './data/lastError.json';
 
 const createTestDb = async () => {
-  const logger = new Logger.Logger({ buildStringify: () => '' });
+  const logger = new Logger.Logger({ stringify: () => '' });
   return createMemoryCache({
     cacheUrl: 'redis://dummyhost:1234',
     logger,

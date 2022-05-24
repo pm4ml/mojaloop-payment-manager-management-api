@@ -63,9 +63,15 @@ const createLogger = (logger) => async (ctx, next) => {
 
 /**
  * Creates koa routes based on handler map
- * @return {Function}
  */
-const createRouter = (handlerMap) => {
+
+interface HandlerMethods {
+  get?: (ctx: any) => Promise<any>;
+  post?: (ctx: any) => Promise<any>;
+  put?: (ctx: any) => Promise<any>;
+}
+
+const createRouter = (handlerMap: Record<string, HandlerMethods>) => {
   const router = new Router();
   for (const [endpoint, methods] of Object.entries(handlerMap)) {
     const koaEndpoint = endpoint.replace(/{/g, ':').replace(/}/g, '');
@@ -74,7 +80,7 @@ const createRouter = (handlerMap) => {
         try {
           ctx.state.logger = ctx.state.logger.push({ handler: handler.name });
           await Promise.resolve(handler(ctx, next));
-        } catch (e) {
+        } catch (e: any) {
           ctx.state.logger.log(`Error: ${e.stack || util.inspect(e)}`);
           ctx.body = { errorMessage: e.message };
           ctx.status = 500;

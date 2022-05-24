@@ -11,20 +11,11 @@ const ControlServerEventEmitter = getInternalEventEmitter();
 
 describe('ControlServer', () => {
   it('exposes a valid message API', () => {
-    expect(Object.keys(ControlServer.build).sort()).toEqual(
-      Object.keys(ControlServer.MESSAGE).sort(),
-      'The API exposed by the builder object must contain as top-level keys all of the message types exposed in the MESSAGE constant. Check that ControlServer.MESSAGE has the same keys as ControlServer.build.'
-    );
-    Object.entries(ControlServer.build).forEach(([messageType, builders]) => {
-      expect(Object.keys(ControlServer.VERB)).toEqual(
-        expect.arrayContaining(Object.keys(builders)),
-        `For message type '${messageType}' every builder must correspond to a verb. Check that ControlServer.build.${messageType} has the same keys as ControlServer.VERB.`
-      );
+    expect(Object.keys(ControlServer.build).sort()).toEqual(Object.keys(ControlServer.MESSAGE).sort());
+    Object.entries(ControlServer.build).forEach(([, builders]) => {
+      expect(Object.keys(ControlServer.VERB)).toEqual(expect.arrayContaining(Object.keys(builders)));
     });
-    expect(Object.keys(ControlServer.build.ERROR.NOTIFY).sort()).toEqual(
-      Object.keys(ControlServer.ERROR).sort(),
-      'ControlServer.ERROR.NOTIFY should contain the same keys as ControlServer.ERROR'
-    );
+    expect(Object.keys(ControlServer.build.ERROR.NOTIFY).sort()).toEqual(Object.keys(ControlServer.ERROR).sort());
   });
 
   describe('API', () => {

@@ -102,9 +102,9 @@ const build = {
   },
   ERROR: {
     NOTIFY: {
-      UNSUPPORTED_MESSAGE: (id) => buildMsg(VERB.NOTIFY, MESSAGE.ERROR, ERROR.UNSUPPORTED_MESSAGE, id),
-      UNSUPPORTED_VERB: (id) => buildMsg(VERB.NOTIFY, MESSAGE.ERROR, ERROR.UNSUPPORTED_VERB, id),
-      JSON_PARSE_ERROR: (id) => buildMsg(VERB.NOTIFY, MESSAGE.ERROR, ERROR.JSON_PARSE_ERROR, id),
+      UNSUPPORTED_MESSAGE: (id?: string) => buildMsg(VERB.NOTIFY, MESSAGE.ERROR, ERROR.UNSUPPORTED_MESSAGE, id),
+      UNSUPPORTED_VERB: (id?: string) => buildMsg(VERB.NOTIFY, MESSAGE.ERROR, ERROR.UNSUPPORTED_VERB, id),
+      JSON_PARSE_ERROR: (id?: string) => buildMsg(VERB.NOTIFY, MESSAGE.ERROR, ERROR.JSON_PARSE_ERROR, id),
     },
   },
 };
@@ -135,9 +135,9 @@ class Client extends ws {
     return build;
   }
 
-  static Create(...args) {
+  static Create({ address = 'localhost', port, logger, appConfig }) {
     return new Promise((resolve, reject) => {
-      const client = new Client(...args);
+      const client = new Client({ address, port, logger, appConfig });
       client.on('open', () => resolve(client));
       client.on('error', (err) => reject(err));
       client.on('message', client._handle);

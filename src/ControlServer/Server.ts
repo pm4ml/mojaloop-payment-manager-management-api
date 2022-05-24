@@ -13,7 +13,6 @@ import jsonPatch from 'fast-json-patch';
 import randomPhrase from '@app/lib/randomphrase';
 import { getInternalEventEmitter, INTERNAL_EVENTS } from './events';
 import { Logger } from '@mojaloop/sdk-standard-components';
-import { IConfig } from '@app/config';
 
 const ControlServerEventEmitter = getInternalEventEmitter();
 
@@ -175,7 +174,6 @@ class Server extends ws.Server {
           switch (msg.verb) {
             case VERB.READ:
               this.onRequestConfig(client);
-              // client.send(build.CONFIGURATION.NOTIFY(cfg, msg.id));
               break;
             default:
               client.send(build.ERROR.NOTIFY.UNSUPPORTED_VERB(msg.id));
@@ -219,21 +217,13 @@ class Server extends ws.Server {
    * @param {string} msg
    * @param {object} errorLogger
    */
-  async broadcast(msg, errorLogger) {
-    const sendToAllClients = (msg, errorLogger) =>
-      Promise.all(
-        [...this.clients.values()].map((socket) =>
-          new Promise((resolve) => socket.send(msg, resolve)).catch(errorLogger(socket, msg))
-        )
-      );
-    return sendToAllClients(msg, errorLogger);
+  async broadcast(msg: string, errorLogger) {
+    return Promise.all(
+      [...this.clients.values()].map((socket) =>
+        new Promise((resolve) => socket.send(msg, resolve)).catch(errorLogger(socket, msg))
+      )
+    );
   }
 }
 
-export {
-  Server,
-  build,
-  MESSAGE,
-  VERB,
-  ERROR,
-};
+export { Server, build, MESSAGE, VERB, ERROR };

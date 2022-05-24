@@ -126,13 +126,13 @@ class Client extends ws {
     const data = typeof msg === 'string' ? msg : serialise(msg);
     this._logger.log('Send msg as a client through websocket : ', data);
     this._logger.log('Websocket client information : ', this.url);
-    return new Promise((resolve) => super.send.call(this, data, resolve));
+    return new Promise<Error | undefined>((resolve) => super.send(data, resolve));
   }
 
   // Receive a single message
   async receive() {
     return new Promise((resolve) => this.once('message', (data) => {
-      const deserialiseMessage = deserialise(data);
+      const deserialiseMessage = deserialise(data[0]);
       resolve(deserialiseMessage);
     }));
   }
