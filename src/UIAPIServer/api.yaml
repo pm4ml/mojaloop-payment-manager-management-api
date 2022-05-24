@@ -450,31 +450,6 @@ paths:
                     status:
                       $ref: '#/components/schemas/TransferStatus'
 
-  /balances:
-    get:
-      summary: 'Retrieves position, reserved, committed balances for a given time-period '
-      operationId: findBalances
-      parameters:
-      - in: query
-        name: startTimestamp
-        required: false
-        schema:
-          $ref: "#/components/schemas/Timestamp"
-      - in: query
-        name: endTimestamp
-        required: false
-        schema:
-          $ref: "#/components/schemas/Timestamp"
-      responses:
-        200:
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Balances'
-
   /dfsp/servercerts:
 
     get:
@@ -1134,21 +1109,6 @@ components:
         committedDate:
           $ref: '#/components/schemas/Timestamp'
 
-    Balances:
-      type: object
-      properties:
-        currency:
-          $ref: '#/components/schemas/Currency'
-        position:
-          $ref: '#/components/schemas/Amount'
-        reserved:
-          $ref: '#/components/schemas/Amount'
-        committed:
-          $ref: '#/components/schemas/Amount'
-        liquidity:
-          $ref: '#/components/schemas/Amount'
-        timestamp:
-          $ref: '#/components/schemas/Timestamp'
     Flow:
       type: object
       properties:

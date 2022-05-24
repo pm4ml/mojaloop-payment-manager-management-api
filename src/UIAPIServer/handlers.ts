@@ -8,7 +8,7 @@
  *       Murthy Kakarlamudi - murthy@modusbox.com                         *
  **************************************************************************/
 
-import { Balances, DFSP, MonetaryZone, Transfer } from '@app/lib/model';
+import { DFSP, MonetaryZone, Transfer } from '@app/lib/model';
 
 const healthCheck = async (ctx) => {
   ctx.body = { status: 'ok' };
@@ -124,11 +124,6 @@ const getTransfersAvgResponseTime = async (ctx) => {
   ctx.body = await transfer.avgResponseTime({ minutePrevious });
 };
 
-const getBalances = async (ctx) => {
-  const balances = new Balances(ctx.state.conf, ctx.state.logger);
-  ctx.body = await balances.findBalances(ctx.request.query);
-};
-
 const getDFSPDetails = async (ctx) => {
   const { dfspId, mcmServerEndpoint } = ctx.state.conf;
   const dfsp = new DFSP({
@@ -224,9 +219,6 @@ export const createHandlers = (opts: HandlersOptions) => ({
   },
   '/minuteAverageTransferResponseTime': {
     get: getTransfersAvgResponseTime,
-  },
-  '/balances': {
-    get: getBalances,
   },
   '/dfsp': {
     get: getDFSPDetails,
