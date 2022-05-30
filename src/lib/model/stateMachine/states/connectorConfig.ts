@@ -65,6 +65,7 @@ export namespace ConnectorConfig {
             invokeRetry({
               id: 'propagateConnectorConfig',
               logger: opts.logger,
+              retryInterval: opts.refreshIntervalSeconds * 1000,
               service: async () => opts.ControlServer.changeConfig(ctx.connectorConfig),
             }),
           onDone: {

@@ -37,8 +37,8 @@ type Context = {
   error?: any;
 };
 
-export const invokeRetry = (opts: InvokeRetryOpts) => {
-  return createMachine<Context>(
+export const invokeRetry = (opts: InvokeRetryOpts) =>
+  createMachine<Context>(
     {
       id: opts.id,
       initial: 'run',
@@ -68,11 +68,8 @@ export const invokeRetry = (opts: InvokeRetryOpts) => {
           data: (context, event) => event.data,
         },
         failure: {
-          always: {
-            target: 'error',
-            cond: 'maxRetriesReached',
-            actions: assign({ retries: (ctx) => ctx.retries + 1 }),
-          },
+          entry: assign({ retries: (ctx) => ctx.retries + 1 }),
+          always: { target: 'error', cond: 'maxRetriesReached' },
           after: {
             [opts.retryInterval ?? DEFAULT_RETRY_INTERVAL]: 'run',
           },
@@ -93,4 +90,3 @@ export const invokeRetry = (opts: InvokeRetryOpts) => {
       },
     }
   );
-};

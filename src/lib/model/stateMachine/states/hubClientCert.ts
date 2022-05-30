@@ -36,6 +36,7 @@ export namespace HubCert {
             invokeRetry({
               id: 'getUnprocessedHubCSRs',
               logger: opts.logger,
+              retryInterval: opts.refreshIntervalSeconds * 1000,
               service: async () => opts.hubCertificateModel.getUnprocessedCerts(),
             }),
           onDone: [
@@ -55,6 +56,7 @@ export namespace HubCert {
             invokeRetry({
               id: 'signHubCSRs',
               logger: opts.logger,
+              retryInterval: opts.refreshIntervalSeconds * 1000,
               service: () =>
                 Promise.all(
                   ctx.hubClientCerts!.map(async (hubCert) => {
@@ -73,6 +75,7 @@ export namespace HubCert {
             invokeRetry({
               id: 'uploadHubCert',
               logger: opts.logger,
+              retryInterval: opts.refreshIntervalSeconds * 1000,
               service: () =>
                 Promise.all(
                   ctx.hubClientCerts!.map((cert) =>

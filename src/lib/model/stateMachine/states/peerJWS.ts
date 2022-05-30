@@ -36,6 +36,7 @@ export namespace PeerJWS {
             invokeRetry({
               id: 'getPeerDFSPJWSCertificates',
               logger: opts.logger,
+              retryInterval: opts.refreshIntervalSeconds * 1000,
               service: async () => opts.dfspCertificateModel.getAllJWSCertificates(),
             }),
           onDone: [

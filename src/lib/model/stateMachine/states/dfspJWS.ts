@@ -37,6 +37,7 @@ export namespace DfspJWS {
             invokeRetry({
               id: 'dfspJWSCreate',
               logger: opts.logger,
+              retryInterval: opts.refreshIntervalSeconds * 1000,
               service: async () => opts.vault.createJWS(),
             }),
           onDone: {
@@ -58,6 +59,7 @@ export namespace DfspJWS {
             invokeRetry({
               id: 'dfspJWSUpload',
               logger: opts.logger,
+              retryInterval: opts.refreshIntervalSeconds * 1000,
               service: async () => opts.dfspCertificateModel.uploadJWS({ publicKey: ctx.dfspJWS!.publicKey }),
             }),
           onDone: {

@@ -14,14 +14,9 @@ import { invokeRetry } from './invokeRetry';
 import _ from 'lodash';
 
 export namespace EndpointConfig {
-  type IP = {
-    address: string;
-    ports: string[];
-  };
-
   export type Context = {
     endpointConfig?: {
-      ipList: IP[];
+      ips: string[];
       callbackHost: string;
     };
   };
@@ -38,8 +33,8 @@ export namespace EndpointConfig {
             cond: 'configChanged',
             actions: assign({
               endpointConfig: () => ({
-                callbackHost: opts.config.callbackHost,
-                ipList: opts.config.whitelistIP,
+                callbackHost: opts.config.mojaloopConnectorFQDN,
+                ips: opts.config.whitelistIP,
               }),
             }) as any,
             target: 'propagatingEndpointConfig',
@@ -57,11 +52,14 @@ export namespace EndpointConfig {
                 invokeRetry({
                   id: 'uploadIPWhitelist',
                   logger: opts.logger,
+                  retryInterval: opts.refreshIntervalSeconds * 1000,
                   service: async () =>
                     opts.dfspEndpointModel.create({
                       direction: 'EGRESS',
                       type: 'IP',
-                      ipList: ctx.endpointConfig?.ipList,
+                      // TODO: Replace with the following line when MCM API changes ready
+                      // ipList: ctx.endpointConfig?.ips,
+                      ipList: ctx.endpointConfig?.ips.map((ip) => ({ address: ip, ports: ['443'] })),
                     }),
                 }),
               onDone: '.completed',
@@ -79,6 +77,7 @@ export namespace EndpointConfig {
                 invokeRetry({
                   id: 'uploadCallbackHost',
                   logger: opts.logger,
+                  retryInterval: opts.refreshIntervalSeconds * 1000,
                   service: async () =>
                     opts.dfspEndpointModel.create({
                       direction: 'INGRESS',
@@ -115,7 +114,7 @@ export namespace EndpointConfig {
 
   export const createGuards = <TContext extends Context>(opts: MachineOpts) => ({
     configChanged: (ctx: TContext) =>
-      !!(opts.config.callbackHost && opts.config.callbackHost !== ctx.endpointConfig?.callbackHost) ||
-      !!(opts.config.whitelistIP && !_.isEqual(opts.config.whitelistIP, ctx.endpointConfig?.ipList)),
+      opts.config.mojaloopConnectorFQDN !== ctx.endpointConfig?.callbackHost ||
+      !_.isEqual(opts.config.whitelistIP, ctx.endpointConfig?.ips),
   });
 }

@@ -108,8 +108,7 @@ const cfg = {
   dfspServerCsrParameters: env.get('DFSP_SERVER_CSR_PARAMETERS').asJsonConfig(),
   caCsrParameters: env.get('CA_CSR_PARAMETERS').asJsonConfig(),
   stateMachineDebugPort: env.get('STATE_MACHINE_DEBUG_PORT').default(8888).asPortNumber(),
-  callbackHost: env.get('CALLBACK_HOST').asString(),
-  whitelistIP: env.get('WHITELIST_IP').asJsonArray(),
+  whitelistIP: env.get('WHITELIST_IP').default('[]').asJsonArray(),
   enableDebugAPI: env.get('ENABLE_DEBUG_API').default('false').asBool(),
 };
 

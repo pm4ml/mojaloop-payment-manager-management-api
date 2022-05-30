@@ -8,7 +8,7 @@
  *       Yevhen Kyriukha <yevhen.kyriukha@modusbox.com>                   *
  **************************************************************************/
 
-import { createMachine, interpret, assign } from 'xstate';
+import { createMachine, interpret, assign, actions } from 'xstate';
 import { inspect } from '@xstate/inspect/lib/server';
 
 import {
@@ -25,6 +25,7 @@ import {
 
 import { MachineOpts } from './states/MachineOpts';
 import WebSocket from 'ws';
+import * as crypto from 'crypto';
 
 interface PendingStates {
   PEER_JWS: boolean;
@@ -65,6 +66,7 @@ type Event =
 
 class ConnectionStateMachine {
   private started: boolean = false;
+  private hash: string;
   private service: any;
   private opts: MachineOpts;
   private context?: Context;
@@ -74,15 +76,20 @@ class ConnectionStateMachine {
     this.opts = opts;
     this.serve();
     const machine = this.createMachine(opts);
+    this.hash = crypto.createHash('sha256').update(JSON.stringify(machine.config.states)).digest('base64');
     this.service = interpret(machine, { devTools: true }).onTransition(async (state) => {
       opts.logger.push({ state: state.value }).log('Transition');
       this.context = state.context;
-      // console.log(this.service.getSnapshot());
-      // const snapshot = this.service.getSnapshot();
-      // delete (snapshot as any).actions;
-
-      // await this.opts.vault.setStateMachineState(snapshot);
-      await this.opts.vault.setStateMachineState(state);
+      // Invoked services are stored in activities.
+      // Load actions from activities so that services can be invoked at state machine resume
+      await this.opts.vault.setStateMachineState({
+        ...state,
+        __hash: this.hash,
+        actions: Object.values(state.activities)
+          .map((activity) => activity && activity.activity)
+          .filter((activity) => activity)
+          .map(actions.start),
+      });
     });
   }
 
@@ -91,10 +98,15 @@ class ConnectionStateMachine {
   }
 
   public async start() {
-    // TODO: uncomment the following 2 lines when the bug https://github.com/statelyai/xstate/issues/871 is fixed
-    // const state = await this.opts.vault.getStateMachineState();
-    // this.service.start(state);
-    this.service.start();
+    const state = await this.opts.vault.getStateMachineState();
+    if (state?.__hash === this.hash) {
+      this.opts.logger.log('Restoring state machine from previous state');
+      this.service.start(state);
+    } else {
+      const reason = state ? 'state machine changed' : 'no previous state found';
+      this.opts.logger.log(`Starting state machine from scratch because ${reason}`);
+      this.service.start();
+    }
 
     this.started = true;
   }

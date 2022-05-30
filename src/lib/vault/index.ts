@@ -153,7 +153,7 @@ class Vault {
       return data;
     } catch (e: any) {
       if (e?.response?.statusCode === 404) {
-        return null;
+        return;
       }
       throw e;
     }

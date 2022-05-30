@@ -45,6 +45,7 @@ export namespace DfspCA {
             invokeRetry({
               id: 'getPrebuiltCA',
               logger: opts.logger,
+              retryInterval: opts.refreshIntervalSeconds * 1000,
               service: async () => opts.vault.getCA(),
             }),
           onDone: {
@@ -60,6 +61,7 @@ export namespace DfspCA {
             invokeRetry({
               id: 'dfspIntCACreate',
               logger: opts.logger,
+              retryInterval: opts.refreshIntervalSeconds * 1000,
               service: async () => opts.vault.createCA((event as CreateIntCAEvent).subject),
             }),
           onDone: {
@@ -75,6 +77,7 @@ export namespace DfspCA {
             invokeRetry({
               id: 'dfspExtCACreate',
               logger: opts.logger,
+              retryInterval: opts.refreshIntervalSeconds * 1000,
               service: async () => {
                 const ev = event as CreateExtCAEvent;
                 const cert = ev.rootCert || '';
@@ -97,6 +100,7 @@ export namespace DfspCA {
             invokeRetry({
               id: 'dfspCAUpload',
               logger: opts.logger,
+              retryInterval: opts.refreshIntervalSeconds * 1000,
               service: async () =>
                 opts.dfspCertificateModel.uploadDFSPCA({
                   rootCertificate: ctx.dfspCA!.cert,

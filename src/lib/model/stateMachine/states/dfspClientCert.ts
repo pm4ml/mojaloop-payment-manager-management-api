@@ -39,6 +39,7 @@ export namespace DfspClientCert {
             invokeRetry({
               id: 'createCsr',
               logger: opts.logger,
+              retryInterval: opts.refreshIntervalSeconds * 1000,
               service: async () => opts.vault.createCSR(),
             }),
           onDone: {
@@ -56,6 +57,7 @@ export namespace DfspClientCert {
             invokeRetry({
               id: 'uploadCsr',
               logger: opts.logger,
+              retryInterval: opts.refreshIntervalSeconds * 1000,
               service: () => opts.dfspCertificateModel.uploadCSR({ csr: ctx.dfspClientCert!.csr! }),
             }),
           onDone: {
@@ -76,6 +78,7 @@ export namespace DfspClientCert {
             invokeRetry({
               id: 'getDfspClientCert',
               logger: opts.logger,
+              retryInterval: opts.refreshIntervalSeconds * 1000,
               service: () =>
                 opts.dfspCertificateModel.getClientCertificate({ inboundEnrollmentId: ctx.dfspClientCert!.id! }),
             }),

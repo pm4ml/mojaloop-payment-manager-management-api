@@ -33,6 +33,7 @@ export namespace HubCA {
             invokeRetry({
               id: 'getHubCA',
               logger: opts.logger,
+              retryInterval: opts.refreshIntervalSeconds * 1000,
               service: async () => opts.hubCertificateModel.getHubCA(),
             }),
           onDone: [
