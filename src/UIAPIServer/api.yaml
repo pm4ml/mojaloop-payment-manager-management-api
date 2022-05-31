@@ -450,31 +450,6 @@ paths:
                     status:
                       $ref: '#/components/schemas/TransferStatus'
 
-  /balances:
-    get:
-      summary: 'Retrieves position, reserved, committed balances for a given time-period '
-      operationId: findBalances
-      parameters:
-      - in: query
-        name: startTimestamp
-        required: false
-        schema:
-          $ref: "#/components/schemas/Timestamp"
-      - in: query
-        name: endTimestamp
-        required: false
-        schema:
-          $ref: "#/components/schemas/Timestamp"
-      responses:
-        200:
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Balances'
-
   /dfsp/servercerts:
 
     get:
@@ -537,20 +512,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/DFSPJWSCert"
       x-swagger-router-controller: DfspJWS
-    delete:
-      tags:
-      - DFSP-jws-certificates-configuration
-      summary: delete JWS certificate
-      description: TBD
-      operationId: deleteDfspJwsCerts
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/JWSCert"
-      x-swagger-router-controller: DfspJWSCerts
     post:
       tags:
       - DFSP-jws-certificates-configuration
@@ -677,30 +638,6 @@ paths:
                 items:
                   $ref: "#/components/schemas/ServerCert"
       x-swagger-router-controller: DfspServerCerts
-  /dfsp/clientcerts/csr:
-    post:
-      tags:
-      - DFSP-client-certificates-configuration
-      summary: post client certificates
-      description: Creates inbound CSR and uploads it to MCM
-      responses:
-        "200":
-          description: successful operation
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SuccessfulEnrollment"
-      x-swagger-router-controller: DfspServerCerts
-  /dfsp/allcerts:
-
-    post:
-      tags:
-      - DFSP-all-certificates-configuration
-      summary: autogenerate and configure all certificates
-      description: TBD
-      responses:
-        "201":
-          description: successful operation
   /monetaryzones:
     get:
       tags:
@@ -1157,21 +1094,6 @@ components:
         committedDate:
           $ref: '#/components/schemas/Timestamp'
 
-    Balances:
-      type: object
-      properties:
-        currency:
-          $ref: '#/components/schemas/Currency'
-        position:
-          $ref: '#/components/schemas/Amount'
-        reserved:
-          $ref: '#/components/schemas/Amount'
-        committed:
-          $ref: '#/components/schemas/Amount'
-        liquidity:
-          $ref: '#/components/schemas/Amount'
-        timestamp:
-          $ref: '#/components/schemas/Timestamp'
     Flow:
       type: object
       properties:
