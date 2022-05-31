@@ -26,6 +26,7 @@ import {
 import * as ControlServer from './ControlServer';
 import { createMemoryCache } from '@app/lib/cacheDatabase';
 import CertManager from './lib/model/CertManager';
+import TestServer from '@app/TestServer';
 
 const LOG_ID = {
   CONTROL: { app: 'mojaloop-payment-manager-management-api-service-control-server' },
@@ -103,14 +104,21 @@ const LOG_ID = {
   });
   controlServer.registerInternalEvents();
 
-  const uiApiServer = await UIAPIServer.create({ config, vault, db, stateMachine });
+  const uiApiServer = await UIAPIServer.create({ config, vault, db, stateMachine, port: config.inboundPort });
   await uiApiServer.start();
+
+  let testServer: TestServer;
+  if (config.enableTestAPI) {
+    testServer = await TestServer.create({ config, stateMachine, port: config.testApiPort });
+    await testServer.start();
+  }
 
   // handle SIGTERM to exit gracefully
   process.on('SIGTERM', async () => {
     console.log('SIGTERM received. Shutting down APIs...');
 
     await Promise.all([uiApiServer.stop(), controlServer.stop()]);
+    if (config.enableTestAPI) await testServer.stop();
     vault.disconnect();
     process.exit(0);
   });

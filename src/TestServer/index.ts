@@ -1,11 +1,11 @@
 /**************************************************************************
- *  (C) Copyright ModusBox Inc. 2019 - All rights reserved.               *
+ *  (C) Copyright Mojaloop Foundation 2022                                *
  *                                                                        *
  *  This file is made available under the terms of the license agreement  *
  *  specified in the corresponding source code repository.                *
  *                                                                        *
  *  ORIGINAL AUTHOR:                                                      *
- *       Murthy Kakarlamudi - murthy@modusbox.com                         *
+ *       Yevhen Kyriukha <yevhen.kyriukha@modusbox.com>                   *
  **************************************************************************/
 
 import Koa from 'koa';
@@ -17,26 +17,22 @@ import path from 'path';
 
 import { Logger } from '@mojaloop/sdk-standard-components';
 
-import { MemoryCache } from '@app/lib/cacheDatabase';
 import { createHandlers } from './handlers';
-import middlewares from './middlewares';
+import middlewares from '@app/UIAPIServer/middlewares';
 import { IConfig } from '@app/config';
-import Vault from '@app/lib/vault';
 import assert from 'assert';
 import { ConnectionStateMachine } from '@app/lib/model';
 
-interface UIAPIServerOptions {
+interface TestServerOptions {
   config: IConfig;
-  vault: Vault;
-  db: MemoryCache;
   stateMachine: ConnectionStateMachine;
   port: number;
 }
 
-class UIAPIServer {
+class TestServer {
   private constructor(private server: http.Server, private logger: Logger.Logger, private port: number) {}
 
-  static async create(opts: UIAPIServerOptions) {
+  static async create(opts: TestServerOptions) {
     const api = new Koa();
     const logger = this._createLogger();
     let validator;
@@ -53,8 +49,6 @@ class UIAPIServer {
     api.use(async (ctx, next) => {
       ctx.state = {
         conf: opts.config,
-        db: opts.db,
-        vault: opts.vault,
         stateMachine: opts.stateMachine,
       };
       await next();
@@ -67,13 +61,13 @@ class UIAPIServer {
 
     const server = http.createServer(api.callback());
 
-    return new UIAPIServer(server, logger, opts.port);
+    return new TestServer(server, logger, opts.port);
   }
 
   async start() {
     assert(this.server);
     await new Promise<void>((resolve) => this.server.listen(this.port, resolve));
-    this.logger.log(`Serving inbound API on port ${this.port}`);
+    this.logger.log(`Serving inbound test API on port ${this.port}`);
   }
 
   async stop() {
@@ -94,4 +88,4 @@ class UIAPIServer {
   }
 }
 
-export default UIAPIServer;
+export default TestServer;

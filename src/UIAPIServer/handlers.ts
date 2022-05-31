@@ -162,10 +162,6 @@ const setDFSPCA = async (ctx) => {
   ctx.stateMachine.sendEvent({ type: 'CREATE_EXT_CA', ...ctx.request.body });
 };
 
-const getStateMachineContext = async (ctx) => {
-  return ctx.stateMachine.getContext();
-};
-
 const createJWSCertificates = async (ctx) => {
   ctx.stateMachine.sendEvent('CREATE_JWS');
 };
@@ -185,11 +181,7 @@ const generateDfspServerCerts = async (ctx) => {
   ctx.stateMachine.sendEvent({ type: 'CREATE_DFSP_SERVER_CERT', csr: ctx.state.conf.dfspServerCsrParameters });
 };
 
-export interface HandlersOptions {
-  enableDebugAPI: boolean;
-}
-
-export const createHandlers = (opts: HandlersOptions) => ({
+export const createHandlers = () => ({
   '/health': {
     get: healthCheck,
   },
@@ -242,9 +234,4 @@ export const createHandlers = (opts: HandlersOptions) => ({
   '/monetaryzones/{monetaryZoneId}/dfsps': {
     get: getDFSPSByMonetaryZone,
   },
-  ...(opts.enableDebugAPI && {
-    '/debug/state': {
-      get: getStateMachineContext,
-    },
-  }),
 });

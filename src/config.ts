@@ -27,6 +27,7 @@ const env = from(process.env, {
   asYamlConfig: (path) => yaml.load(getFileContent(path) as any),
   asJsonConfig: (path) => JSON.parse(getFileContent(path) as any),
   asTextFileContent: (path) => getFileContent(path).toString().trim(),
+  asList: (data) => data.split(','),
 });
 
 const vaultAuthMethod = env.get('VAULT_AUTH_METHOD').required().asEnum(['K8S', 'APP_ROLE']);
@@ -108,8 +109,9 @@ const cfg = {
   dfspServerCsrParameters: env.get('DFSP_SERVER_CSR_PARAMETERS').asJsonConfig(),
   caCsrParameters: env.get('CA_CSR_PARAMETERS').asJsonConfig(),
   stateMachineDebugPort: env.get('STATE_MACHINE_DEBUG_PORT').default(8888).asPortNumber(),
-  whitelistIP: env.get('WHITELIST_IP').default('[]').asJsonArray(),
-  enableDebugAPI: env.get('ENABLE_DEBUG_API').default('false').asBool(),
+  whitelistIP: env.get('WHITELIST_IP').default('').asList(),
+  enableTestAPI: env.get('ENABLE_TEST_API').default('true').asBool(),
+  testApiPort: env.get('TEST_API_PORT').default('9050').asPortNumber(),
 };
 
 export type IConfigVault = typeof vault;
