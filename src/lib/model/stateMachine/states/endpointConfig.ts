@@ -17,7 +17,7 @@ export namespace EndpointConfig {
   export type Context = {
     endpointConfig?: {
       ips: string[];
-      callbackHost: string;
+      callbackURL: string;
     };
   };
 
@@ -33,7 +33,7 @@ export namespace EndpointConfig {
             cond: 'configChanged',
             actions: assign({
               endpointConfig: () => ({
-                callbackHost: opts.config.mojaloopConnectorFQDN,
+                callbackURL: opts.config.callbackURL,
                 ips: opts.config.whitelistIP,
               }),
             }) as any,
@@ -69,18 +69,18 @@ export namespace EndpointConfig {
               completed: { type: 'final' },
             },
           },
-          uploadingCallbackHost: {
+          uploadingCallbackURL: {
             invoke: {
-              id: 'uploadCallbackHost',
+              id: 'uploadCallbackURL',
               src: (ctx) =>
                 invokeRetry({
-                  id: 'uploadCallbackHost',
+                  id: 'uploadCallbackURL',
                   logger: opts.logger,
                   retryInterval: opts.refreshIntervalSeconds * 1000,
                   service: async () =>
                     opts.dfspEndpointModel.create({
                       direction: 'INGRESS',
-                      url: ctx.endpointConfig?.callbackHost,
+                      url: ctx.endpointConfig?.callbackURL,
                     }),
                 }),
               onDone: '.completed',
@@ -112,7 +112,7 @@ export namespace EndpointConfig {
 
   export const createGuards = <TContext extends Context>(opts: MachineOpts) => ({
     configChanged: (ctx: TContext) =>
-      opts.config.mojaloopConnectorFQDN !== ctx.endpointConfig?.callbackHost ||
+      opts.config.callbackURL !== ctx.endpointConfig?.callbackURL ||
       !_.isEqual(opts.config.whitelistIP, ctx.endpointConfig?.ips),
   });
 }

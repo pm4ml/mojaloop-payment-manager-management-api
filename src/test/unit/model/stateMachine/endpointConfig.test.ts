@@ -53,7 +53,7 @@ describe('EndpointConfig', () => {
 
   test('should upload endpoint config', async () => {
     opts.config.whitelistIP = ['1.1.1.1/32'];
-    opts.config.mojaloopConnectorFQDN = 'connector.fsp.example.com';
+    opts.config.callbackURL = 'connector.fsp.example.com:443';
     const service = startMachine(opts);
 
     await waitFor(service, (state) => state.matches('endpointConfig.retry'));
@@ -65,7 +65,7 @@ describe('EndpointConfig', () => {
 
     expect(opts.dfspEndpointModel.create).toHaveBeenNthCalledWith(2, {
       direction: 'INGRESS',
-      url: opts.config.mojaloopConnectorFQDN,
+      url: opts.config.callbackURL,
     });
 
     service.stop();

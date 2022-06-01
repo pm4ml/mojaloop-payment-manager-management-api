@@ -110,6 +110,7 @@ const cfg = {
   caCsrParameters: env.get('CA_CSR_PARAMETERS').asJsonConfig(),
   stateMachineDebugPort: env.get('STATE_MACHINE_DEBUG_PORT').default(8888).asPortNumber(),
   whitelistIP: env.get('WHITELIST_IP').default('').asList(),
+  callbackURL: env.get('CALLBACK_URL').default('connector.fsp.example.com:443').asUrlString(),
   enableTestAPI: env.get('ENABLE_TEST_API').default('true').asBool(),
   testApiPort: env.get('TEST_API_PORT').default('9050').asPortNumber(),
 };

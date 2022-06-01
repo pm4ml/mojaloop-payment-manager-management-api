@@ -1,6 +1,6 @@
 {
   "name": "mojaloop-payment-manager-management-api-service",
-  "version": "4.0.5",
+  "version": "4.0.6",
   "description": "Mojaloop Payment Manager - Management API Service",
   "main": "index.js",
   "author": "Murthy kakarlamudi, ModusBox Inc.",

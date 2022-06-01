@@ -3,6 +3,16 @@ info:
   title: Mojaloop Payment Manager Mgmt Test API
   version: 1.0.0
 paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      description: This endpoint checks the health of the endpoint.
+      tags:
+      - Health
+      responses:
+        200:
+          description: Returns empty body if the scheme adapter outbound transfers service is running.
+
   /state:
     get:
       tags:
