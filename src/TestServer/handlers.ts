@@ -9,7 +9,7 @@
  **************************************************************************/
 
 const getStateMachineContext = async (ctx) => {
-  return ctx.stateMachine.getContext();
+  ctx.body = ctx.state.stateMachine.getContext();
 };
 
 export const createHandlers = () => ({

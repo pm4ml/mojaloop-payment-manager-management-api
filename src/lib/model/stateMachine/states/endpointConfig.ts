@@ -56,7 +56,6 @@ export namespace EndpointConfig {
                   service: async () =>
                     opts.dfspEndpointModel.create({
                       direction: 'EGRESS',
-                      type: 'IP',
                       // TODO: Replace with the following line when MCM API changes ready
                       // ipList: ctx.endpointConfig?.ips,
                       ipList: ctx.endpointConfig?.ips.map((ip) => ({ address: ip, ports: ['443'] })),
@@ -81,7 +80,6 @@ export namespace EndpointConfig {
                   service: async () =>
                     opts.dfspEndpointModel.create({
                       direction: 'INGRESS',
-                      type: 'URL',
                       url: ctx.endpointConfig?.callbackHost,
                     }),
                 }),

@@ -60,13 +60,11 @@ describe('EndpointConfig', () => {
 
     expect(opts.dfspEndpointModel.create).toHaveBeenNthCalledWith(1, {
       direction: 'EGRESS',
-      type: 'IP',
       ipList: [{ address: '1.1.1.1/32', ports: ['443'] }],
     });
 
     expect(opts.dfspEndpointModel.create).toHaveBeenNthCalledWith(2, {
       direction: 'INGRESS',
-      type: 'URL',
       url: opts.config.mojaloopConnectorFQDN,
     });
 
