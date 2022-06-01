@@ -46,7 +46,7 @@ executors:
   default-machine:
     working_directory: /home/circleci/project/git
     machine:
-      image: ubuntu-2004:202010-01
+      image: ubuntu-2004:202201-02
 
 ##
 # Jobs
