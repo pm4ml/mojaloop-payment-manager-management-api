@@ -8,11 +8,18 @@
  *       Yevhen Kyriukha <yevhen.kyriukha@modusbox.com>                   *
  **************************************************************************/
 
+const healthCheck = async (ctx) => {
+  ctx.body = { status: 'ok' };
+};
+
 const getStateMachineContext = async (ctx) => {
   ctx.body = ctx.state.stateMachine.getContext();
 };
 
 export const createHandlers = () => ({
+  '/health': {
+    get: healthCheck,
+  },
   '/state': {
     get: getStateMachineContext,
   },
