@@ -8,7 +8,7 @@
  *       Yevhen Kyriukha <yevhen.kyriukha@modusbox.com>                   *
  **************************************************************************/
 
-import { createMachine, interpret, assign, actions } from 'xstate';
+import { createMachine, interpret, assign } from 'xstate';
 import { inspect } from '@xstate/inspect/lib/server';
 
 import {
@@ -26,6 +26,7 @@ import {
 import { MachineOpts } from './states/MachineOpts';
 import WebSocket from 'ws';
 import * as crypto from 'crypto';
+import { ActionObject } from 'xstate/lib/types';
 
 interface PendingStates {
   PEER_JWS: boolean;
@@ -65,11 +66,13 @@ type Event =
   | EndpointConfig.Event;
 
 class ConnectionStateMachine {
+  private static VERSION = 1;
   private started: boolean = false;
   private hash: string;
   private service: any;
   private opts: MachineOpts;
   private context?: Context;
+  private actions: Record<string, ActionObject<Context, Event>> = {};
   // private pendingStates: PendingStates = {};
 
   constructor(opts: MachineOpts) {
@@ -80,16 +83,32 @@ class ConnectionStateMachine {
     this.service = interpret(machine, { devTools: true }).onTransition(async (state) => {
       opts.logger.push({ state: state.value }).log('Transition');
       this.context = state.context;
-      // Invoked services are stored in activities.
-      // Load actions from activities so that services can be invoked at state machine resume
+      this.updateActions(state.actions);
       await this.opts.vault.setStateMachineState({
-        ...state,
-        __hash: this.hash,
-        actions: Object.values(state.activities)
-          .map((activity) => activity && activity.activity)
-          .filter((activity) => activity)
-          .map(actions.start),
+        state,
+        hash: this.hash,
+        version: ConnectionStateMachine.VERSION,
+        actions: this.actions,
       });
+    });
+  }
+
+  private updateActions(acts: Array<ActionObject<Context, Event>>) {
+    acts.forEach((action) => {
+      if (action.type === 'xstate.cancel') {
+        delete this.actions[action.sendId];
+      }
+      if (action.event?.type?.startsWith('xstate.after')) {
+        this.actions[action.id] = action;
+      }
+      if (action.activity?.type === 'xstate.invoke') {
+        if (action.type === 'xstate.stop') {
+          delete this.actions[action.activity.id];
+        }
+        if (action.type === 'xstate.start') {
+          this.actions[action.activity.id] = action;
+        }
+      }
     });
   }
 
@@ -99,9 +118,13 @@ class ConnectionStateMachine {
 
   public async start() {
     const state = await this.opts.vault.getStateMachineState();
-    if (state?.__hash === this.hash) {
+    if (state?.hash === this.hash && state?.version === ConnectionStateMachine.VERSION) {
       this.opts.logger.log('Restoring state machine from previous state');
-      this.service.start(state);
+      this.actions = state.actions;
+      this.service.start({
+        ...state.state,
+        actions: Object.values(this.actions),
+      });
     } else {
       const reason = state ? 'state machine changed' : 'no previous state found';
       this.opts.logger.log(`Starting state machine from scratch because ${reason}`);
