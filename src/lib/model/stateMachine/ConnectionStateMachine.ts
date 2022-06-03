@@ -66,7 +66,7 @@ type Event =
   | EndpointConfig.Event;
 
 class ConnectionStateMachine {
-  private static VERSION = 1;
+  private static VERSION = 2;
   private started: boolean = false;
   private hash: string;
   private service: any;
