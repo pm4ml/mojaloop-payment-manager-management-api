@@ -99,7 +99,7 @@ export namespace EndpointConfig {
       completed: {
         always: {
           target: 'retry',
-          actions: send('PEER_JWS_CONFIGURED'),
+          actions: send('ENDPOINT_CONFIG_PROPAGATED'),
         },
       },
       retry: {

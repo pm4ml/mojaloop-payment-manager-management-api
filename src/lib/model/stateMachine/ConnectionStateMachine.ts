@@ -68,7 +68,7 @@ type Event =
 class ConnectionStateMachine {
   private static VERSION = 2;
   private started: boolean = false;
-  private hash: string;
+  private readonly hash: string;
   private service: any;
   private opts: MachineOpts;
   private context?: Context;
@@ -171,102 +171,50 @@ class ConnectionStateMachine {
           },
         },
         type: 'parallel',
+        on: {
+          NEW_HUB_CA_FETCHED: [
+            { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ HUB_CA: false } }) }) },
+            { actions: 'notifyCompleted', cond: 'completedStates' },
+          ],
+          DFSP_CA_PROPAGATED: [
+            { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_CA: false } }) }) },
+            { actions: 'notifyCompleted', cond: 'completedStates' },
+          ],
+          DFSP_CLIENT_CERT_CONFIGURED: [
+            { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_CLIENT_CERT: false } }) }) },
+            { actions: 'notifyCompleted', cond: 'completedStates' },
+          ],
+          DFSP_SERVER_CERT_CONFIGURED: [
+            { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_SERVER_CERT: false } }) }) },
+            { actions: 'notifyCompleted', cond: 'completedStates' },
+          ],
+          HUB_CLIENT_CERT_SIGNED: [
+            { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ HUB_CERT: false } }) }) },
+            { actions: 'notifyCompleted', cond: 'completedStates' },
+          ],
+          PEER_JWS_CONFIGURED: [
+            { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ PEER_JWS: false } }) }) },
+            { actions: 'notifyCompleted', cond: 'completedStates' },
+          ],
+          DFSP_JWS_PROPAGATED: [
+            { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_JWS: false } }) }) },
+            { actions: 'notifyCompleted', cond: 'completedStates' },
+          ],
+          ENDPOINT_CONFIG_PROPAGATED: [
+            { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ ENDPOINT_CONFIG: false } }) }) },
+            { actions: 'notifyCompleted', cond: 'completedStates' },
+          ],
+        },
         states: {
-          fetchingHubCA: {
-            ...HubCA.createState<Context>(opts),
-            entry: [assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ HUB_CA: true } }) })],
-            on: {
-              NEW_HUB_CA_FETCHED: [
-                { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ HUB_CA: false } }) }) },
-                { actions: 'notifyCompleted', cond: 'completedStates' },
-              ],
-            },
-          },
-          creatingDFSPCA: {
-            ...DfspCA.createState<Context>(opts),
-            entry: [assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_CA: true } }) })],
-            on: {
-              DFSP_CA_PROPAGATED: [
-                { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_CA: false } }) }) },
-                { actions: 'notifyCompleted', cond: 'completedStates' },
-              ],
-            },
-          },
-          creatingDfspClientCert: {
-            ...DfspClientCert.createState<Context>(opts),
-            entry: [assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_CLIENT_CERT: true } }) })],
-            on: {
-              DFSP_CLIENT_CERT_CONFIGURED: [
-                {
-                  actions: assign({
-                    pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_CLIENT_CERT: false } }),
-                  }),
-                },
-                { actions: 'notifyCompleted', cond: 'completedStates' },
-              ],
-            },
-          },
-          creatingDfspServerCert: {
-            ...DfspServerCert.createState<Context>(opts),
-            entry: [assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_SERVER_CERT: true } }) })],
-            on: {
-              DFSP_SERVER_CERT_CONFIGURED: [
-                {
-                  actions: assign({
-                    pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_SERVER_CERT: false } }),
-                  }),
-                },
-                { actions: 'notifyCompleted', cond: 'completedStates' },
-              ],
-            },
-          },
-          creatingHubClientCert: {
-            ...HubCert.createState<Context>(opts),
-            entry: [assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ HUB_CERT: true } }) })],
-            on: {
-              HUB_CLIENT_CERT_SIGNED: [
-                { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ HUB_CERT: false } }) }) },
-                { actions: 'notifyCompleted', cond: 'completedStates' },
-              ],
-            },
-          },
-          pullingPeerJWS: {
-            ...PeerJWS.createState<Context>(opts),
-            entry: [assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ PEER_JWS: true } }) })],
-            on: {
-              PEER_JWS_CONFIGURED: [
-                { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ PEER_JWS: false } }) }) },
-                { actions: 'notifyCompleted', cond: 'completedStates' },
-              ],
-            },
-          },
-          creatingJWS: {
-            ...DfspJWS.createState<Context>(opts),
-            entry: [assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_JWS: true } }) })],
-            on: {
-              DFSP_JWS_PROPAGATED: [
-                { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_JWS: false } }) }) },
-                { actions: 'notifyCompleted', cond: 'completedStates' },
-              ],
-            },
-          },
-          endpointConfig: {
-            ...EndpointConfig.createState<Context>(opts),
-            entry: [assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ ENDPOINT_CONFIG: true } }) })],
-            on: {
-              DFSP_JWS_PROPAGATED: [
-                {
-                  actions: assign({
-                    pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ ENDPOINT_CONFIG: false } }),
-                  }),
-                },
-                { actions: 'notifyCompleted', cond: 'completedStates' },
-              ],
-            },
-          },
-          connectorConfig: {
-            ...ConnectorConfig.createState<Context>(opts),
-          },
+          fetchingHubCA: HubCA.createState<Context>(opts),
+          creatingDFSPCA: DfspCA.createState<Context>(opts),
+          creatingDfspClientCert: DfspClientCert.createState<Context>(opts),
+          creatingDfspServerCert: DfspServerCert.createState<Context>(opts),
+          creatingHubClientCert: HubCert.createState<Context>(opts),
+          pullingPeerJWS: PeerJWS.createState<Context>(opts),
+          creatingJWS: DfspJWS.createState<Context>(opts),
+          endpointConfig: EndpointConfig.createState<Context>(opts),
+          connectorConfig: ConnectorConfig.createState<Context>(opts),
         },
       },
       {
