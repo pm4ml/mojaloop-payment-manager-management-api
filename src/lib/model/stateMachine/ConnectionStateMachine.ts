@@ -53,7 +53,7 @@ type Event =
   | ProgressMonitor.Event;
 
 class ConnectionStateMachine {
-  private static VERSION = 2;
+  private static VERSION = 3;
   private started: boolean = false;
   private readonly hash: string;
   private service: any;
@@ -156,6 +156,7 @@ class ConnectionStateMachine {
           creatingJWS: DfspJWS.createState<Context>(opts),
           endpointConfig: EndpointConfig.createState<Context>(opts),
           connectorConfig: ConnectorConfig.createState<Context>(opts),
+          progressMonitor: ProgressMonitor.createState<Context>(opts),
         },
       },
       {
