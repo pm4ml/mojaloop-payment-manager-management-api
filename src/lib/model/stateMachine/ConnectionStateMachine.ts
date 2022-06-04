@@ -8,7 +8,7 @@
  *       Yevhen Kyriukha <yevhen.kyriukha@modusbox.com>                   *
  **************************************************************************/
 
-import { createMachine, interpret, assign } from 'xstate';
+import { createMachine, interpret } from 'xstate';
 import { inspect } from '@xstate/inspect/lib/server';
 
 import {
