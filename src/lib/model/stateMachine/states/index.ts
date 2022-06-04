@@ -17,3 +17,4 @@ export * from './dfspClientCert';
 export * from './dfspServerCert';
 export * from './connectorConfig';
 export * from './endpointConfig';
+export * from './progressMonitor';

@@ -25,12 +25,8 @@ const startMachine = (opts: ReturnType<typeof createMachineOpts>, onConfigChange
       context: {},
       type: 'parallel',
       states: {
-        pullingPeerJWS: {
-          ...PeerJWS.createState<Context>(opts),
-        },
-        connectorConfig: {
-          ...createTestConfigState(onConfigChange),
-        },
+        pullingPeerJWS: PeerJWS.createState<Context>(opts),
+        connectorConfig: createTestConfigState(onConfigChange),
       },
     },
     {

@@ -25,9 +25,7 @@ const startMachine = (opts: ReturnType<typeof createMachineOpts>) => {
       context: {},
       type: 'parallel',
       states: {
-        creatingHubClientCert: {
-          ...HubCert.createState<Context>(opts),
-        },
+        creatingHubClientCert: HubCert.createState<Context>(opts),
       },
     },
     {

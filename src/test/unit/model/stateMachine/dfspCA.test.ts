@@ -25,9 +25,7 @@ const startMachine = (opts: ReturnType<typeof createMachineOpts>) => {
       context: {},
       type: 'parallel',
       states: {
-        creatingDFSPCA: {
-          ...DfspCA.createState<Context>(opts),
-        },
+        creatingDFSPCA: DfspCA.createState<Context>(opts),
       },
     },
     {

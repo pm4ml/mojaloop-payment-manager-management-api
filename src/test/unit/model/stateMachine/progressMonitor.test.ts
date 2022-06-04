@@ -10,13 +10,13 @@
 
 import 'tsconfig-paths/register';
 
-import { EndpointConfig } from '@app/lib/model/stateMachine/states';
+import { ProgressMonitor } from '@app/lib/model/stateMachine/states';
 import { createMachine, interpret } from 'xstate';
 import { createMachineOpts } from './commonMocks';
 import { waitFor } from 'xstate/lib/waitFor';
 
-type Context = EndpointConfig.Context;
-type Event = EndpointConfig.Event;
+type Context = ProgressMonitor.Context;
+type Event = ProgressMonitor.Event;
 
 const startMachine = (opts: ReturnType<typeof createMachineOpts>) => {
   const machine = createMachine<Context, Event>(
@@ -25,12 +25,12 @@ const startMachine = (opts: ReturnType<typeof createMachineOpts>) => {
       context: {},
       type: 'parallel',
       states: {
-        endpointConfig: EndpointConfig.createState<Context>(opts),
+        progressMonitor: ProgressMonitor.createState<Context>(opts),
       },
     },
     {
       guards: {
-        ...EndpointConfig.createGuards<Context>(opts),
+        ...ProgressMonitor.createGuards<Context>(),
       },
       actions: {},
     }
@@ -42,29 +42,28 @@ const startMachine = (opts: ReturnType<typeof createMachineOpts>) => {
   return service;
 };
 
-describe('EndpointConfig', () => {
+describe('ProgressMonitor', () => {
   let opts: ReturnType<typeof createMachineOpts>;
 
-  beforeEach(() => {
+  beforeAll(() => {
     opts = createMachineOpts();
   });
 
-  test('should upload endpoint config', async () => {
-    opts.config.whitelistIP = ['1.1.1.1/32'];
-    opts.config.callbackURL = 'connector.fsp.example.com:443';
+  test('should initialize context', async () => {
     const service = startMachine(opts);
 
-    await waitFor(service, (state) => state.matches('endpointConfig.retry'));
+    await waitFor(service, (state) => state.matches('progressMonitor.idle'));
 
-    expect(opts.dfspEndpointModel.create).toHaveBeenNthCalledWith(1, {
-      direction: 'EGRESS',
-      ipList: [{ address: '1.1.1.1/32', ports: ['443'] }],
-    });
+    service.send('NEW_HUB_CA_FETCHED');
+    service.send('DFSP_CA_PROPAGATED');
+    service.send('DFSP_CLIENT_CERT_CONFIGURED');
+    service.send('DFSP_SERVER_CERT_CONFIGURED');
+    service.send('HUB_CLIENT_CERT_SIGNED');
+    service.send('PEER_JWS_CONFIGURED');
+    service.send('DFSP_JWS_PROPAGATED');
+    service.send('ENDPOINT_CONFIG_PROPAGATED');
 
-    expect(opts.dfspEndpointModel.create).toHaveBeenNthCalledWith(2, {
-      direction: 'INGRESS',
-      url: opts.config.callbackURL,
-    });
+    await waitFor(service, (state) => state.matches('progressMonitor.notifyingCompleted'));
 
     service.stop();
   });

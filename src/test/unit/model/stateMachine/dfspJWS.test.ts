@@ -25,12 +25,8 @@ const startMachine = (opts: ReturnType<typeof createMachineOpts>, onConfigChange
       context: {},
       type: 'parallel',
       states: {
-        creatingJWS: {
-          ...DfspJWS.createState<Context>(opts),
-        },
-        connectorConfig: {
-          ...createTestConfigState(onConfigChange),
-        },
+        creatingJWS: DfspJWS.createState<Context>(opts),
+        connectorConfig: createTestConfigState(onConfigChange),
       },
     },
     {

@@ -21,6 +21,7 @@ import {
   HubCert,
   ConnectorConfig,
   EndpointConfig,
+  ProgressMonitor,
 } from './states';
 
 import { MachineOpts } from './states/MachineOpts';
@@ -28,23 +29,7 @@ import WebSocket from 'ws';
 import * as crypto from 'crypto';
 import { ActionObject } from 'xstate/lib/types';
 
-interface PendingStates {
-  PEER_JWS: boolean;
-  DFSP_JWS: boolean;
-  DFSP_CA: boolean;
-  DFSP_SERVER_CERT: boolean;
-  DFSP_CLIENT_CERT: boolean;
-  HUB_CA: boolean;
-  HUB_CERT: boolean;
-  ENDPOINT_CONFIG: boolean;
-}
-
-interface MachineContext {
-  pendingStates: PendingStates;
-}
-
-type Context = MachineContext &
-  PeerJWS.Context &
+type Context = PeerJWS.Context &
   DfspJWS.Context &
   DfspCA.Context &
   DfspClientCert.Context &
@@ -52,7 +37,8 @@ type Context = MachineContext &
   HubCert.Context &
   HubCA.Context &
   ConnectorConfig.Context &
-  EndpointConfig.Context;
+  EndpointConfig.Context &
+  ProgressMonitor.Context;
 
 type Event =
   | PeerJWS.Event
@@ -63,7 +49,8 @@ type Event =
   | HubCert.Event
   | HubCA.Event
   | ConnectorConfig.Event
-  | EndpointConfig.Event;
+  | EndpointConfig.Event
+  | ProgressMonitor.Event;
 
 class ConnectionStateMachine {
   private static VERSION = 2;
@@ -73,7 +60,6 @@ class ConnectionStateMachine {
   private opts: MachineOpts;
   private context?: Context;
   private actions: Record<string, ActionObject<Context, Event>> = {};
-  // private pendingStates: PendingStates = {};
 
   constructor(opts: MachineOpts) {
     this.opts = opts;
@@ -158,53 +144,8 @@ class ConnectionStateMachine {
     return createMachine<Context, Event>(
       {
         id: 'machine',
-        context: {
-          pendingStates: {
-            PEER_JWS: true,
-            DFSP_JWS: true,
-            DFSP_CA: true,
-            DFSP_SERVER_CERT: true,
-            DFSP_CLIENT_CERT: true,
-            HUB_CA: true,
-            HUB_CERT: true,
-            ENDPOINT_CONFIG: true,
-          },
-        },
+        context: {},
         type: 'parallel',
-        on: {
-          NEW_HUB_CA_FETCHED: [
-            { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ HUB_CA: false } }) }) },
-            { actions: 'notifyCompleted', cond: 'completedStates' },
-          ],
-          DFSP_CA_PROPAGATED: [
-            { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_CA: false } }) }) },
-            { actions: 'notifyCompleted', cond: 'completedStates' },
-          ],
-          DFSP_CLIENT_CERT_CONFIGURED: [
-            { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_CLIENT_CERT: false } }) }) },
-            { actions: 'notifyCompleted', cond: 'completedStates' },
-          ],
-          DFSP_SERVER_CERT_CONFIGURED: [
-            { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_SERVER_CERT: false } }) }) },
-            { actions: 'notifyCompleted', cond: 'completedStates' },
-          ],
-          HUB_CLIENT_CERT_SIGNED: [
-            { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ HUB_CERT: false } }) }) },
-            { actions: 'notifyCompleted', cond: 'completedStates' },
-          ],
-          PEER_JWS_CONFIGURED: [
-            { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ PEER_JWS: false } }) }) },
-            { actions: 'notifyCompleted', cond: 'completedStates' },
-          ],
-          DFSP_JWS_PROPAGATED: [
-            { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ DFSP_JWS: false } }) }) },
-            { actions: 'notifyCompleted', cond: 'completedStates' },
-          ],
-          ENDPOINT_CONFIG_PROPAGATED: [
-            { actions: assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ ENDPOINT_CONFIG: false } }) }) },
-            { actions: 'notifyCompleted', cond: 'completedStates' },
-          ],
-        },
         states: {
           fetchingHubCA: HubCA.createState<Context>(opts),
           creatingDFSPCA: DfspCA.createState<Context>(opts),
@@ -219,7 +160,6 @@ class ConnectionStateMachine {
       },
       {
         guards: {
-          completedStates: (ctx) => Object.values(ctx.pendingStates).every((s) => !s),
           ...PeerJWS.createGuards<Context>(),
           // ...DfspJWS.createGuards<Context>(),
           ...DfspClientCert.createGuards<Context>(),
@@ -228,13 +168,9 @@ class ConnectionStateMachine {
           ...HubCert.createGuards<Context>(),
           ...HubCA.createGuards<Context>(),
           ...EndpointConfig.createGuards<Context>(opts),
+          ...ProgressMonitor.createGuards<Context>(),
         },
         actions: {
-          // completeStep: (ctx) => assign({ pendingStates: (ctx) => ({ ...ctx.pendingStates, ...{ PEER_JWS: false } }) }),
-          notifyCompleted: () => {
-            // TODO: notify onboard completed
-            console.log('Onboarding completed');
-          },
           // ...ConnectorConfig.createActions<Context>(),
         },
       }

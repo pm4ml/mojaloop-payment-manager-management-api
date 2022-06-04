@@ -25,12 +25,8 @@ const startMachine = (opts: ReturnType<typeof createMachineOpts>, onConfigChange
       context: {},
       type: 'parallel',
       states: {
-        creatingDfspClientCert: {
-          ...DfspClientCert.createState<Context>(opts),
-        },
-        connectorConfig: {
-          ...createTestConfigState(onConfigChange),
-        },
+        creatingDfspClientCert: DfspClientCert.createState<Context>(opts),
+        connectorConfig: createTestConfigState(onConfigChange),
       },
     },
     {

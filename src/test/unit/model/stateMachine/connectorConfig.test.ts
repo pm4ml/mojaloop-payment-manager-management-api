@@ -25,9 +25,7 @@ const startMachine = (opts: ReturnType<typeof createMachineOpts>) => {
       context: {},
       type: 'parallel',
       states: {
-        connectorConfig: {
-          ...ConnectorConfig.createState<Context>(opts),
-        },
+        connectorConfig: ConnectorConfig.createState<Context>(opts),
       },
     },
     {

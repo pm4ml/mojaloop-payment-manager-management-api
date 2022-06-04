@@ -25,12 +25,8 @@ const startMachine = (opts: ReturnType<typeof createMachineOpts>, onConfigChange
       context: {},
       type: 'parallel',
       states: {
-        fetchingHubCA: {
-          ...HubCA.createState<Context>(opts),
-        },
-        connectorConfig: {
-          ...createTestConfigState(onConfigChange),
-        },
+        fetchingHubCA: HubCA.createState<Context>(opts),
+        connectorConfig: createTestConfigState(onConfigChange),
       },
     },
     {
