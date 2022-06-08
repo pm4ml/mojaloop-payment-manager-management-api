@@ -289,6 +289,11 @@ class Vault {
     });
   }
 
+  certIsValid(certPem, date = Date.now()) {
+    const cert = forge.pki.certificateFromPem(certPem);
+    return cert.validity.notBefore.getTime() > date && date < cert.validity.notAfter.getTime();
+  }
+
   createCSR(csrParameters?: CsrParams) {
     const keys = forge.pki.rsa.generateKeyPair(this.cfg.keyLength);
     const csr = forge.pki.createCertificationRequest();

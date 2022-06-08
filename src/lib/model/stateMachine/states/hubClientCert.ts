@@ -49,24 +49,32 @@ export namespace HubCert {
               retryInterval: opts.refreshIntervalSeconds * 1000,
               service: async () => opts.hubCertificateModel.getClientCerts(),
             }),
-          onDone: [
-            {
-              target: 'signingHubCSR',
-              actions: assign({
-                hubClientCerts: (ctx, { data }) =>
-                  data.map((remoteCsr) => ({
-                    id: remoteCsr.id,
-                    csr: remoteCsr.csr,
-                    ...(ctx.hubClientCerts?.some((processedCsr) => processedCsr.csr === remoteCsr.csr) && {
-                      cert: remoteCsr.certificate,
-                    }),
-                  })),
-              }),
-              cond: 'hasUnprocessedCerts',
-            },
-            { target: 'completed' },
-          ],
+          onDone: 'updatingCSR',
         },
+      },
+      updatingCSR: {
+        entry: assign({
+          hubClientCerts: (ctx, event: AnyEventObject) =>
+            event.data.map((remoteCsr) => ({
+              id: remoteCsr.id,
+              csr: remoteCsr.csr,
+              ...(ctx.hubClientCerts?.some(
+                (processedCsr) =>
+                  processedCsr.csr === remoteCsr.csr &&
+                  remoteCsr.certificate &&
+                  opts.vault.certIsValid(remoteCsr.certificate)
+              ) && {
+                cert: remoteCsr.certificate,
+              }),
+            })),
+        }),
+        always: [
+          {
+            target: 'signingHubCSR',
+            cond: 'hasUnprocessedCerts',
+          },
+          { target: 'completed' },
+        ],
       },
       signingHubCSR: {
         invoke: {
@@ -78,12 +86,11 @@ export namespace HubCert {
               retryInterval: opts.refreshIntervalSeconds * 1000,
               service: () =>
                 Promise.all(
-                  ctx
-                    .hubClientCerts!.filter((cert) => !cert.cert)
-                    .map(async (hubCert) => {
-                      const { certificate } = await opts.vault.signHubCSR(hubCert.csr);
-                      return { ...hubCert, cert: certificate };
-                    })
+                  ctx.hubClientCerts!.map(async (hubCert) => {
+                    if (hubCert.cert) return hubCert;
+                    const { certificate } = await opts.vault.signHubCSR(hubCert.csr);
+                    return { ...hubCert, cert: certificate };
+                  })
                 ),
             }),
           onDone: { actions: assign({ hubClientCerts: (context, { data }) => data }), target: 'uploadingHubCert' },
@@ -127,7 +134,6 @@ export namespace HubCert {
   });
 
   export const createGuards = <TContext extends Context>() => ({
-    hasUnprocessedCerts: (ctx: TContext, event: AnyEventObject) =>
-      event.data.some((remoteCsr) => !ctx.hubClientCerts?.some((processedCsr) => processedCsr.csr === remoteCsr.csr)),
+    hasUnprocessedCerts: (ctx: TContext) => ctx.hubClientCerts!.some((cert) => !cert.cert),
   });
 }

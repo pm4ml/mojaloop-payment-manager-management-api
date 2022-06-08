@@ -52,6 +52,8 @@ describe('HubCert', () => {
     if (csr === 'HUB CSR 4') return { certificate: 'HUB CERT 4' };
   });
 
+  opts.vault.certIsValid.mockImplementation(() => true);
+
   opts.refreshIntervalSeconds = 1;
   const service = startMachine(opts);
 
@@ -119,6 +121,7 @@ describe('HubCert', () => {
     expect(opts.hubCertificateModel.getClientCerts).toHaveBeenCalled();
     expect(opts.vault.signHubCSR).toHaveBeenNthCalledWith(++signHubCSRCalls, 'HUB CSR 3');
     expect(opts.vault.signHubCSR).toHaveBeenNthCalledWith(++signHubCSRCalls, 'HUB CSR 4');
+    uploadServerCertCalls += 2;
     expect(opts.hubCertificateModel.uploadServerCertificate).toHaveBeenNthCalledWith(++uploadServerCertCalls, {
       enId: 333,
       entry: { certificate: 'HUB CERT 3' },
@@ -181,6 +184,31 @@ describe('HubCert', () => {
     expect(opts.hubCertificateModel.uploadServerCertificate).toHaveBeenNthCalledWith(++uploadServerCertCalls, {
       enId: 111,
       entry: { certificate: 'HUB CERT 1 (NEW)' },
+    });
+    uploadServerCertCalls += 3;
+  });
+
+  test('should re-sign expired hub certificates', async () => {
+    opts.hubCertificateModel.getClientCerts.mockImplementation(async () => [
+      { id: 111, csr: 'HUB CSR 1 (NEW)', certificate: 'HUB CERT 1 (NEW)' },
+      { id: 222, csr: 'HUB CSR 2', certificate: 'HUB CERT 2' },
+      { id: 333, csr: 'HUB CSR 3', certificate: 'HUB CERT 3' },
+      { id: 444, csr: 'HUB CSR 4', certificate: 'HUB CERT 4' },
+    ]);
+
+    opts.vault.signHubCSR.mockImplementation(async () => ({ certificate: 'HUB CERT 4 (RENEWED)' }));
+
+    opts.vault.certIsValid.mockImplementation((cert) => cert !== 'HUB CERT 4');
+
+    await waitFor(service, (state) => state.matches('creatingHubClientCert.fetchingHubCSR'));
+    await waitFor(service, (state) => state.matches('creatingHubClientCert.retry'));
+
+    expect(opts.hubCertificateModel.getClientCerts).toHaveBeenCalled();
+    expect(opts.vault.signHubCSR).toHaveBeenNthCalledWith(++signHubCSRCalls, 'HUB CSR 4');
+    uploadServerCertCalls += 3;
+    expect(opts.hubCertificateModel.uploadServerCertificate).toHaveBeenNthCalledWith(++uploadServerCertCalls, {
+      enId: 444,
+      entry: { certificate: 'HUB CERT 4 (RENEWED)' },
     });
   });
 });
