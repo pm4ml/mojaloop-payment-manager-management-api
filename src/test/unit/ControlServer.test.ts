@@ -62,8 +62,7 @@ describe('ControlServer', () => {
 
       expect(server.broadcast).toHaveBeenCalledTimes(1);
       expect(server.broadcast).toHaveBeenCalledWith(
-        ControlServer.build.CONFIGURATION.NOTIFY(changedConfig, randomPhrase()),
-        expect.any(Function)
+        ControlServer.build.CONFIGURATION.NOTIFY(changedConfig, randomPhrase())
       );
     });
   });
