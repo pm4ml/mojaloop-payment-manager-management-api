@@ -196,7 +196,9 @@ class Server extends ws.Server {
    * from other modules.
    */
   registerInternalEvents() {
-    ControlServerEventEmitter.on(INTERNAL_EVENTS.SERVER.BROADCAST_CONFIG_CHANGE, (params) => this.broadcastConfigChange(params));
+    ControlServerEventEmitter.on(INTERNAL_EVENTS.SERVER.BROADCAST_CONFIG_CHANGE, (params) =>
+      this.broadcastConfigChange(params)
+    );
   }
 
   /**
