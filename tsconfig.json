@@ -1,34 +1,59 @@
 {
   "include": [
-    "src/**/*",
-    "test/**/*",
+    "src",
+    "src/**/*.json",
+    "test",
+    "jest.bdd.config.js",
+    "jest.config.js",
+    "jest.integration.config.js",
     ".eslintrc.js",
-    "typings.d.ts",
+    "docker",
+    "commitlint.config.js",
+    "types/ambient.d.ts",
+    "config",
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "dist",
+    "coverage",
+    "test",
+    "commitlint.config.js",
+    "jest.bdd.config.js",
+    "jest.config.js"
   ],
   "compilerOptions": {
+    "target": "es2020",
+    "module": "commonjs",
+    "rootDirs": [
+      "src",
+      "test"
+    ],
     "baseUrl": ".",
     "paths": {
-      "@app/*": ["./src/*"],
+      "@app/*": [ "dist/src/*" ]
     },
+    "lib": [
+      "es2020"
+    ],
+    "importHelpers": true,
+    "declaration": true,
     "sourceMap": true,
-    "module": "commonjs",
-    "target": "es2021",
-    "noEmit": false,
+    "rootDir": "./",
     "outDir": "dist",
-    "lib": ["es2021"],
     "strict": true,
     "noImplicitAny": false,
-    "noImplicitThis": false,
-    "alwaysStrict": true,
-    "strictBindCallApply": true,
+    "strictNullChecks": true,
     "strictFunctionTypes": true,
-    "skipLibCheck": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": false,
     "noUnusedParameters": false,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": false,
+    "moduleResolution": "node",
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
   }
 }
