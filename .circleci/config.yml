@@ -16,13 +16,13 @@ orbs:
 # YAML defaults templates, in alphabetical order
 ##
 defaults_Dependencies: &defaults_Dependencies |
-  apk --update --no-cache add \
-    git \
-    ca-certificates \
-    curl \
-    wget \
-    openssh-client \
-    -t build-dependencies make gcc g++ python3 libtool autoconf automake
+  apk --no-cache add bash
+  apk --no-cache add git
+  apk --no-cache add ca-certificates
+  apk --no-cache add curl
+  apk --no-cache add openssh-client
+  apk add --no-cache -t build-dependencies make gcc g++ python3 libtool autoconf automake jq
+  apk add --no-cache -t openssl ncurses coreutils libgcc linux-headers grep util-linux binutils findutils
   npm config set unsafe-perm true
   npm install -g node-gyp
 
@@ -41,7 +41,7 @@ executors:
   default-docker:
     working_directory: /home/circleci/project/git
     docker:
-      - image: node:lts-alpine
+      - image: node:16.15.0-alpine # Ref: https://hub.docker.com/_/node?tab=tags&page=1&name=alpine
 
   default-machine:
     working_directory: /home/circleci/project/git
