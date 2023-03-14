@@ -50,7 +50,7 @@ describe('HubCert', () => {
     if (csr === 'HUB CSR 2') return { certificate: 'HUB CERT 2' };
     if (csr === 'HUB CSR 3') return { certificate: 'HUB CERT 3' };
     if (csr === 'HUB CSR 4') return { certificate: 'HUB CERT 4' };
-    return { certificate: 'UNKNOWN' }
+    return { certificate: 'UNKNOWN' };
   });
 
   opts.vault.certIsValid.mockImplementation(() => true);

@@ -1,12 +1,12 @@
 declare module '@mojaloop/ml-number' {
   export enum RoundingMode {
     ROUND_DOWN = 'ROUND_DOWN',
-    ROUND_UP = 'ROUND_UP'
+    ROUND_UP = 'ROUND_UP',
   }
 
   export default class MLNumber {
-    constructor (value: string | number | MLNumber)
-  
+    constructor(value: string | number | MLNumber);
+
     /**
      * @function sumList
      *
@@ -16,8 +16,8 @@ declare module '@mojaloop/ml-number' {
      *
      * @return {MLNumber} - Returns a new MLNumber object and return a new Instance of MLNumber
      */
-    sumList (values: MLNumber[]): MLNumber
-  
+    sumList(values: MLNumber[]): MLNumber;
+
     /**
      * @function add
      *
@@ -27,8 +27,8 @@ declare module '@mojaloop/ml-number' {
      *
      * @return {MLNumber} - Returns a MLNumber object and return a new Instance of MLNumber
      */
-    add (addition: string | number | MLNumber): MLNumber
-  
+    add(addition: string | number | MLNumber): MLNumber;
+
     /**
      * @function multiply
      *
@@ -38,8 +38,8 @@ declare module '@mojaloop/ml-number' {
      *
      * @return {MLNumber} - Returns a MLNumber object and return a new Instance of MLNumber
      */
-    multiply (product: string | number | MLNumber): MLNumber
-  
+    multiply(product: string | number | MLNumber): MLNumber;
+
     /**
      * @function subtract
      *
@@ -49,8 +49,8 @@ declare module '@mojaloop/ml-number' {
      *
      * @return {MLNumber} - Returns a MLNumber object and return a new Instance of MLNumber
      */
-    subtract (difference: string | number | MLNumber): MLNumber
-  
+    subtract(difference: string | number | MLNumber): MLNumber;
+
     /**
      * @function divide
      *
@@ -60,8 +60,8 @@ declare module '@mojaloop/ml-number' {
      *
      * @return {MLNumber} - Returns a MLNumber object and return a new Instance of MLNumber
      */
-    divide (denominator: string | number | MLNumber): MLNumber
-  
+    divide(denominator: string | number | MLNumber): MLNumber;
+
     /**
      * @function shiftedBy
      *
@@ -71,8 +71,8 @@ declare module '@mojaloop/ml-number' {
      *
      * @return {MLNumber} - Returns a MLNumber object and return a new Instance of MLNumber
      */
-    shiftedBy (n: number): MLNumber
-  
+    shiftedBy(n: number): MLNumber;
+
     /**
      * @function toString
      *
@@ -80,8 +80,8 @@ declare module '@mojaloop/ml-number' {
      *
      * @return {string} - Returns string value from MLNumber object
      */
-    toString (): string
-  
+    toString(): string;
+
     /**
      * @function toNumber
      *
@@ -89,8 +89,8 @@ declare module '@mojaloop/ml-number' {
      *
      * @return {number} - Returns number value from MLNumber object
      */
-    toNumber (): number
-  
+    toNumber(): number;
+
     /**
      * @function toFixed
      *
@@ -101,6 +101,6 @@ declare module '@mojaloop/ml-number' {
      *
      * @return {string} - Returns pretty string value with decimal points and rounding from MLNumber object
      */
-    toFixed (decimalPlaces?: number, roundingMode?: RoundingMode): string
+    toFixed(decimalPlaces?: number, roundingMode?: RoundingMode): string;
   }
 }

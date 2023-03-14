@@ -13,7 +13,7 @@ fi
 
 cd $TEMP_DIR
 if [ ! -f vault ]; then
-	wget https://releases.hashicorp.com/vault/1.8.1/vault_1.8.1_linux_amd64.zip -N -q --show-progress
+	wget https://releases.hashicorp.com/vault/1.8.1/vault_1.8.1_linux_amd64.zip -q
 	unzip vault*.zip
 fi
 VAULT_DEV_ROOT_TOKEN_ID=$VAULT_TOKEN VAULT_DEV_LISTEN_ADDRESS=0.0.0.0:8233 ./vault server -dev &

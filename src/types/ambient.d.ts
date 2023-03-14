@@ -1,8 +1,8 @@
 // for mojaloop there is lack for @types files
 // to stop typescript complains, we have to declare some modules here
 
-declare module '@mojaloop/central-services-error-handling'{
-  export function validateRoutes(options?: Record<string, unknown>): Record<string, unknown>
+declare module '@mojaloop/central-services-error-handling' {
+  export function validateRoutes(options?: Record<string, unknown>): Record<string, unknown>;
   interface APIError {
     errorInformation: {
       errorCode: string | number;
@@ -11,12 +11,12 @@ declare module '@mojaloop/central-services-error-handling'{
   }
   class FSPIOPError {
     public toString(): string;
-    public toApiErrorRecord(options: { includeCauseExtension?: boolean; truncateExtensions?: boolean }): APIError
+    public toApiErrorRecord(options: { includeCauseExtension?: boolean; truncateExtensions?: boolean }): APIError;
   }
   interface FactoryI {
     createFSPIOPErrorFromOpenapiError(error: any, replyTo?: any): FSPIOPError;
   }
-  export const Factory: FactoryI
+  export const Factory: FactoryI;
   interface FSPIOPErrorCode {
     code: string;
     message: string;
@@ -97,13 +97,13 @@ declare module '@mojaloop/central-services-error-handling'{
       PAYEE_PERMISSION_ERROR: FSPIOPErrorCode; // code: '5300', message: 'Payee permission error' },
       GENERIC_PAYEE_BLOCKED_ERROR: FSPIOPErrorCode; // code: '5400', message: 'Generic Payee blocked error' }
     };
-  }
+  };
   export function ReformatFSPIOPError(
     error: Record<string, unknown>,
     apiErrorCode?: FSPIOPErrorCode,
     replyTo?: string,
     extensions?: Record<string, unknown>
-  ): FSPIOPError
+  ): FSPIOPError;
 
   export function CreateFSPIOPError(
     apiErrorCode?: FSPIOPErrorCode,
@@ -112,7 +112,7 @@ declare module '@mojaloop/central-services-error-handling'{
     replyTo?: string,
     extensions?: Record<string, unknown>,
     useDescriptionAsMessage?: boolean
-  ): FSPIOPError
+  ): FSPIOPError;
 }
 declare module '@mojaloop/central-services-shared' {
   interface ReturnCode {
@@ -185,7 +185,7 @@ declare module '@mojaloop/central-services-shared' {
     THIRDPARTY_TRANSACTIONS_AUTHORIZATIONS_POST = 'FSPIOP_THIRDPARTY_TRANSACTIONS_AUTHORIZATIONS_POST',
     THIRDPARTY_TRANSACTIONS_AUTHORIZATIONS_PUT = 'FSPIOP_THIRDPARTY_TRANSACTIONS_AUTHORIZATIONS_PUT',
     THIRDPARTY_TRANSACTIONS_AUTHORIZATIONS_ERROR = 'FSPIOP_THIRDPARTY_TRANSACTIONS_AUTHORIZATIONS_PUT_ERROR',
-    THIRDPARTY_CALLBACK_URL_TRX_REQ_POST = 'THIRDPARTY_CALLBACK_URL_TRX_REQ_POST'
+    THIRDPARTY_CALLBACK_URL_TRX_REQ_POST = 'THIRDPARTY_CALLBACK_URL_TRX_REQ_POST',
   }
   interface EndPointsEnum {
     EndpointType: {
@@ -270,29 +270,29 @@ declare module '@mojaloop/central-services-shared' {
     };
   }
   class Endpoints {
-    public fetchEndpoints(fspId: string): Promise<{[id: string]: string}>
+    public fetchEndpoints(fspId: string): Promise<{ [id: string]: string }>;
 
     public getEndpoint(
       switchUrl: string,
       fsp: string,
       endpointType: FspEndpointTypesEnum,
-      options?: {[id: string]: string | number | boolean }
-    ): Promise<string>
+      options?: { [id: string]: string | number | boolean }
+    ): Promise<string>;
 
-    public initializeCache(policyOptions: Record<string, unknown>): Promise<boolean>
+    public initializeCache(policyOptions: Record<string, unknown>): Promise<boolean>;
   }
   interface Span {
-    getChild (id: string): Span;
-    setTags (tags: {[id: string]: string}): void;
+    getChild(id: string): Span;
+    setTags(tags: { [id: string]: string }): void;
   }
 
-  import OpenAPIBackend, { Context, Handler } from 'openapi-backend'
-  import { SpawnSyncOptions } from 'child_process'
+  import OpenAPIBackend, { Context, Handler } from 'openapi-backend';
+  import { SpawnSyncOptions } from 'child_process';
 
   class Request {
     public sendRequest(
       url: string,
-      headers: {[id: string]: string},
+      headers: { [id: string]: string },
       source: string,
       destination: string,
       method?: string,
@@ -300,7 +300,7 @@ declare module '@mojaloop/central-services-shared' {
       responseType?: string,
       span?: SpawnSyncOptions,
       jwsSigner?: any
-    ): Promise<any>
+    ): Promise<any>;
   }
 
   interface Util {
@@ -322,29 +322,28 @@ declare module '@mojaloop/central-services-shared' {
     };
   }
 
-  const Enum: Enum
-  const Util: Util
+  const Enum: Enum;
+  const Util: Util;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const HealthCheck: any
+  const HealthCheck: any;
 }
 
-declare module '@mojaloop/central-services-metrics'
-declare module '@hapi/good'
-declare module 'blipp'
-declare module 'convict-commander'
+declare module '@mojaloop/central-services-metrics';
+declare module '@hapi/good';
+declare module 'blipp';
+declare module 'convict-commander';
 
 // version 2.4 -> https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/javascript-state-machine/index.d.ts
 // we are using ^3.1.0
 declare module 'javascript-state-machine' {
-  type Method = (...args: unknown[]) => void | Promise<void>
-  type Data = Record<string, string | number | boolean | unknown>
+  type Method = (...args: unknown[]) => void | Promise<void>;
+  type Data = Record<string, string | number | boolean | unknown>;
 
-
-    interface Transition {
-      name: string;
-      from: string;
-      to: string;
-    }
+  interface Transition {
+    name: string;
+    from: string;
+    to: string;
+  }
   interface TransitionEvent<JSM> {
     transition: string;
     from: string;
@@ -364,48 +363,47 @@ declare module 'javascript-state-machine' {
     state: string;
 
     // return true if state s is the current state
-    is(s: string): boolean
+    is(s: string): boolean;
 
     // return true if transition t can occur from the current state
-    can(t: string): boolean
+    can(t: string): boolean;
 
     // return true if transition t cannot occur from the current state
-    cannot(t: string): boolean
+    cannot(t: string): boolean;
 
     // return list of transitions that are allowed from the current state
-    transitions(): string[]
+    transitions(): string[];
 
     // return list of all possible transitions
-    allTransitions(): string[]
+    allTransitions(): string[];
 
     // return list of all possible states
-    allStates(): string []
+    allStates(): string[];
   }
   export default class StateMachine {
-    constructor(config: StateMachineConfig)
+    constructor(config: StateMachineConfig);
 
     // current state
     state: string;
 
     // return true if state s is the current state
-    is(s: string): boolean
+    is(s: string): boolean;
 
     // return true if transition t can occur from the current state
-    can(t: string): boolean
+    can(t: string): boolean;
 
     // return true if transition t cannot occur from the current state
-    cannot(t: string): boolean
+    cannot(t: string): boolean;
 
     // return list of transitions that are allowed from the current state
-    transitions(): string[]
+    transitions(): string[];
 
     // return list of all possible transitions
-    allTransitions(): string[]
+    allTransitions(): string[];
 
     // return list of all possible states
-    allStates(): string []
+    allStates(): string[];
 
-    static factory(spec: StateMachineConfig): StateMachine
+    static factory(spec: StateMachineConfig): StateMachine;
   }
-
 }
