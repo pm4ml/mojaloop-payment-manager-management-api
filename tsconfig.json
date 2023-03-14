@@ -9,8 +9,7 @@
     ".eslintrc.js",
     "docker",
     "commitlint.config.js",
-    "types/ambient.d.ts",
-    "config",
+    "types/ambient.d.ts"
   ],
   "exclude": [
     "node_modules",
@@ -26,11 +25,12 @@
     "module": "commonjs",
     "rootDirs": [
       "src",
-      "test"
+      "test",
+      "dist"
     ],
     "baseUrl": ".",
     "paths": {
-      "@app/*": [ "dist/src/*" ]
+      "@app/*": [ "src/*" ]
     },
     "lib": [
       "es2020"

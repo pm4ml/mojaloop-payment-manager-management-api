@@ -19,7 +19,7 @@
   "scripts": {
     "build": "tsc",
     "start": "npm run start:no-build",
-    "start:no-build": "node dist/src/index.js",
+    "start:no-build": "node -r ./tsconfig-paths.js dist/src/index.js",
     "start:build": "npm run build && npm run start:no-build",
     "start:dev": "ts-node -r tsconfig-paths/register -P ./tsconfig.json src/index.ts",
     "lint": "eslint src",

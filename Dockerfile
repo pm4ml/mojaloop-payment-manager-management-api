@@ -34,13 +34,12 @@ LABEL org.label-schema.vcs-url=$VCS_URL
 LABEL org.label-schema.vcs-ref=$VCS_REF
 LABEL org.label-schema.version=$VERSION
 
-COPY package.json package-lock.json* /opt/app/
+COPY tsconfig.json tsconfig-paths.js package.json package-lock.json* /opt/app/
 
 RUN npm ci --production
 
 ## Copy of dist directory from builder
 COPY --from=builder /opt/app/dist ./dist
-COPY --from=builder /opt/app/config ./config
 
 ## Expose any application ports
 EXPOSE 3000
