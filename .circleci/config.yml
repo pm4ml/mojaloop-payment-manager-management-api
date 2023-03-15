@@ -168,12 +168,16 @@ jobs:
       - checkout
       - setup_remote_docker:
           version: 18.09.3
-      - run: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
-      - run: |
+      - run:
+        name: Login Docker
+        command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+      - run:
+        name: Build Docker
+        command: |
           export IMAGE_TAG=$(echo $CIRCLE_TAG | tr -d v)
           echo "tag is $IMAGE_TAG"
           docker buildx build --push \
-            --platform linux/arm/v7,linux/arm64/v8,linux/i386,linux/amd64 \
+            --platform linux/arm/v7,linux/arm64/v8,linux/amd64 \
             --tag $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:$IMAGE_TAG .
 
   license-scan:
