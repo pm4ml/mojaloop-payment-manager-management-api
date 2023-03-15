@@ -168,12 +168,8 @@ jobs:
       - checkout
       - setup_remote_docker:
           version: 18.09.3
-      - run:
-        name: Login Docker
-        command: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
-      - run:
-        name: Build Docker
-        command: |
+      - run: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+      - run: |
           export IMAGE_TAG=$(echo $CIRCLE_TAG | tr -d v)
           echo "tag is $IMAGE_TAG"
           docker buildx build --push \
