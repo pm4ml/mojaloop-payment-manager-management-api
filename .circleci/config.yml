@@ -169,11 +169,9 @@ jobs:
       - setup_remote_docker:
           version: 18.09.3
       - run: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
-      - run:
-          name: Set image tag
-          command: |
-            export IMAGE_TAG=$(echo $CIRCLE_TAG | tr -d v)
       - run: |
+          export IMAGE_TAG=$(echo $CIRCLE_TAG | tr -d v)
+          echo "tag is $IMAGE_TAG"
           docker buildx build --push \
             --platform linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/i386,linux/amd64 \
             --tag $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:$IMAGE_TAG .
