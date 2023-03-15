@@ -161,6 +161,26 @@ jobs:
           root: /tmp
           paths:
             - ./docker-image.tar
+  publish:
+    docker:
+      - image: jdrouet/docker-with-buildx:stable
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 18.09.3
+      - run: docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+      - run:
+          name: Set image tag
+          command: |
+            if [[ -v CIRCLE_TAG ]]; then
+              echo 'export IMAGE_TAG=$(echo $CIRCLE_TAG | tr -d v)' >> $BASH_ENV
+            else
+              echo 'export IMAGE_TAG=$CIRCLE_BRANCH' >> $BASH_ENV
+            fi
+      - run: |
+          docker buildx build --push \
+            --platform linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/i386,linux/amd64 \
+            --tag $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:$IMAGE_TAG .
 
   license-scan:
     executor: default-machine
@@ -234,9 +254,39 @@ workflows:
                 - /feature*/
                 - /bugfix*/
                 - /hotfix*/
+  # deploy:
+  #   jobs:
+  #     - docker/publish:
+  #         context: pm4ml-ci
+  #         filters:
+  #           tags:
+  #             only: /v[0-9]+(\.[0-9]+)*(\-snapshot(\.[0-9]+))?(\-hotfix(\.[0-9]+))?/
+  #           branches:
+  #             ignore:
+  #               - /.*/
+  #         extra_build_args: '--build-arg NPM_TOKEN=${NPM_TOKEN}'
+  #         before_build:
+  #           - run:
+  #               name: Set image tag
+  #               command: |
+  #                 if [[ -v CIRCLE_TAG ]]; then
+  #                   echo 'export IMAGE_TAG=$(echo $CIRCLE_TAG | tr -d v)' >> $BASH_ENV
+  #                 else
+  #                   echo 'export IMAGE_TAG=$CIRCLE_BRANCH' >> $BASH_ENV
+  #                 fi
+  #         lint-dockerfile: false
+  #         image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+  #         tag: $IMAGE_TAG
+  #         docker-username: DOCKER_USER
+  #         docker-password: DOCKER_PASSWORD
+#          after_build:
+#            - slack/status:
+#              success_message: Publish/deploy succeeded in branch $CIRCLE_BRANCH
+#              failure_message: Public/deploy failed in branch $CIRCLE_BRANCH
+#              webhook: $SLACK_WEBHOOK
   deploy:
     jobs:
-      - docker/publish:
+      - publish:
           context: pm4ml-ci
           filters:
             tags:
@@ -244,23 +294,4 @@ workflows:
             branches:
               ignore:
                 - /.*/
-          extra_build_args: '--build-arg NPM_TOKEN=${NPM_TOKEN}'
-          before_build:
-            - run:
-                name: Set image tag
-                command: |
-                  if [[ -v CIRCLE_TAG ]]; then
-                    echo 'export IMAGE_TAG=$(echo $CIRCLE_TAG | tr -d v)' >> $BASH_ENV
-                  else
-                    echo 'export IMAGE_TAG=$CIRCLE_BRANCH' >> $BASH_ENV
-                  fi
-          lint-dockerfile: false
-          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
-          tag: $IMAGE_TAG
-          docker-username: DOCKER_USER
-          docker-password: DOCKER_PASSWORD
-#          after_build:
-#            - slack/status:
-#              success_message: Publish/deploy succeeded in branch $CIRCLE_BRANCH
-#              failure_message: Public/deploy failed in branch $CIRCLE_BRANCH
-#              webhook: $SLACK_WEBHOOK
+
