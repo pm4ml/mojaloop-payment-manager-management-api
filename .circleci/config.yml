@@ -172,11 +172,7 @@ jobs:
       - run:
           name: Set image tag
           command: |
-            if [[ -v CIRCLE_TAG ]]; then
-              echo 'export IMAGE_TAG=$(echo $CIRCLE_TAG | tr -d v)' >> $BASH_ENV
-            else
-              echo 'export IMAGE_TAG=$CIRCLE_BRANCH' >> $BASH_ENV
-            fi
+            export IMAGE_TAG=$(echo $CIRCLE_TAG | tr -d v)
       - run: |
           docker buildx build --push \
             --platform linux/arm/v6,linux/arm/v7,linux/arm64/v8,linux/i386,linux/amd64 \
