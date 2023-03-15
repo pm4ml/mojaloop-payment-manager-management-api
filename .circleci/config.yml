@@ -168,7 +168,7 @@ jobs:
       - checkout
       - setup_remote_docker:
           version: 18.09.3
-      - run: docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+      - run: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
       - run:
           name: Set image tag
           command: |
