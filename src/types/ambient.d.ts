@@ -1,5 +1,5 @@
 // for mojaloop there is lack for @types files
-// to stop typescript complains, we have to declare some modules here
+// to stop typescript complaints, we have to declare some modules here
 
 declare module '@mojaloop/central-services-error-handling' {
   export function validateRoutes(options?: Record<string, unknown>): Record<string, unknown>;
