@@ -16,13 +16,13 @@ orbs:
 # YAML defaults templates, in alphabetical order
 ##
 defaults_Dependencies: &defaults_Dependencies |
-  apk --update --no-cache add \
-    git \
-    ca-certificates \
-    curl \
-    wget \
-    openssh-client \
-    -t build-dependencies make gcc g++ python3 libtool autoconf automake
+  apk --no-cache add bash
+  apk --no-cache add git
+  apk --no-cache add ca-certificates
+  apk --no-cache add curl
+  apk --no-cache add openssh-client
+  apk add --no-cache -t build-dependencies make gcc g++ python3 libtool autoconf automake jq
+  apk add --no-cache -t openssl ncurses coreutils libgcc linux-headers grep util-linux binutils findutils
   npm config set unsafe-perm true
   npm install -g node-gyp
 
@@ -41,7 +41,7 @@ executors:
   default-docker:
     working_directory: /home/circleci/project/git
     docker:
-      - image: node:lts-alpine
+      - image: node:16.15.0-alpine # Ref: https://hub.docker.com/_/node?tab=tags&page=1&name=alpine
 
   default-machine:
     working_directory: /home/circleci/project/git
@@ -161,6 +161,20 @@ jobs:
           root: /tmp
           paths:
             - ./docker-image.tar
+  publish:
+    docker:
+      - image: jdrouet/docker-with-buildx:stable
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 18.09.3
+      - run: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
+      - run: |
+          export IMAGE_TAG=$(echo $CIRCLE_TAG | tr -d v)
+          echo "tag is $IMAGE_TAG"
+          docker buildx build --push \
+            --platform linux/arm/v7,linux/arm64/v8,linux/amd64 \
+            --tag $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:$IMAGE_TAG .
 
   license-scan:
     executor: default-machine
@@ -234,33 +248,44 @@ workflows:
                 - /feature*/
                 - /bugfix*/
                 - /hotfix*/
-  deploy:
-    jobs:
-      - docker/publish:
-          context: pm4ml-ci
-          filters:
-            tags:
-              only: /v[0-9]+(\.[0-9]+)*(\-snapshot)?(\-hotfix(\.[0-9]+))?/
-            branches:
-              ignore:
-                - /.*/
-          extra_build_args: '--build-arg NPM_TOKEN=${NPM_TOKEN}'
-          before_build:
-            - run:
-                name: Set image tag
-                command: |
-                  if [[ -v CIRCLE_TAG ]]; then
-                    echo 'export IMAGE_TAG=$(echo $CIRCLE_TAG | tr -d v)' >> $BASH_ENV
-                  else
-                    echo 'export IMAGE_TAG=$CIRCLE_BRANCH' >> $BASH_ENV
-                  fi
-          lint-dockerfile: false
-          image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
-          tag: $IMAGE_TAG
-          docker-username: DOCKER_USER
-          docker-password: DOCKER_PASSWORD
+  # deploy:
+  #   jobs:
+  #     - docker/publish:
+  #         context: pm4ml-ci
+  #         filters:
+  #           tags:
+  #             only: /v[0-9]+(\.[0-9]+)*(\-snapshot(\.[0-9]+))?(\-hotfix(\.[0-9]+))?/
+  #           branches:
+  #             ignore:
+  #               - /.*/
+  #         extra_build_args: '--build-arg NPM_TOKEN=${NPM_TOKEN}'
+  #         before_build:
+  #           - run:
+  #               name: Set image tag
+  #               command: |
+  #                 if [[ -v CIRCLE_TAG ]]; then
+  #                   echo 'export IMAGE_TAG=$(echo $CIRCLE_TAG | tr -d v)' >> $BASH_ENV
+  #                 else
+  #                   echo 'export IMAGE_TAG=$CIRCLE_BRANCH' >> $BASH_ENV
+  #                 fi
+  #         lint-dockerfile: false
+  #         image: $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME
+  #         tag: $IMAGE_TAG
+  #         docker-username: DOCKER_USER
+  #         docker-password: DOCKER_PASSWORD
 #          after_build:
 #            - slack/status:
 #              success_message: Publish/deploy succeeded in branch $CIRCLE_BRANCH
 #              failure_message: Public/deploy failed in branch $CIRCLE_BRANCH
 #              webhook: $SLACK_WEBHOOK
+  deploy:
+    jobs:
+      - publish:
+          context: pm4ml-ci
+          filters:
+            tags:
+              only: /v[0-9]+(\.[0-9]+)*(\-snapshot(\.[0-9]+))?(\-hotfix(\.[0-9]+))?/
+            branches:
+              ignore:
+                - /.*/
+

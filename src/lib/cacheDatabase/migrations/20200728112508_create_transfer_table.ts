@@ -11,8 +11,8 @@ import { Knex } from 'knex';
 
 const TABLE_NAME = 'transfer';
 
-exports.up = (knex: Knex) =>
-  knex.schema.createTable(TABLE_NAME, (table) => {
+export async function up(knex: Knex): Promise<any> {
+  return knex.schema.createTable(TABLE_NAME, (table: Knex.TableBuilder) => {
     table.string('id').primary();
     table.string('redis_key').primary();
     table.boolean('success'); // TRUE - Fulfill, FALSE - Error, NULL - Pending
@@ -34,5 +34,8 @@ exports.up = (knex: Knex) =>
     table.integer('completed_at');
     table.string('raw');
   });
+}
 
-exports.down = (knex: Knex) => knex.schema.dropTableIfExists(TABLE_NAME);
+export async function down(knex: Knex): Promise<any> {
+  return knex.schema.dropTable(TABLE_NAME);
+}

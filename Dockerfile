@@ -1,20 +1,25 @@
-FROM node:lts-alpine as builder
+## *Builder*
+FROM node:16.15.0-alpine as builder
 
 RUN apk add --no-cache git python3 build-base
 
-EXPOSE 3000
+## Create app directory
+WORKDIR /opt/app
 
-WORKDIR /app/
+## Copy basic files for installing dependencies
+COPY tsconfig.json package.json package-lock.json /opt/app/
+COPY src /opt/app/src
 
-COPY ./package.json ./package.json
-COPY ./package-lock.json ./package-lock.json
+RUN npm ci
 
-RUN npm install --only=production
+## Build the app
+RUN npm run build
 
-FROM node:lts-alpine
+## *Application*
+FROM node:16.15.0-alpine
 
-# APP
-WORKDIR /app
+RUN apk add --no-cache git python3 g++ make
+WORKDIR /opt/app
 
 ARG BUILD_DATE
 ARG VCS_URL
@@ -29,8 +34,14 @@ LABEL org.label-schema.vcs-url=$VCS_URL
 LABEL org.label-schema.vcs-ref=$VCS_REF
 LABEL org.label-schema.version=$VERSION
 
-COPY --from=builder /app/ /app
-COPY ./src ./src
-COPY ./tsconfig.json ./tsconfig.json
+COPY tsconfig.json tsconfig-paths.js package.json package-lock.json* /opt/app/
 
-CMD ["npm", "start"]
+RUN npm ci --production
+
+## Copy of dist directory from builder
+COPY --from=builder /opt/app/dist ./dist
+
+## Expose any application ports
+EXPOSE 3000
+
+CMD [ "npm" , "start" ]
