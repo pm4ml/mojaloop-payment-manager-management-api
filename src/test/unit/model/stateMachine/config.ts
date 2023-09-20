@@ -47,8 +47,8 @@ export default {
   auth: {
     enabled: true,
     creds: {
-      user: 'test5',
-      pass: 'test5',
+      clientId: 'clientId',
+      clientSecret: 'clientSecret',
     },
   },
   stateMachineDebugPort: 8888,

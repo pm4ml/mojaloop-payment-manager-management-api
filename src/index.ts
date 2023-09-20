@@ -10,12 +10,9 @@
 
 import 'tsconfig-paths/register';
 
-import Vault from '@app/lib/vault';
+import process from 'node:process';
+import { hostname } from 'node:os';
 import { Logger } from '@mojaloop/sdk-standard-components';
-import UIAPIServer from './UIAPIServer';
-import { hostname } from 'os';
-import config from '@app/config';
-import { ConnectionStateMachine } from '@app/lib/model';
 import {
   AuthModel,
   DFSPCertificateModel,
@@ -23,10 +20,15 @@ import {
   HubCertificateModel,
   HubEndpointModel,
 } from '@pm4ml/mcm-client';
-import * as ControlServer from './ControlServer';
+
+import Vault from '@app/lib/vault';
+import config from '@app/config';
+import { ConnectionStateMachine } from '@app/lib/model';
 import { createMemoryCache } from '@app/lib/cacheDatabase';
-import CertManager from './lib/model/CertManager';
 import TestServer from '@app/TestServer';
+import * as ControlServer from './ControlServer';
+import UIAPIServer from './UIAPIServer';
+import CertManager from './lib/model/CertManager';
 
 const LOG_ID = {
   CONTROL: { app: 'mojaloop-payment-manager-management-api-service-control-server' },
@@ -48,7 +50,7 @@ const LOG_ID = {
   const authModel = new AuthModel({
     logger,
     auth: config.auth,
-    hubEndpoint: config.mcmServerEndpoint,
+    hubIamProviderUrl: config.hubIamProviderUrl,
   });
   await authModel.login();
 

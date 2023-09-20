@@ -91,6 +91,7 @@ const cfg = {
   cacheUrl: env.get('CACHE_URL').default('redis://redis:6379').asUrlString(),
   cacheSyncInterval: env.get('CACHE_SYNC_INTERVAL_SECONDS').default(30).asIntPositive(),
 
+  hubIamProviderUrl: env.get('HUB_IAM_PROVIDER_URL').required().asString(),
   mcmServerEndpoint: env.get('MCM_SERVER_ENDPOINT').required().asString(),
   refreshIntervalSeconds: env.get('REFRESH_INTERVAL_SECONDS').default(60).asIntPositive(),
   mojaloopConnectorFQDN: env.get('MOJALOOP_CONNECTOR_FQDN').default('connector.fsp.example.com').asString(),
@@ -100,8 +101,8 @@ const cfg = {
     enabled: authEnabled,
     ...(authEnabled && {
       creds: {
-        user: env.get('AUTH_USER').required().asString(),
-        pass: env.get('AUTH_PASS').required().asString(),
+        clientId: env.get('AUTH_CLIENT_ID').required().asString(), // todo: think, if it should be the same as DFSP_ID
+        clientSecret: env.get('AUTH_CLIENT_SECRET').required().asString(),
       },
     }),
   },
