@@ -101,7 +101,7 @@ const cfg = {
     enabled: authEnabled,
     ...(authEnabled && {
       creds: {
-        clientId: env.get('AUTH_CLIENT_ID').required().asString(), // todo: think, if it should be the same as DFSP_ID
+        clientId: env.get('AUTH_CLIENT_ID').required().asString(),
         clientSecret: env.get('AUTH_CLIENT_SECRET').required().asString(),
       },
     }),
@@ -109,6 +109,7 @@ const cfg = {
   dfspClientCsrParameters: env.get('DFSP_CLIENT_CSR_PARAMETERS').asJsonConfig(),
   dfspServerCsrParameters: env.get('DFSP_SERVER_CSR_PARAMETERS').asJsonConfig(),
   caCsrParameters: env.get('CA_CSR_PARAMETERS').asJsonConfig(),
+
   stateMachineDebugPort: env.get('STATE_MACHINE_DEBUG_PORT').default(8888).asPortNumber(),
   whitelistIP: env.get('WHITELIST_IP').default('').asList(),
   callbackURL: env.get('CALLBACK_URL').default('connector.fsp.example.com:443').asUrlString(),

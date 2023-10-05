@@ -73,6 +73,7 @@ interface HandlerMethods {
 
 const createRouter = (handlerMap: Record<string, HandlerMethods>) => {
   const router = new Router();
+
   for (const [endpoint, methods] of Object.entries(handlerMap)) {
     const koaEndpoint = endpoint.replace(/{/g, ':').replace(/}/g, '');
     for (const [method, handler] of Object.entries(methods)) {

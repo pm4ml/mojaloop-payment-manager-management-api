@@ -106,12 +106,22 @@ const LOG_ID = {
   });
   controlServer.registerInternalEvents();
 
-  const uiApiServer = await UIAPIServer.create({ config, vault, db, stateMachine, port: config.inboundPort });
+  const uiApiServer = await UIAPIServer.create({
+    config,
+    vault,
+    db,
+    stateMachine,
+    port: config.inboundPort,
+  });
   await uiApiServer.start();
 
   let testServer: TestServer;
   if (config.enableTestAPI) {
-    testServer = await TestServer.create({ config, stateMachine, port: config.testApiPort });
+    testServer = await TestServer.create({
+      config,
+      stateMachine,
+      port: config.testApiPort,
+    });
     await testServer.start();
   }
 
