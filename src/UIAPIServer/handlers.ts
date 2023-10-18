@@ -154,6 +154,17 @@ const getDFSPSByMonetaryZone = async (ctx) => {
   ctx.body = await dfsp.getDfspsByMonetaryZone({ monetaryZoneId: ctx.params.monetaryZoneId });
 };
 
+const getDFSPEndpoint = async (ctx) => {
+  const { dfspId, mcmServerEndpoint } = ctx.state.conf;
+  const dfsp = new DFSP({
+    dfspId,
+    mcmServerEndpoint,
+    logger: ctx.state.logger,
+  });
+  const { direction, type, state } = ctx.query;
+  ctx.body = await dfsp.getEndpoints({ direction, type, state });
+};
+
 const createDFSPCA = async (ctx) => {
   ctx.stateMachine.sendEvent({ type: 'CREATE_INT_CA', subject: ctx.request.body });
 };
@@ -227,6 +238,9 @@ export const createHandlers = () => ({
   '/dfsp/ca': {
     post: createDFSPCA,
     put: setDFSPCA,
+  },
+  '/dfsp/endpoints': {
+    get: getDFSPEndpoint,
   },
   '/monetaryzones': {
     get: getMonetaryZones,

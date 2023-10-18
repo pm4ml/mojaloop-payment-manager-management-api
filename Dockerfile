@@ -7,10 +7,9 @@ RUN apk add --no-cache git python3 build-base
 WORKDIR /opt/app
 
 ## Copy basic files for installing dependencies
-COPY tsconfig.json package.json package-lock.json /opt/app/
-COPY src /opt/app/src
-
+COPY tsconfig.json package*.json /opt/app/
 RUN npm ci
+COPY src /opt/app/src
 
 ## Build the app
 RUN npm run build
@@ -34,7 +33,7 @@ LABEL org.label-schema.vcs-url=$VCS_URL
 LABEL org.label-schema.vcs-ref=$VCS_REF
 LABEL org.label-schema.version=$VERSION
 
-COPY tsconfig.json tsconfig-paths.js package.json package-lock.json* /opt/app/
+COPY tsconfig.json tsconfig-paths.js package*.json /opt/app/
 
 RUN npm ci --production
 
