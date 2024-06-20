@@ -72,6 +72,8 @@ export interface VaultOpts {
   commonName: string;
 }
 
+const MAX_TIMEOUT = Math.pow(2, 31) / 2 - 1; // https://developer.mozilla.org/en-US/docs/Web/API/setTimeout#maximum_delay_value
+
 class Vault {
   private cfg: VaultOpts;
   private reconnectTimer?: NodeJS.Timeout;
@@ -84,14 +86,14 @@ class Vault {
   }
 
   async connect() {
-    await this.logger.log('Connecting to Vault');
+    const { auth, endpoint } = this.cfg;
+    this.logger.push({ endpoint }).log('Connecting to Vault');
 
     if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
 
     let creds;
 
-    const { auth } = this.cfg;
-    const vault = NodeVault({ endpoint: this.cfg.endpoint });
+    const vault = NodeVault({ endpoint });
     if (auth.appRole) {
       creds = await vault.approleLogin({
         role_id: auth.appRole.roleId,
@@ -105,15 +107,16 @@ class Vault {
     } else {
       throw new Error('Unsupported auth method');
     }
+
     this.client = NodeVault({
-      endpoint: this.cfg.endpoint,
+      endpoint,
       token: creds.auth.client_token,
     });
 
-    const tokenRefreshMs = (creds.auth.lease_duration - 10) * 1000;
+    const tokenRefreshMs = Math.min((creds.auth.lease_duration - 10) * 1000, MAX_TIMEOUT);
     this.reconnectTimer = setTimeout(this.connect.bind(this), tokenRefreshMs);
 
-    await this.logger.push({ endpoint: this.cfg.endpoint }).log('Connected to Vault');
+    this.logger.log(`Connected to Vault  [reconnect after: ${tokenRefreshMs} ms]`);
   }
 
   disconnect() {
@@ -237,11 +240,15 @@ class Vault {
       }
     }
     assert(this.client);
-    const { data } = await this.client.request({
+
+    const options = {
       path: `/${this.cfg.mounts.pki}/issue/${this.cfg.pkiServerRole}`,
       method: 'POST',
       json: reqJson,
-    });
+    };
+    this.logger.push({ options }).log(`sending createDFSPServerCert request`);
+
+    const { data } = await this.client.request(options);
     return {
       intermediateChain: data.ca_chain,
       rootCertificate: data.issuing_ca,
@@ -255,7 +262,8 @@ class Vault {
    */
   async signHubCSR(csr: string) {
     assert(this.client);
-    const { data } = await this.client.request({
+
+    const options = {
       path: `/${this.cfg.mounts.pki}/sign/${this.cfg.pkiClientRole}`,
       method: 'POST',
       json: {
@@ -263,7 +271,11 @@ class Vault {
         csr: csr,
         // ttl: `${this._signExpiryHours}h`,
       },
-    });
+    };
+    this.logger.push({ options }).log(`sending signHubCSR request`);
+
+    const { data } = await this.client.request(options);
+
     return data;
   }
 

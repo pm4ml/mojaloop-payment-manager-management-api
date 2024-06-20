@@ -92,6 +92,7 @@ const cfg = {
   cacheUrl: env.get('CACHE_URL').default('redis://redis:6379').asUrlString(),
   cacheSyncInterval: env.get('CACHE_SYNC_INTERVAL_SECONDS').default(30).asIntPositive(),
 
+  hubIamProviderUrl: env.get('HUB_IAM_PROVIDER_URL').required().asString(), // with schema
   mcmServerEndpoint: env.get('MCM_SERVER_ENDPOINT').required().asString(),
   refreshIntervalSeconds: env.get('REFRESH_INTERVAL_SECONDS').default(60).asIntPositive(),
   mojaloopConnectorFQDN: env.get('MOJALOOP_CONNECTOR_FQDN').default('connector.fsp.example.com').asString(),
@@ -101,14 +102,15 @@ const cfg = {
     enabled: authEnabled,
     ...(authEnabled && {
       creds: {
-        user: env.get('AUTH_USER').required().asString(),
-        pass: env.get('AUTH_PASS').required().asString(),
+        clientId: env.get('AUTH_CLIENT_ID').required().asString(),
+        clientSecret: env.get('AUTH_CLIENT_SECRET').required().asString(),
       },
     }),
   },
   dfspClientCsrParameters: env.get('DFSP_CLIENT_CSR_PARAMETERS').asJsonConfig(),
   dfspServerCsrParameters: env.get('DFSP_SERVER_CSR_PARAMETERS').asJsonConfig(),
   caCsrParameters: env.get('CA_CSR_PARAMETERS').asJsonConfig(),
+
   stateMachineDebugPort: env.get('STATE_MACHINE_DEBUG_PORT').default(8888).asPortNumber(),
   whitelistIP: env.get('WHITELIST_IP').default('').asList(),
   callbackURL: env.get('CALLBACK_URL').default('connector.fsp.example.com:443').asUrlString(),
