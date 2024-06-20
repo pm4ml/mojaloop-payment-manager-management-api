@@ -20,7 +20,7 @@ import {
   AuthModel,
   DFSPCertificateModel,
   DFSPEndpointModel,
-  HubCertificateModel,
+  HubCertificateModel, // with getHubJWSCertificate() method
   HubEndpointModel,
 } from '@pm4ml/mcm-client';
 import * as ControlServer from './ControlServer';
@@ -91,12 +91,6 @@ const LOG_ID = {
   });
   await stateMachine.start();
 
-  const db = await createMemoryCache({
-    cacheUrl: config.cacheUrl,
-    syncInterval: config.cacheSyncInterval,
-    logger,
-  });
-
   const controlServer = new ControlServer.Server({
     port: config.control.port,
     logger: logger.push(LOG_ID.CONTROL),
@@ -104,8 +98,17 @@ const LOG_ID = {
   });
   controlServer.registerInternalEvents();
 
-  const uiApiServer = await UIAPIServer.create({ config, vault, db, stateMachine, port: config.inboundPort });
-  await uiApiServer.start();
+  let uiApiServer: UIAPIServer;
+  if (config.enableUiApiServer) {
+    const db = await createMemoryCache({
+      cacheUrl: config.cacheUrl,
+      syncInterval: config.cacheSyncInterval,
+      logger,
+    });
+
+    uiApiServer = await UIAPIServer.create({ config, vault, db, stateMachine, port: config.inboundPort });
+    await uiApiServer.start();
+  }
 
   let testServer: TestServer;
   if (config.enableTestAPI) {
@@ -113,13 +116,20 @@ const LOG_ID = {
     await testServer.start();
   }
 
-  // handle SIGTERM to exit gracefully
-  process.on('SIGTERM', async () => {
-    console.log('SIGTERM received. Shutting down APIs...');
+  // handle signals to exit gracefully
+  ['SIGINT', 'SIGTERM'].forEach((signal) => {
+    process.on(signal, async () => {
+      logger.info(`${signal} received. Shutting down APIs...`);
 
-    await Promise.all([uiApiServer.stop(), controlServer.stop()]);
-    if (config.enableTestAPI) await testServer.stop();
-    vault.disconnect();
-    process.exit(0);
+      // eslint-disable-next-line
+      await Promise.all([
+        controlServer.stop(),
+        uiApiServer?.stop(),
+        testServer?.stop()
+      ]);
+      vault.disconnect();
+
+      process.exit(0);
+    });
   });
 })();

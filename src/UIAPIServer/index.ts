@@ -81,6 +81,7 @@ class UIAPIServer {
       return;
     }
     await new Promise((resolve) => this.server.close(resolve));
+    // todo: add DB disconnect (knex and redis)
     console.log('inbound shut down complete');
   }
 

@@ -128,6 +128,6 @@ export namespace DfspClientCert {
 
   export const createGuards = <TContext extends Context>() => ({
     hasNewDfspClientCert: (ctx: TContext, event: AnyEventObject) =>
-      event.data.state === CertState.CERT_SIGNED && event.data.certificate !== ctx.dfspClientCert!.cert,
+      event.data?.state === CertState.CERT_SIGNED && event.data.certificate !== ctx.dfspClientCert!.cert,
   });
 }

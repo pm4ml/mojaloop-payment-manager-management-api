@@ -173,6 +173,12 @@ class Server extends ws.Server {
         client.send(build.ERROR.NOTIFY.JSON_PARSE_ERROR());
       }
       logger.push({ msg }).log('Handling received message');
+
+      if (!msg) {
+        logger.warn('No deserialised WS message');
+        return;
+      }
+
       switch (msg.msg) {
         case MESSAGE.CONFIGURATION:
           switch (msg.verb) {
