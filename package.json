@@ -27,7 +27,9 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "test": "jest --ci --reporters=default --reporters=jest-junit --env=node src/test/unit",
-    "test:int": "jest --ci --reporters=default --reporters=jest-junit --env=node src/test/integration --forceExit"
+    "test:int": "jest --ci --reporters=default --reporters=jest-junit --env=node src/test/integration --forceExit",
+    "release": "npx standard-version --no-verify --releaseCommitMessageFormat 'ci(release): {{currentTag}} [skip ci]'",
+    "snapshot": "npx standard-version --no-verify --skip.changelog --prerelease snapshot --releaseCommitMessageFormat 'ci(snapshot): {{currentTag}}'"
   },
   "dependencies": {
     "@babel/eslint-parser": "^7.18.2",
@@ -89,8 +91,14 @@
     "openapi-response-validator": "^11.0.1",
     "redis-mock": "^0.56.3",
     "rimraf": "^4.4.0",
+    "standard-version": "^9.5.0",
     "supertest": "^6.2.3",
     "ts-jest": "^28.0.4",
     "ts-node-dev": "^2.0.0"
+  },
+  "standard-version": {
+    "scripts": {
+      "postchangelog": "replace '\\[pm4ml/#(\\d+)\\]\\(https://github.com/pm4ml/(.*)/issues/(\\d+)\\)' '[pm4ml/#$1](https://github.com/pm4ml/project/issues/$1)' CHANGELOG.md"
+    }
   }
 }
