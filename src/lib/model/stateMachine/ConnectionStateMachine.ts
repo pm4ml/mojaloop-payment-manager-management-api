@@ -8,7 +8,7 @@
  *       Yevhen Kyriukha <yevhen.kyriukha@modusbox.com>                   *
  **************************************************************************/
 
-import { createMachine, interpret } from 'xstate';
+import { createMachine, interpret, State, StateMachine } from 'xstate';
 import { inspect } from '@xstate/inspect/lib/server';
 
 import {
@@ -52,34 +52,52 @@ type Event =
   | EndpointConfig.Event
   | ProgressMonitor.Event;
 
+type ActionType = ActionObject<Context, Event>;
+
+type StateMachineType = StateMachine<Context, any, Event>;
+
 class ConnectionStateMachine {
   private static VERSION = 3;
   private started: boolean = false;
+
   private readonly hash: string;
-  private service: any;
+  private service: any; // todo: define type
   private opts: MachineOpts;
   private context?: Context;
-  private actions: Record<string, ActionObject<Context, Event>> = {};
+  private actions: Record<string, ActionType> = {};
 
   constructor(opts: MachineOpts) {
     this.opts = opts;
     this.serve();
+
     const machine = this.createMachine(opts);
-    this.hash = crypto.createHash('sha256').update(JSON.stringify(machine.config.states)).digest('base64');
-    this.service = interpret(machine, { devTools: true }).onTransition(async (state) => {
-      opts.logger.push({ state: state.value }).log('Transition');
-      this.context = state.context;
-      this.updateActions(state.actions);
-      await this.opts.vault.setStateMachineState({
+    this.hash = ConnectionStateMachine.createHash(machine);
+
+    this.service = interpret(machine, { devTools: true });
+    this.service.onTransition(this.handleTransition.bind(this));
+  }
+
+  private handleTransition(state: State<Context, Event>) {
+    this.opts.logger.push({ state: state.value }).log('Transition');
+    this.context = state.context;
+    this.updateActions(state.actions);
+    this.setState(state);
+  }
+
+  private setState(state: State<Context, Event>) {
+    this.opts.vault
+      .setStateMachineState({
         state,
         hash: this.hash,
         version: ConnectionStateMachine.VERSION,
         actions: this.actions,
+      })
+      .catch((err) => {
+        this.opts.logger.push({ err }).log('Failed to set state machine state');
       });
-    });
   }
 
-  private updateActions(acts: Array<ActionObject<Context, Event>>) {
+  private updateActions(acts: Array<ActionType>) {
     acts.forEach((action) => {
       if (action.type === 'xstate.cancel') {
         delete this.actions[action.sendId];
@@ -104,7 +122,9 @@ class ConnectionStateMachine {
 
   public async start() {
     const state = await this.opts.vault.getStateMachineState();
-    if (state?.hash === this.hash && state?.version === ConnectionStateMachine.VERSION) {
+    const isPrevious = state?.hash === this.hash && state?.version === ConnectionStateMachine.VERSION;
+
+    if (isPrevious) {
       this.opts.logger.log('Restoring state machine from previous state');
       this.actions = state.actions;
       this.service.start({
@@ -140,7 +160,7 @@ class ConnectionStateMachine {
     });
   }
 
-  private createMachine(opts: MachineOpts) {
+  private createMachine(opts: MachineOpts): StateMachineType {
     return createMachine<Context, Event>(
       {
         id: 'machine',
@@ -176,6 +196,10 @@ class ConnectionStateMachine {
         },
       }
     );
+  }
+
+  static createHash(machine: StateMachineType) {
+    return crypto.createHash('sha256').update(JSON.stringify(machine.config.states)).digest('base64');
   }
 }
 

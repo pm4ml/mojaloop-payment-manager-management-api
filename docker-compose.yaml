@@ -1,7 +1,9 @@
 version: '3'
 services:
+
  redis:
    image: "redis"
+
  management-api:
    image: "mojaloop-payment-manager-management-api-service"
    environment:

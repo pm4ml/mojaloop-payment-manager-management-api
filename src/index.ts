@@ -10,23 +10,25 @@
 
 import 'tsconfig-paths/register';
 
-import Vault from '@app/lib/vault';
+import process from 'node:process';
+import { hostname } from 'node:os';
 import { Logger } from '@mojaloop/sdk-standard-components';
-import UIAPIServer from './UIAPIServer';
-import { hostname } from 'os';
-import config from '@app/config';
-import { ConnectionStateMachine } from '@app/lib/model';
 import {
   AuthModel,
   DFSPCertificateModel,
   DFSPEndpointModel,
-  HubCertificateModel,
+  HubCertificateModel, // with getHubJWSCertificate() method
   HubEndpointModel,
 } from '@pm4ml/mcm-client';
-import * as ControlServer from './ControlServer';
+
+import Vault from '@app/lib/vault';
+import config from '@app/config';
+import { ConnectionStateMachine } from '@app/lib/model';
 import { createMemoryCache } from '@app/lib/cacheDatabase';
-import CertManager from './lib/model/CertManager';
 import TestServer from '@app/TestServer';
+import * as ControlServer from './ControlServer';
+import UIAPIServer from './UIAPIServer';
+import CertManager from './lib/model/CertManager';
 
 const LOG_ID = {
   CONTROL: { app: 'mojaloop-payment-manager-management-api-service-control-server' },
@@ -48,7 +50,7 @@ const LOG_ID = {
   const authModel = new AuthModel({
     logger,
     auth: config.auth,
-    hubEndpoint: config.mcmServerEndpoint,
+    hubIamProviderUrl: config.hubIamProviderUrl,
   });
   await authModel.login();
 
@@ -91,12 +93,6 @@ const LOG_ID = {
   });
   await stateMachine.start();
 
-  const db = await createMemoryCache({
-    cacheUrl: config.cacheUrl,
-    syncInterval: config.cacheSyncInterval,
-    logger,
-  });
-
   const controlServer = new ControlServer.Server({
     port: config.control.port,
     logger: logger.push(LOG_ID.CONTROL),
@@ -104,22 +100,48 @@ const LOG_ID = {
   });
   controlServer.registerInternalEvents();
 
-  const uiApiServer = await UIAPIServer.create({ config, vault, db, stateMachine, port: config.inboundPort });
-  await uiApiServer.start();
+  let uiApiServer: UIAPIServer;
+  if (config.enableUiApiServer) {
+    const db = await createMemoryCache({
+      cacheUrl: config.cacheUrl,
+      syncInterval: config.cacheSyncInterval,
+      logger,
+    });
+
+    uiApiServer = await UIAPIServer.create({
+      config,
+      vault,
+      db,
+      stateMachine,
+      port: config.inboundPort,
+    });
+    await uiApiServer.start();
+  }
 
   let testServer: TestServer;
   if (config.enableTestAPI) {
-    testServer = await TestServer.create({ config, stateMachine, port: config.testApiPort });
+    testServer = await TestServer.create({
+      config,
+      stateMachine,
+      port: config.testApiPort,
+    });
     await testServer.start();
   }
 
-  // handle SIGTERM to exit gracefully
-  process.on('SIGTERM', async () => {
-    console.log('SIGTERM received. Shutting down APIs...');
+  // handle signals to exit gracefully
+  ['SIGINT', 'SIGTERM'].forEach((signal) => {
+    process.on(signal, async () => {
+      logger.info(`${signal} received. Shutting down APIs...`);
 
-    await Promise.all([uiApiServer.stop(), controlServer.stop()]);
-    if (config.enableTestAPI) await testServer.stop();
-    vault.disconnect();
-    process.exit(0);
+      // eslint-disable-next-line
+      await Promise.all([
+        controlServer.stop(),
+        uiApiServer?.stop(),
+        testServer?.stop()
+      ]);
+      vault.disconnect();
+
+      process.exit(0);
+    });
   });
 })();
