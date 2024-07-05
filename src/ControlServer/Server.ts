@@ -21,6 +21,7 @@ const ControlServerEventEmitter = getInternalEventEmitter();
  *************************************************************************/
 const MESSAGE = {
   CONFIGURATION: 'CONFIGURATION',
+  PEER_JWS: 'PEER_JWS',
   ERROR: 'ERROR',
 };
 
@@ -87,6 +88,10 @@ const build = {
     READ: (id?: string) => buildMsg(VERB.READ, MESSAGE.CONFIGURATION, {}, id),
     NOTIFY: (config, id?: string) => buildMsg(VERB.NOTIFY, MESSAGE.CONFIGURATION, config, id),
   },
+  PEER_JWS: {
+    READ: (id?: string) => buildMsg(VERB.READ, MESSAGE.PEER_JWS, {}, id),
+    NOTIFY: (peerJWS, id?: string) => buildMsg(VERB.NOTIFY, MESSAGE.PEER_JWS, peerJWS, id),
+  },
   ERROR: {
     NOTIFY: {
       UNSUPPORTED_MESSAGE: (id) => buildMsg(VERB.NOTIFY, MESSAGE.ERROR, ERROR.UNSUPPORTED_MESSAGE, id),
@@ -113,12 +118,16 @@ export interface ServerOpts {
   logger: Logger.Logger;
   port: number;
   onRequestConfig: (client: unknown) => void;
+  onRequestPeerJWS: (client: unknown) => void;
+  onUploadPeerJWS: (client: unknown) => void;
 }
 
 class Server extends ws.Server {
   private _logger: Logger.Logger;
   private _clientData: Map<any, any>;
   private onRequestConfig: (client: unknown) => void;
+  private onRequestPeerJWS: (client: unknown) => void;
+  private onUploadPeerJWS: (client: unknown) => void;
 
   constructor(opts: ServerOpts) {
     super({ clientTracking: true, port: opts.port });
@@ -126,6 +135,8 @@ class Server extends ws.Server {
     this._logger = opts.logger;
     this._clientData = new Map();
     this.onRequestConfig = opts.onRequestConfig;
+    this.onRequestPeerJWS = opts.onRequestPeerJWS;
+    this.onUploadPeerJWS = opts.onUploadPeerJWS;
 
     this.on('error', (err) => {
       this._logger.push({ err }).log('Unhandled websocket error occurred. Shutting down.');
@@ -190,6 +201,22 @@ class Server extends ws.Server {
               break;
           }
           break;
+        case MESSAGE.PEER_JWS:
+          switch (msg.verb) {
+            case VERB.READ:
+              this.onRequestPeerJWS(client);
+              break;
+            case VERB.NOTIFY:
+              this.onUploadPeerJWS(msg.data);
+              break;
+            default:
+              client.send(build.ERROR.NOTIFY.UNSUPPORTED_VERB(msg.id));
+              break;
+          }
+          break;
+        case MESSAGE.ERROR:
+          logger.push({ msg }).log('Received error message');
+          break;
         default:
           client.send(build.ERROR.NOTIFY.UNSUPPORTED_MESSAGE(msg.id));
           break;
@@ -205,6 +232,9 @@ class Server extends ws.Server {
     ControlServerEventEmitter.on(INTERNAL_EVENTS.SERVER.BROADCAST_CONFIG_CHANGE, (params) =>
       this.broadcastConfigChange(params)
     );
+    ControlServerEventEmitter.on(INTERNAL_EVENTS.SERVER.BROADCAST_PEER_JWS_CHANGE, (params) =>
+      this.broadcastPeerJWS(params)
+    );
   }
 
   /**
@@ -213,6 +243,14 @@ class Server extends ws.Server {
   broadcastConfigChange(updatedConfig) {
     const updateConfMsg = build.CONFIGURATION.NOTIFY(updatedConfig, randomPhrase());
     return this.broadcast(updateConfMsg);
+  }
+
+  /**
+   * Broadcast configuration change to all connected clients.
+   */
+  broadcastPeerJWS(peerJWS) {
+    const notificationMsg = build.PEER_JWS.NOTIFY(peerJWS, randomPhrase());
+    return this.broadcast(notificationMsg);
   }
 
   /**

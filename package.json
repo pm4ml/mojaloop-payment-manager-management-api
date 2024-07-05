@@ -36,7 +36,7 @@
     "@kubernetes/client-node": "^0.16.2",
     "@mojaloop/api-snippets": "^17.0.3",
     "@mojaloop/sdk-standard-components": "github:mojaloop/sdk-standard-components#feat/IPROD-93",
-    "@pm4ml/mcm-client": "github:pm4ml/mcm-client#feat/IPROD-93",
+    "@pm4ml/mcm-client": "github:pm4ml/mcm-client#v3.0.0",
     "@xstate/inspect": "^0.7.0",
     "ajv": "^8.11.0",
     "async-injection": "^1.5.0",

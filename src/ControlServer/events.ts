@@ -17,6 +17,7 @@ import { EventEmitter } from 'events';
 export const INTERNAL_EVENTS = {
   SERVER: {
     BROADCAST_CONFIG_CHANGE: 'BROADCAST_CONFIG_CHANGE',
+    BROADCAST_PEER_JWS_CHANGE: 'BROADCAST_PEER_JWS_CHANGE',
   },
 };
 const internalEventEmitter = new EventEmitter();
@@ -38,4 +39,8 @@ export const getInternalEventEmitter = () => {
 // TODO: Add connector config type
 export const changeConfig = (config: any) => {
   internalEventEmitter.emit(INTERNAL_EVENTS.SERVER.BROADCAST_CONFIG_CHANGE, config);
+};
+
+export const notifyPeerJWS = (peerJWS: any) => {
+  internalEventEmitter.emit(INTERNAL_EVENTS.SERVER.BROADCAST_PEER_JWS_CHANGE, peerJWS);
 };

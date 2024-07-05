@@ -97,6 +97,8 @@ const LOG_ID = {
     port: config.control.port,
     logger: logger.push(LOG_ID.CONTROL),
     onRequestConfig: () => stateMachine.sendEvent({ type: 'REQUEST_CONNECTOR_CONFIG' }),
+    onRequestPeerJWS: () => stateMachine.sendEvent({ type: 'REQUEST_PEER_JWS' }),
+    onUploadPeerJWS: (peerJWS: any) => stateMachine.sendEvent({ type: 'UPLOAD_PEER_JWS', data: peerJWS }),
   });
   controlServer.registerInternalEvents();
 
