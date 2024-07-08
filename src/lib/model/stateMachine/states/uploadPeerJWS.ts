@@ -77,10 +77,16 @@ export namespace UploadPeerJWS {
               id: 'uploadingPeerJWS',
               logger: opts.logger,
               retryInterval: opts.refreshIntervalSeconds * 1000,
-              // service: async () => opts.ControlServer.changeConfig(ctx.connectorConfig),
               service: async () => {
-                return event.data;
-              }
+                const changesToUpload = event.data.changes.map(({dfspId, publicKey, createdAt}) => {
+                  return {
+                    dfspId,
+                    publicKey,
+                    createdAt,
+                  }
+                });
+                return opts.dfspCertificateModel.uploadExternalDfspJWS(changesToUpload);
+              },
             }),
           onDone: {
             target: 'idle',
