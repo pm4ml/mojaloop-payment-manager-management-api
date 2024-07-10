@@ -26,9 +26,9 @@ defaults_Dependencies: &defaults_Dependencies |
   npm install -g node-gyp
 
 defaults_machine_Dependencies: &defaults_machine_Dependencies |
-  apt-get update
-  apt-get install -y docker
-  apt-get install -y docker-compose
+  sudo apt update
+  sudo apt install -y docker
+  sudo apt install -y docker-compose
 
 defaults_license_scanner: &defaults_license_scanner
   name: Install and set up license-scanner
