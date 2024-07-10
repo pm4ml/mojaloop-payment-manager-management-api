@@ -84,9 +84,9 @@ jobs:
       - run:
           name: Execute unit tests
           command: |
-            ./scripts/run-vault.sh
+            npm run backend:start
             npm test
-            ./scripts/kill-vault.sh
+            npm run backend:stop
       - store_test_results:
           path: /home/circleci/project/git/
       - store_artifacts:

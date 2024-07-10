@@ -31,6 +31,8 @@ describe('ControlServer', () => {
         onRequestConfig: (cl: any) => {
           cl.send(ControlServer.build.CONFIGURATION.NOTIFY(appConfig));
         },
+        onRequestPeerJWS: (cl: any) => {},
+        onUploadPeerJWS: (cl: any) => {},
       });
       server.registerInternalEvents();
       client = await TestControlClient.Client.Create({

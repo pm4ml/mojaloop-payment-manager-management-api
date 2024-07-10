@@ -20,7 +20,7 @@ export default {
   runMigrations: true,
   cacheUrl: 'redis://localhost:7005',
   cacheSyncInterval: 10,
-  mcmServerEndpoint: 'localhost:3001/api',
+  mcmServerEndpoint: 'http://localhost:3001/api',
   refreshIntervalSeconds: 60,
   mojaloopConnectorFQDN: 'connector.fsp.example.com',
   certManager: {

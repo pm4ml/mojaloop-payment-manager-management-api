@@ -29,7 +29,10 @@
     "test": "jest --ci --reporters=default --reporters=jest-junit --env=node src/test/unit",
     "test:int": "jest --ci --reporters=default --reporters=jest-junit --env=node src/test/integration --forceExit",
     "release": "npx standard-version --no-verify --releaseCommitMessageFormat 'ci(release): {{currentTag}} [skip ci]'",
-    "snapshot": "npx standard-version --no-verify --skip.changelog --prerelease snapshot --releaseCommitMessageFormat 'ci(snapshot): {{currentTag}}'"
+    "snapshot": "npx standard-version --no-verify --skip.changelog --prerelease snapshot --releaseCommitMessageFormat 'ci(snapshot): {{currentTag}}'",
+    "backend:start": "docker compose up -d --wait",
+    "backend:stop": "docker compose down -v",
+    "backend:restart": "npm run backend:stop && npm run backend:start"
   },
   "dependencies": {
     "@babel/eslint-parser": "^7.18.2",
