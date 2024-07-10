@@ -29,6 +29,8 @@ defaults_machine_Dependencies: &defaults_machine_Dependencies |
   sudo apt update
   sudo apt install -y docker
   sudo apt install -y docker-compose
+  sudo apt install -y musl-dev
+  sudo apt install -y build-essential
 
 defaults_license_scanner: &defaults_license_scanner
   name: Install and set up license-scanner

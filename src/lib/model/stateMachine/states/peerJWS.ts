@@ -85,8 +85,8 @@ export namespace PeerJWS {
           onError: {
             target: 'completed',
             actions: send('NO_PEER_JWS_CHANGES'),
-          }
-        }
+          },
+        },
       },
       notifyPeerJWS: {
         invoke: {

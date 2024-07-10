@@ -17,13 +17,11 @@ import _ from 'lodash';
 type JWS = PeerJWS.JWS;
 
 export namespace UploadPeerJWS {
-
   export interface Context {
     peerJWS?: JWS[];
   }
 
-  type UpdateAction =
-    | { type: 'UPLOAD_PEER_JWS'; peerJWS: JWS[] };
+  type UpdateAction = { type: 'UPLOAD_PEER_JWS'; peerJWS: JWS[] };
 
   export type Event = UpdateAction | DoneEventObject;
 
@@ -66,8 +64,8 @@ export namespace UploadPeerJWS {
           },
           onError: {
             target: 'idle',
-          }
-        }
+          },
+        },
       },
       uploadingPeerJWS: {
         invoke: {
@@ -78,21 +76,19 @@ export namespace UploadPeerJWS {
               logger: opts.logger,
               retryInterval: opts.refreshIntervalSeconds * 1000,
               service: async () => {
-                const changesToUpload = event.data.changes.map(({dfspId, publicKey, createdAt}) => {
+                const changesToUpload = event.data.changes.map(({ dfspId, publicKey, createdAt }) => {
                   return {
                     dfspId,
                     publicKey,
                     createdAt,
-                  }
+                  };
                 });
                 return opts.dfspCertificateModel.uploadExternalDfspJWS(changesToUpload);
               },
             }),
           onDone: {
             target: 'idle',
-            actions: [
-              assign({ peerJWS: (_context, event) => event.data.updatedPeerJWS }),
-            ],
+            actions: [assign({ peerJWS: (_context, event) => event.data.updatedPeerJWS })],
           },
         },
       },
