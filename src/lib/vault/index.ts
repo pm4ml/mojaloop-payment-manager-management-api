@@ -11,6 +11,7 @@ import NodeVault from 'node-vault';
 import { strict as assert } from 'assert';
 import SDK from '@mojaloop/sdk-standard-components';
 import forge from 'node-forge';
+import { create } from 'lodash';
 
 // TODO: Use hashi-vault-js package
 // TODO: find and link document containing rules on allowable paths
@@ -339,6 +340,7 @@ class Vault {
     return {
       publicKey: forge.pki.publicKeyToPem(keypair.publicKey, 72),
       privateKey: forge.pki.privateKeyToPem(keypair.privateKey, 72),
+      createdAt: Math.floor(Date.now() / 1000),
     };
   }
 }

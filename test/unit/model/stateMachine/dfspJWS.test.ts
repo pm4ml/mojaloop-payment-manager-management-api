@@ -61,11 +61,12 @@ describe('DfspJWS', () => {
     expect(configUpdate).toHaveBeenCalledWith({ jwsSigningKey: 'JWS PRIVKEY' });
 
     // recreate JWS
-    opts.vault.createJWS.mockImplementation(() => ({ publicKey: 'JWS PUBKEY NEW', privateKey: 'JWS PRIVKEY NEW' }));
+    const createdAt = Math.floor(Date.now() / 1000);
+    opts.vault.createJWS.mockImplementation(() => ({ publicKey: 'JWS PUBKEY NEW', privateKey: 'JWS PRIVKEY NEW', createdAt }));
     service.send({ type: 'CREATE_JWS' });
     await waitFor(service, (state) => state.matches('creatingJWS.idle'));
     expect(opts.vault.createJWS).toHaveBeenCalledTimes(2);
-    expect(opts.dfspCertificateModel.uploadJWS).toHaveBeenLastCalledWith({ publicKey: 'JWS PUBKEY NEW' });
+    expect(opts.dfspCertificateModel.uploadJWS).toHaveBeenLastCalledWith({ publicKey: 'JWS PUBKEY NEW', createdAt });
     expect(configUpdate).toHaveBeenCalledWith({ jwsSigningKey: 'JWS PRIVKEY NEW' });
 
     service.stop();
