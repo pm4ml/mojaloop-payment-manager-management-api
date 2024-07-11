@@ -45,48 +45,145 @@ const startMachine = (opts: ReturnType<typeof createMachineOpts>, onConfigChange
 
 describe('PeerJWS', () => {
   let opts: ReturnType<typeof createMachineOpts>;
+  const createdAt = Math.floor(Date.now() / 1000);
+  const testfsp1JWS = { dfspId: 'testfsp1', publicKey: 'TEST KEY 1', createdAt };
+  const testfsp2JWS = { dfspId: 'testfsp2', publicKey: 'TEST KEY 2', createdAt };
+  const testfsp3JWS = { dfspId: 'testfsp3', publicKey: 'TEST KEY 3', createdAt };
+  const testfsp4JWS = { dfspId: 'testfsp4', publicKey: 'TEST KEY 4', createdAt };
+  let service: ReturnType<typeof startMachine>;
+  const configUpdate = jest.fn();
 
-  beforeEach(() => {
+  beforeAll(() => {
     opts = createMachineOpts();
   });
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
-  test('should download peer JWS', async () => {
-    const createdAt = Math.floor(Date.now() / 1000);
+  test('Start the state machine', async () => {
     opts.dfspCertificateModel.getAllJWSCertificates.mockImplementation(async () => [
-      { dfspId: 'testfsp1', publicKey: 'TEST KEY 1', createdAt },
-      { dfspId: 'testfsp2', publicKey: 'TEST KEY 2', createdAt },
+      testfsp1JWS,
+      testfsp2JWS,
     ]);
-    const configUpdate = jest.fn();
+    opts.ControlServer.notifyPeerJWS.mockImplementation(async () => {});
+    
     opts.refreshIntervalSeconds = 1;
-    const service = startMachine(opts, configUpdate);
-
+    service = startMachine(opts, configUpdate);
     await waitFor(service, (state) => state.matches('pullingPeerJWS.retry'));
 
     expect(opts.dfspCertificateModel.getAllJWSCertificates).toHaveBeenCalled();
+    expect(opts.ControlServer.notifyPeerJWS).toHaveBeenCalledWith([
+      testfsp1JWS,
+      testfsp2JWS,
+    ]);
 
-    expect(configUpdate).toHaveBeenCalledWith({ peerJWSKeys: { testfsp1: 'TEST KEY 1', testfsp2: 'TEST KEY 2' } });
+    expect(configUpdate).toHaveBeenCalledWith({ 
+      peerJWSKeys: {
+        [testfsp1JWS.dfspId]: testfsp1JWS.publicKey,
+        [testfsp2JWS.dfspId]: testfsp2JWS.publicKey 
+      }
+    });
+
+  });
+
+  test('should not notify if there are no changes', async () => {
+    opts.dfspCertificateModel.getAllJWSCertificates.mockImplementation(async () => [
+      testfsp1JWS,
+      testfsp2JWS,
+    ]);
+    opts.ControlServer.notifyPeerJWS.mockImplementation(async () => {});
+    // No changes
+    await waitFor(service, (state) => state.matches('pullingPeerJWS.fetchingPeerJWS'));
+    await waitFor(service, (state) => state.matches('pullingPeerJWS.retry'));
+    // keys are the same therefore no changes to config
+    expect(configUpdate).toHaveBeenCalledTimes(0);
+  });
+
+  test('should notify when new peer JWS are available', async () => {
+    // now add two more peer jws keys
+    opts.dfspCertificateModel.getAllJWSCertificates.mockImplementation(async () => [
+      testfsp1JWS,
+      testfsp2JWS,
+      testfsp3JWS,
+      testfsp4JWS,
+    ]);
+    opts.ControlServer.notifyPeerJWS.mockImplementation(async () => {});
 
     await waitFor(service, (state) => state.matches('pullingPeerJWS.fetchingPeerJWS'));
     await waitFor(service, (state) => state.matches('pullingPeerJWS.retry'));
 
-    // keys are the same therefore no changes to config
     expect(configUpdate).toHaveBeenCalledTimes(1);
+    expect(configUpdate).toHaveBeenCalledWith({ 
+      peerJWSKeys: {
+        [testfsp1JWS.dfspId]: testfsp1JWS.publicKey,
+        [testfsp2JWS.dfspId]: testfsp2JWS.publicKey,
+        [testfsp3JWS.dfspId]: testfsp3JWS.publicKey,
+        [testfsp4JWS.dfspId]: testfsp4JWS.publicKey 
+      }
+    });
+  });
 
-    // now change peer jws keys
+  test('should not notify when a JWS cert with old timestamp passed', async () => {
     opts.dfspCertificateModel.getAllJWSCertificates.mockImplementation(async () => [
-      { dfspId: 'testfsp1', publicKey: 'TEST KEY 1', createdAt },
-      { dfspId: 'testfsp3', publicKey: 'TEST KEY 3', createdAt },
-      { dfspId: 'testfsp4', publicKey: 'TEST KEY 4', createdAt },
+      testfsp1JWS,
+      testfsp2JWS,
+      testfsp3JWS,
+      {
+        ...testfsp4JWS,
+        createdAt: createdAt - 1,
+        publicKey: 'TEST KEY 4 OLD',
+      },
+    ]);
+    opts.ControlServer.notifyPeerJWS.mockImplementation(async () => {});
+
+    await waitFor(service, (state) => state.matches('pullingPeerJWS.fetchingPeerJWS'));
+    await waitFor(service, (state) => state.matches('pullingPeerJWS.retry'));
+
+    expect(configUpdate).toHaveBeenCalledTimes(0);
+  });
+
+  test('should notify when some keys are updated', async () => {
+    // now change some keys and update timestamp
+    const createdAtUpdated = Math.floor(Date.now() / 1000);
+    const testfsp3JWSUpdated = {
+      ...testfsp3JWS,
+      publicKey: 'TEST KEY 3 UPDATED',
+      createdAt: createdAtUpdated,
+    }
+    const testfsp4JWSUpdated = {
+      ...testfsp4JWS,
+      publicKey: 'TEST KEY 4 UPDATED',
+      createdAt: createdAtUpdated,
+    }
+    opts.dfspCertificateModel.getAllJWSCertificates.mockImplementation(async () => [
+      testfsp1JWS,
+      testfsp2JWS,
+      testfsp3JWSUpdated,
+      testfsp4JWSUpdated,
     ]);
 
     await waitFor(service, (state) => state.matches('pullingPeerJWS.fetchingPeerJWS'));
     await waitFor(service, (state) => state.matches('pullingPeerJWS.retry'));
 
-    expect(opts.dfspCertificateModel.getAllJWSCertificates).toHaveBeenCalledTimes(3);
-    expect(configUpdate).toHaveBeenCalledWith({
-      peerJWSKeys: { testfsp1: 'TEST KEY 1', testfsp2: 'TEST KEY 2', testfsp3: 'TEST KEY 3', testfsp4: 'TEST KEY 4' },
+    expect(configUpdate).toHaveBeenCalledTimes(1);
+    expect(configUpdate).toHaveBeenCalledWith({ 
+      peerJWSKeys: {
+        [testfsp1JWS.dfspId]: testfsp1JWS.publicKey,
+        [testfsp2JWS.dfspId]: testfsp2JWS.publicKey,
+        [testfsp3JWSUpdated.dfspId]: testfsp3JWSUpdated.publicKey,
+        [testfsp4JWSUpdated.dfspId]: testfsp4JWSUpdated.publicKey 
+      }
     });
+  });
+
+  test('Stop state machine', async () => {
+    // No changes again this time for final check
+    await waitFor(service, (state) => state.matches('pullingPeerJWS.fetchingPeerJWS'));
+    await waitFor(service, (state) => state.matches('pullingPeerJWS.retry'));
+
+    expect(configUpdate).toHaveBeenCalledTimes(0);
 
     service.stop();
   });
+
 });

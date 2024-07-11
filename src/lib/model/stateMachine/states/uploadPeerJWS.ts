@@ -83,12 +83,20 @@ export namespace UploadPeerJWS {
                     createdAt,
                   };
                 });
-                return opts.dfspCertificateModel.uploadExternalDfspJWS(changesToUpload);
+                try {
+                  await opts.dfspCertificateModel.uploadExternalDfspJWS(changesToUpload);
+                  return event.data;
+                } catch (error) {
+                  throw error;
+                }
               },
             }),
           onDone: {
             target: 'idle',
             actions: [assign({ peerJWS: (_context, event) => event.data.updatedPeerJWS })],
+          },
+          onError: {
+            target: 'idle',
           },
         },
       },
