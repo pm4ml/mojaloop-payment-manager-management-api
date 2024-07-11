@@ -43,23 +43,27 @@ const startMachine = (opts: ReturnType<typeof createMachineOpts>) => {
 };
 
 describe('HubCert', () => {
-  const opts = createMachineOpts();
-  opts.vault.signHubCSR.mockImplementation(async (csr) => {
-    if (csr === 'HUB CSR 1') return { certificate: 'HUB CERT 1' };
-    if (csr === 'HUB CSR 1 (NEW)') return { certificate: 'HUB CERT 1 (NEW)' };
-    if (csr === 'HUB CSR 2') return { certificate: 'HUB CERT 2' };
-    if (csr === 'HUB CSR 3') return { certificate: 'HUB CERT 3' };
-    if (csr === 'HUB CSR 4') return { certificate: 'HUB CERT 4' };
-    return { certificate: 'UNKNOWN' };
-  });
-
-  opts.vault.certIsValid.mockImplementation(() => true);
-
-  opts.refreshIntervalSeconds = 1;
-  const service = startMachine(opts);
-
+  let service: ReturnType<typeof startMachine>;
   let signHubCSRCalls = 0;
   let uploadServerCertCalls = 0;
+  let opts: ReturnType<typeof createMachineOpts>;
+  beforeAll(() => {
+    opts = createMachineOpts();
+    opts.vault.signHubCSR.mockImplementation(async (csr) => {
+      if (csr === 'HUB CSR 1') return { certificate: 'HUB CERT 1' };
+      if (csr === 'HUB CSR 1 (NEW)') return { certificate: 'HUB CERT 1 (NEW)' };
+      if (csr === 'HUB CSR 2') return { certificate: 'HUB CERT 2' };
+      if (csr === 'HUB CSR 3') return { certificate: 'HUB CERT 3' };
+      if (csr === 'HUB CSR 4') return { certificate: 'HUB CERT 4' };
+      return { certificate: 'UNKNOWN' };
+    });
+  
+    opts.vault.certIsValid.mockImplementation(() => true);
+  
+    opts.refreshIntervalSeconds = 1;
+    service = startMachine(opts);
+  
+  });
 
   afterAll(() => {
     service.stop();

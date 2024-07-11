@@ -85,3 +85,8 @@ devspace*
 src/junit.xml
 src/.env
 src/secrets/jwsCerts
+
+junit.xml
+
+**/role-id
+**/secret-id

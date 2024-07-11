@@ -8,6 +8,8 @@
  *       Yevhen Kyriukha <yevhen.kyriukha@modusbox.com>                   *
  **************************************************************************/
 
+import 'tsconfig-paths/register';
+
 import Vault from '@app/lib/vault';
 import config from './config';
 import * as MCMClient from '@pm4ml/mcm-client';
@@ -20,13 +22,12 @@ jest.mock('@app/ControlServer');
 jest.mock('@mojaloop/sdk-standard-components');
 
 export const createMachineOpts = () => {
-  const vault = jest.mocked(
-    new Vault({
-      ...config.vault,
-      commonName: config.mojaloopConnectorFQDN,
-      logger: new SDKStandardComponents.Logger.Logger(),
-    })
-  );
+  const vaultObj = new Vault({
+    ...config.vault,
+    commonName: config.mojaloopConnectorFQDN,
+    logger: new SDKStandardComponents.Logger.Logger(),
+  });
+  const vault = jest.mocked(vaultObj);
 
   const modelOpts = {
     dfspId: config.dfspId,
@@ -64,7 +65,9 @@ export const createTestConfigState = (onConfigChange: typeof jest.fn) => ({
     idle: {},
     updatingConfig: {
       invoke: {
-        src: async (ctx, event: any) => onConfigChange(event.config),
+        src: async (ctx, event: any) => {
+          return onConfigChange(event.config);
+        },
         onDone: 'idle',
       },
     },

@@ -2,7 +2,6 @@
   "include": [
     "src",
     "src/**/*.json",
-    "test",
     "jest.bdd.config.js",
     "jest.config.js",
     "jest.integration.config.js",
@@ -25,7 +24,6 @@
     "module": "commonjs",
     "rootDirs": [
       "src",
-      "test",
       "dist"
     ],
     "baseUrl": ".",

@@ -9,6 +9,7 @@
  **************************************************************************/
 
 export * from './peerJWS';
+export * from './uploadPeerJWS';
 export * from './dfspJWS';
 export * from './hubCA';
 export * from './hubClientCert';

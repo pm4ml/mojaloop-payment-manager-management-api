@@ -332,6 +332,7 @@ declare module '@mojaloop/central-services-metrics';
 declare module '@hapi/good';
 declare module 'blipp';
 declare module 'convict-commander';
+declare module 'tsconfig-paths/register';
 
 // version 2.4 -> https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/javascript-state-machine/index.d.ts
 // we are using ^3.1.0

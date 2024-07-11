@@ -25,6 +25,13 @@ defaults_Dependencies: &defaults_Dependencies |
   apk add --no-cache -t openssl ncurses coreutils libgcc linux-headers grep util-linux binutils findutils
   npm install -g node-gyp
 
+defaults_machine_Dependencies: &defaults_machine_Dependencies |
+  sudo apt update
+  sudo apt install -y docker
+  sudo apt install -y docker-compose
+  sudo apt install -y musl-dev
+  sudo apt install -y build-essential
+
 defaults_license_scanner: &defaults_license_scanner
   name: Install and set up license-scanner
   command: |
@@ -70,23 +77,22 @@ jobs:
             - node_modules
 
   test-unit:
-    executor: default-docker
+    executor: default-machine
     steps:
       - checkout
       - run:
-          name: Install general dependencies
-          command: *defaults_Dependencies
-      - restore_cache:
-          keys:
-          - dependency-cache-v1-{{ checksum "package-lock.json" }}
-          paths:
-            - node_modules
+          name: Install machine dependencies
+          command: *defaults_machine_Dependencies
+      - run:
+          name: NPM Install
+          command: |
+            npm install
       - run:
           name: Execute unit tests
           command: |
-            ./scripts/run-vault.sh
+            npm run backend:start
             npm test
-            ./scripts/kill-vault.sh
+            npm run backend:stop
       - store_test_results:
           path: /home/circleci/project/git/
       - store_artifacts:

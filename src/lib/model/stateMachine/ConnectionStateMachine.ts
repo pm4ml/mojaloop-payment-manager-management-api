@@ -22,6 +22,7 @@ import {
   ConnectorConfig,
   EndpointConfig,
   ProgressMonitor,
+  UploadPeerJWS,
 } from './states';
 
 import { MachineOpts } from './states/MachineOpts';
@@ -37,6 +38,7 @@ type Context = PeerJWS.Context &
   HubCert.Context &
   HubCA.Context &
   ConnectorConfig.Context &
+  UploadPeerJWS.Context &
   EndpointConfig.Context &
   ProgressMonitor.Context;
 
@@ -49,6 +51,7 @@ type Event =
   | HubCert.Event
   | HubCA.Event
   | ConnectorConfig.Event
+  | UploadPeerJWS.Event
   | EndpointConfig.Event
   | ProgressMonitor.Event;
 
@@ -173,6 +176,7 @@ class ConnectionStateMachine {
           creatingDfspServerCert: DfspServerCert.createState<Context>(opts),
           creatingHubClientCert: HubCert.createState<Context>(opts),
           pullingPeerJWS: PeerJWS.createState<Context>(opts),
+          uploadingPeerJWS: UploadPeerJWS.createState<Context>(opts),
           creatingJWS: DfspJWS.createState<Context>(opts),
           endpointConfig: EndpointConfig.createState<Context>(opts),
           connectorConfig: ConnectorConfig.createState<Context>(opts),
