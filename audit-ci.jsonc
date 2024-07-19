@@ -1,0 +1,16 @@
+{
+  "$schema": "https://github.com/IBM/audit-ci/raw/main/docs/schema.json",
+  // audit-ci supports reading JSON, JSONC, and JSON5 config files.
+  // Only use one of ["low": true, "moderate": true, "high": true, "critical": true]
+  "moderate": true,
+  "allowlist": [ // NOTE: Please add as much information as possible to any items added to the allowList
+    // Currently no fixes available for the following
+    "GHSA-49j4-86m8-q2jw", // mysql2
+    "GHSA-4rch-2fh8-94vw", // mysql2
+    "GHSA-72xf-g2v4-qvf3", // @kubernetes/client-node>request>tough-cookie
+    "GHSA-fpw7-j2hg-69v5", // mysql2
+    "GHSA-mqr2-w7wj-jjgr", // mysql2
+    "GHSA-p8p7-x288-28g6", // @kubernetes/client-node>request
+    "GHSA-pmh2-wpjm-fj45" // mysql2
+  ]
+}
