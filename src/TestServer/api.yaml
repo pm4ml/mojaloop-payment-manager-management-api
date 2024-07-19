@@ -13,6 +13,16 @@ paths:
         200:
           description: Returns empty body if the scheme adapter outbound transfers service is running.
 
+  /ready:
+    get:
+      summary: Readiness check endpoint
+      description: This endpoint checks the readiness of the endpoint.
+      tags:
+      - Readiness
+      responses:
+        200:
+          description: Returns empty body if the scheme adapter outbound transfers service is ready.
+
   /state:
     get:
       tags:

@@ -52,7 +52,6 @@ const LOG_ID = {
     auth: config.auth,
     hubIamProviderUrl: config.hubIamProviderUrl,
   });
-  await authModel.login();
 
   const vault = new Vault({
     ...config.vault,
@@ -91,16 +90,6 @@ const LOG_ID = {
     certManager,
     ControlServer,
   });
-  await stateMachine.start();
-
-  const controlServer = new ControlServer.Server({
-    port: config.control.port,
-    logger: logger.push(LOG_ID.CONTROL),
-    onRequestConfig: () => stateMachine.sendEvent({ type: 'REQUEST_CONNECTOR_CONFIG' }),
-    onRequestPeerJWS: () => stateMachine.sendEvent({ type: 'REQUEST_PEER_JWS' }),
-    onUploadPeerJWS: (peerJWS: any) => stateMachine.sendEvent({ type: 'UPLOAD_PEER_JWS', data: peerJWS }),
-  });
-  controlServer.registerInternalEvents();
 
   let uiApiServer: UIAPIServer;
   if (config.enableUiApiServer) {
@@ -129,6 +118,19 @@ const LOG_ID = {
     });
     await testServer.start();
   }
+
+  await authModel.login();
+
+  const controlServer = new ControlServer.Server({
+    port: config.control.port,
+    logger: logger.push(LOG_ID.CONTROL),
+    onRequestConfig: () => stateMachine.sendEvent({ type: 'REQUEST_CONNECTOR_CONFIG' }),
+    onRequestPeerJWS: () => stateMachine.sendEvent({ type: 'REQUEST_PEER_JWS' }),
+    onUploadPeerJWS: (peerJWS: any) => stateMachine.sendEvent({ type: 'UPLOAD_PEER_JWS', data: peerJWS }),
+  });
+  controlServer.registerInternalEvents();
+
+  await stateMachine.start();
 
   // handle signals to exit gracefully
   ['SIGINT', 'SIGTERM'].forEach((signal) => {

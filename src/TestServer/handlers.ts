@@ -16,7 +16,14 @@ const getStateMachineContext = async (ctx) => {
   ctx.body = ctx.state.stateMachine.getContext();
 };
 
+const started = async (ctx) => {
+  ctx.body = ctx.state.stateMachine.started;
+};
+
 export const createHandlers = () => ({
+  '/ready': {
+    get: started,
+  },
   '/health': {
     get: healthCheck,
   },

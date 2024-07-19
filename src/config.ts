@@ -105,6 +105,8 @@ const cfg = {
         clientId: env.get('AUTH_CLIENT_ID').required().asString(),
         clientSecret: env.get('AUTH_CLIENT_SECRET').required().asString(),
       },
+      retry: env.get('AUTH_RETRY').default(9).asInt(),
+      delay: env.get('AUTH_DELAY').default(10).asInt(),
     }),
   },
   dfspClientCsrParameters: env.get('DFSP_CLIENT_CSR_PARAMETERS').asJsonConfig(),
