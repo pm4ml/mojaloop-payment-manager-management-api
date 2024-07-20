@@ -45,7 +45,7 @@
     "@kubernetes/client-node": "^0.16.2",
     "@mojaloop/api-snippets": "^17.5.1",
     "@mojaloop/sdk-standard-components": "18.3.0",
-    "@pm4ml/mcm-client": "github:pm4ml/mcm-client#v3.1.0",
+    "@pm4ml/mcm-client": "github:pm4ml/mcm-client#fix/retry",
     "@xstate/inspect": "^0.7.0",
     "ajv": "^8.11.0",
     "async-injection": "^1.5.0",
