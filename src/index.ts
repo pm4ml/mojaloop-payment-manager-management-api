@@ -52,7 +52,12 @@ const LOG_ID = {
     auth: config.auth,
     hubIamProviderUrl: config.hubIamProviderUrl,
   });
-  await authModel.login();
+
+  try {
+    await authModel.login();
+  } catch (error) {
+    // error is logged in the authModel.login() method
+  }
 
   const vault = new Vault({
     ...config.vault,
