@@ -106,8 +106,8 @@ export namespace UploadPeerJWS {
                     return [];
                   }
                   return event.data.updatedPeerJWS;
-                }
-              })
+                },
+              }),
             ],
           },
           onError: {
