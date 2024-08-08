@@ -76,15 +76,20 @@ export namespace UploadPeerJWS {
               logger: opts.logger,
               retryInterval: opts.refreshIntervalSeconds * 1000,
               service: async () => {
-                const changesToUpload = event.data.changes.map(({ dfspId, publicKey, createdAt }) => {
-                  return {
-                    dfspId,
-                    publicKey,
-                    createdAt,
-                  };
-                });
                 try {
-                  await opts.dfspCertificateModel.uploadExternalDfspJWS(changesToUpload);
+                  if (!event?.data) {
+                    opts.logger.warn('No event.data in uploadingPeerJWS');
+                    // todo: think if we need to return something here?
+                  } else {
+                    const changesToUpload = event.data.changes.map(({ dfspId, publicKey, createdAt }) => {
+                      return {
+                        dfspId,
+                        publicKey,
+                        createdAt,
+                      };
+                    });
+                    await opts.dfspCertificateModel.uploadExternalDfspJWS(changesToUpload);
+                  }
                   return event.data;
                 } catch (error) {
                   throw error;
@@ -93,7 +98,17 @@ export namespace UploadPeerJWS {
             }),
           onDone: {
             target: 'idle',
-            actions: [assign({ peerJWS: (_context, event) => event.data.updatedPeerJWS })],
+            actions: [
+              assign({
+                peerJWS: (_context, event) => {
+                  if (!event?.data) {
+                    opts.logger.warn('No event.data in uploadingPeerJWS.onDone');
+                    return [];
+                  }
+                  return event.data.updatedPeerJWS;
+                }
+              })
+            ],
           },
           onError: {
             target: 'idle',
