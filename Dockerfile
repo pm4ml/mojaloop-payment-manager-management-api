@@ -33,7 +33,7 @@ LABEL org.label-schema.vcs-url=$VCS_URL
 LABEL org.label-schema.vcs-ref=$VCS_REF
 LABEL org.label-schema.version=$VERSION
 
-COPY tsconfig.json tsconfig-paths.js package*.json /opt/app/
+COPY tsconfig.json package*.json /opt/app/
 
 RUN npm ci --production
 
