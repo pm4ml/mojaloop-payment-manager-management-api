@@ -8,7 +8,7 @@
  *       Murthy Kakarlamudi - murthy@modusbox.com                         *
  **************************************************************************/
 
-import { DFSP, MonetaryZone, Transfer } from '@app/lib/model';
+import { DFSP, MonetaryZone, Transfer } from '../lib/model';
 
 const healthCheck = async (ctx) => {
   ctx.body = { status: 'ok' };

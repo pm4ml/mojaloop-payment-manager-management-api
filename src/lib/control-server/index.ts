@@ -12,8 +12,9 @@
  ************************************************************************* */
 import ws from 'ws';
 import jsonPatch from 'fast-json-patch';
-import randomPhrase from '@app/lib/randomphrase';
 import SDKStandardComponents from '@mojaloop/sdk-standard-components';
+import randomPhrase from '../../lib/randomphrase';
+
 import Logger = SDKStandardComponents.Logger.Logger;
 
 /** ************************************************************************

@@ -1,42 +1,22 @@
 {
   "include": [
     "src",
-    "src/**/*.json",
-    "jest.bdd.config.js",
-    "jest.config.js",
-    "jest.integration.config.js",
-    ".eslintrc.js",
-    "docker",
-    "commitlint.config.js",
-    "types/ambient.d.ts"
+    "src/**/*.json"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "coverage",
-    "test",
-    "commitlint.config.js",
-    "jest.bdd.config.js",
-    "jest.config.js"
+    "coverage"
   ],
   "compilerOptions": {
     "target": "es2020",
     "module": "commonjs",
-    "rootDirs": [
-      "src",
-      "dist"
-    ],
     "baseUrl": ".",
-    "paths": {
-      "@app/*": [ "src/*" ]
-    },
-    "lib": [
-      "es2020"
-    ],
+    "lib": ["es2020"],
     "importHelpers": true,
     "declaration": true,
     "sourceMap": true,
-    "rootDir": "./",
+    "rootDir": "./src",
     "outDir": "dist",
     "strict": true,
     "noImplicitAny": false,
@@ -52,6 +32,12 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "skipLibCheck": true
-  }
+    "skipLibCheck": true,
+    "paths": {
+      "@app/*": [ "src/*" ]
+    }
+  },
+  "files": [
+    "src/types/**/*.d.ts"
+  ]
 }

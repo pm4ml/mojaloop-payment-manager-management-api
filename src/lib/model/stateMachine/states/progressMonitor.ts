@@ -9,8 +9,8 @@
  ************************************************************************* */
 
 import { assign, DoneEventObject, MachineConfig } from 'xstate';
+import { invokeRetry } from '../../../../lib/model/stateMachine/states/invokeRetry';
 import { MachineOpts } from './MachineOpts';
-import { invokeRetry } from '@app/lib/model/stateMachine/states/invokeRetry';
 
 export namespace ProgressMonitor {
   export interface Context {

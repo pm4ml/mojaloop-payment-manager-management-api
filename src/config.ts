@@ -12,8 +12,6 @@ import fs from 'fs';
 import { from } from 'env-var';
 import yaml from 'js-yaml';
 
-require('dotenv').config();
-
 function getFileContent(path: string) {
   if (!fs.existsSync(path)) {
     throw new Error(`File ${path} doesn't exist`);

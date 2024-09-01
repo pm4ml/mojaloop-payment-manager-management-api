@@ -8,8 +8,6 @@
  *       Murthy Kakarlamudi - murthy@modusbox.com                             *
  **************************************************************************/
 
-import 'tsconfig-paths/register';
-
 import process from 'node:process';
 import { hostname } from 'node:os';
 import { Logger } from '@mojaloop/sdk-standard-components';
@@ -21,11 +19,11 @@ import {
   HubEndpointModel,
 } from '@pm4ml/mcm-client';
 
-import Vault from '@app/lib/vault';
-import config from '@app/config';
-import { ConnectionStateMachine } from '@app/lib/model';
-import { createMemoryCache } from '@app/lib/cacheDatabase';
-import TestServer from '@app/TestServer';
+import Vault from './lib/vault';
+import config from './config';
+import { ConnectionStateMachine } from './lib/model';
+import { createMemoryCache } from './lib/cacheDatabase';
+import TestServer from './TestServer';
 import * as ControlServer from './ControlServer';
 import UIAPIServer from './UIAPIServer';
 import CertManager from './lib/model/CertManager';
