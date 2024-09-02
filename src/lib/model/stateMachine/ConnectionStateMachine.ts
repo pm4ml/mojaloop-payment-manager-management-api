@@ -9,7 +9,7 @@
  **************************************************************************/
 
 import { createMachine, interpret, State, StateMachine } from 'xstate';
-import { inspect } from '@xstate/inspect/lib/server';
+// import { inspect } from '@xstate/inspect/lib/server';
 
 import {
   DfspJWS,
@@ -26,7 +26,7 @@ import {
 } from './states';
 
 import { MachineOpts } from './states/MachineOpts';
-import WebSocket from 'ws';
+// import WebSocket from 'ws';
 import * as crypto from 'crypto';
 import { ActionObject } from 'xstate/lib/types';
 
@@ -81,7 +81,8 @@ class ConnectionStateMachine {
   }
 
   private handleTransition(state: State<Context, Event>) {
-    this.opts.logger.push({ state: state.value }).log('Transition');
+    // this.opts.logger.push({ state: state.value }).log('Transition');
+    this.opts.logger.log('Transition', { state: state.value });
     this.context = state.context;
     this.updateActions(state.actions);
     this.setState(state);
@@ -152,15 +153,16 @@ class ConnectionStateMachine {
   }
 
   private serve() {
-    console.log(
-      `Serving state machine introspection on port ${this.opts.port}\n` +
-        `Access URL: https://stately.ai/viz?inspect&server=ws://localhost:${this.opts.port}`
-    );
-    inspect({
-      server: new WebSocket.Server({
-        port: this.opts.port,
-      }),
-    });
+    console.log('No inspect!!!!');
+    // console.log(
+    //   `Serving state machine introspection on port ${this.opts.port}\n` +
+    //     `Access URL: https://stately.ai/viz?inspect&server=ws://localhost:${this.opts.port}`
+    // );
+    // inspect({
+    //   server: new WebSocket.Server({
+    //     port: this.opts.port,
+    //   }),
+    // });
   }
 
   private createMachine(opts: MachineOpts): StateMachineType {
