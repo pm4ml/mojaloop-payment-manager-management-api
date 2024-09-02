@@ -81,8 +81,8 @@ class ConnectionStateMachine {
   }
 
   private handleTransition(state: State<Context, Event>) {
-    // this.opts.logger.push({ state: state.value }).log('Transition');
-    this.opts.logger.log('Transition', { state: state.value });
+    this.opts.logger.push({ state: state.value }).log('Transition');
+    // this.opts.logger.log('Transition', { state: state.value });
     this.context = state.context;
     this.updateActions(state.actions);
     this.setState(state);
