@@ -70,6 +70,7 @@ services:
     depends_on:
       - mysql
       - vault-dev
+      - keycloak
 
   keycloak:
     build:
