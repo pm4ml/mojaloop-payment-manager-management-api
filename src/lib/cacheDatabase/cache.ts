@@ -81,7 +81,7 @@ class Cache {
     //if we are given an object, turn it into a string
     if (typeof value !== 'string') {
       value = JSON.stringify(value);
-      console.log(`in cache set: ${value}`);
+      this.logger.debug(`in cache set: ${value}`);
     }
 
     await this.client.set(key, value);

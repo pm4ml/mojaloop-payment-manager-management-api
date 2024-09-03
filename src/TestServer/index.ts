@@ -75,7 +75,7 @@ class TestServer {
       return;
     }
     await new Promise((resolve) => this.server.close(resolve));
-    console.log('inbound shut down complete');
+    this.logger.log('inbound shut down complete');
   }
 
   static _createLogger() {

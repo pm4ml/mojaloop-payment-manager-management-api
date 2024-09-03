@@ -110,10 +110,25 @@ const cfg = {
   caCsrParameters: env.get('CA_CSR_PARAMETERS').asJsonConfig(),
 
   stateMachineDebugPort: env.get('STATE_MACHINE_DEBUG_PORT').default(8888).asPortNumber(),
+  stateMachineInspectEnabled: env.get('STATE_MACHINE_INSPECT_ENABLED').default('false').asBool(),
   whitelistIP: env.get('WHITELIST_IP').default('').asList(),
   callbackURL: env.get('CALLBACK_URL').default('connector.fsp.example.com:443').asUrlString(),
   enableTestAPI: env.get('ENABLE_TEST_API').default('true').asBool(),
   testApiPort: env.get('TEST_API_PORT').default('9050').asPortNumber(),
+
+  instrumentation: {
+    metrics: {
+      disabled: env.get('INSTRUMENTATION_METRICS_DISABLED').default('false').asBool(),
+      port: env.get('INSTRUMENTATION_METRICS_PORT').default('4003').asPortNumber(),
+      config: {
+        timeout: env.get('INSTRUMENTATION_METRICS_CONFIG_TIMEOUT').default(5000).asIntPositive(),
+        prefix: env.get('INSTRUMENTATION_METRICS_CONFIG_PREFIX').default('').asString(),
+        defaultLabels: {
+          serviceName: 'payment-manager-management-api-service',
+        },
+      },
+    },
+  },
 };
 
 export type IConfigVault = typeof vault;

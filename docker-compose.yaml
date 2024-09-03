@@ -1,5 +1,30 @@
-version: '3'
+version: "3.9"
+
+volumes:
+  mysql-data:
+  prom-data:
+  grafana-data:
+
 services:
+  men-api:
+    image: mojaloop-payment-manager-management-api-men-api:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./.env.example
+      - ./docker/.env.docker
+    volumes:
+      - ./resources:/resources
+      - ./docker/vault/tmp:/vault
+    ports:
+      - "9000:9000"
+      - "9050:9050"
+    depends_on:
+      - vault-dev
+      - keycloak
+      - redis
 
   redis:
     image: redis:6.2.4-alpine
@@ -13,7 +38,7 @@ services:
 
   vault-dev:
     image: vault:1.2.1
-    restart: always
+    restart: unless-stopped
     environment:
       VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8233
       VAULT_ADDR: http://127.0.0.1:8233
@@ -31,3 +56,82 @@ services:
       timeout: 1s
       retries: 20
 
+## ----- MCM Layer ----- ##
+  connection-manager-api:
+    image: ghcr.io/pm4ml/connection-manager-api:v2.4.0
+    command: npm run start:dev
+    restart: unless-stopped
+    env_file: ./docker/.env.mcm-api
+    volumes:
+      - ./resources:/usr/src/app/resources
+      - ./docker/vault/tmp:/vault/tmp
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mysql
+      - vault-dev
+
+  keycloak:
+    build:
+      context: ./docker/keycloak
+      dockerfile: Dockerfile
+    command: start-dev # --import-realm
+    restart: unless-stopped
+    environment:
+      - KC_HTTP_PORT=8080
+      - KC_DB=mysql
+      - KC_DB_URL=jdbc:mysql://mysql:3306/${DB_NAME:-mcm}?allowPublicKeyRetrieval=true&useSSL=false
+      - KC_DB_USERNAME=${DB_USER:-mcm}
+      - KC_DB_PASSWORD=${DB_PASS:-mcm}
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    volumes:
+      - ./docker/keycloak/:/opt/keycloak/data/import/
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+
+  mysql:
+    image: mysql/mysql-server:8.0
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD:-mcm}
+      - MYSQL_USER=${DB_USER:-mcm}
+      - MYSQL_PASSWORD=${DB_PASS:-mcm}
+      - MYSQL_DATABASE=${DB_NAME:-mcm}
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
+    command: mysqld --lower_case_table_names=1 --skip-ssl --character_set_server=utf8mb4 --explicit_defaults_for_timestamp
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./docker/sql-init/:/docker-entrypoint-initdb.d/
+    ports:
+      - "3306:3306"
+
+## ----- Metrics ----- ##
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/metrics/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prom-data:/prometheus
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "33000:3000"
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./docker/metrics/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
