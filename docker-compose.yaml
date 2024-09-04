@@ -6,8 +6,8 @@ volumes:
   grafana-data:
 
 services:
-  men-api:
-    image: mojaloop-payment-manager-management-api-men-api:latest
+  management-api:
+    image: management-api:latest
     build:
       context: .
       dockerfile: Dockerfile
