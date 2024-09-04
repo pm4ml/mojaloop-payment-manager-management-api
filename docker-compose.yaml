@@ -73,10 +73,8 @@ services:
       - keycloak
 
   keycloak:
-    build:
-      context: ./docker/keycloak
-      dockerfile: Dockerfile
-    command: start-dev # --import-realm
+    image: quay.io/keycloak/keycloak:22.0.1
+    command: [ 'start-dev --import-realm' ]
     restart: unless-stopped
     environment:
       - KC_HTTP_PORT=8080
@@ -84,6 +82,7 @@ services:
       - KC_DB_URL=jdbc:mysql://mysql:3306/${DB_NAME:-mcm}?allowPublicKeyRetrieval=true&useSSL=false
       - KC_DB_USERNAME=${DB_USER:-mcm}
       - KC_DB_PASSWORD=${DB_PASS:-mcm}
+      - KC_HEALTH_ENABLED=true
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
     volumes:
@@ -91,7 +90,8 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
 
   mysql:
     image: mysql/mysql-server:8.0
@@ -108,6 +108,8 @@ services:
       - ./docker/sql-init/:/docker-entrypoint-initdb.d/
     ports:
       - "3306:3306"
+    healthcheck:
+      test: "mysqladmin ping -u root -p$${MYSQL_ROOT_PASSWORD}"
 
 ## ----- Metrics ----- ##
   prometheus:
