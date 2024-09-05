@@ -11,7 +11,6 @@ import NodeVault from 'node-vault';
 import { strict as assert } from 'assert';
 import SDK from '@mojaloop/sdk-standard-components';
 import forge from 'node-forge';
-import { create } from 'lodash';
 
 // TODO: Use hashi-vault-js package
 // TODO: find and link document containing rules on allowable paths
