@@ -61,7 +61,11 @@ export namespace DfspJWS {
               id: 'dfspJWSUpload',
               logger: opts.logger,
               retryInterval: opts.refreshIntervalSeconds * 1000,
-              service: async () => opts.dfspCertificateModel.uploadJWS({ publicKey: ctx.dfspJWS!.publicKey, createdAt: ctx.dfspJWS!.createdAt }),
+              service: async () =>
+                opts.dfspCertificateModel.uploadJWS({
+                  publicKey: ctx.dfspJWS!.publicKey,
+                  createdAt: ctx.dfspJWS!.createdAt,
+                }),
             }),
           onDone: {
             target: 'idle',
