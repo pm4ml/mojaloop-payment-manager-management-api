@@ -339,6 +339,7 @@ class Vault {
     return {
       publicKey: forge.pki.publicKeyToPem(keypair.publicKey, 72),
       privateKey: forge.pki.privateKeyToPem(keypair.privateKey, 72),
+      createdAt: Math.floor(Date.now() / 1000),
     };
   }
 }

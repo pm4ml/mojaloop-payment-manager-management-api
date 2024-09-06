@@ -8,8 +8,11 @@
  *       Yevhen Kyriukha <yevhen.kyriukha@modusbox.com>                   *
  **************************************************************************/
 
+import { createHash } from 'node:crypto';
 import { createMachine, interpret, State, StateMachine } from 'xstate';
+import { ActionObject } from 'xstate/lib/types';
 import { inspect } from '@xstate/inspect/lib/server';
+import WebSocket from 'ws';
 
 import {
   DfspJWS,
@@ -26,9 +29,6 @@ import {
 } from './states';
 
 import { MachineOpts } from './states/MachineOpts';
-import WebSocket from 'ws';
-import * as crypto from 'crypto';
-import { ActionObject } from 'xstate/lib/types';
 
 type Context = PeerJWS.Context &
   DfspJWS.Context &
@@ -152,15 +152,15 @@ class ConnectionStateMachine {
   }
 
   private serve() {
-    console.log(
-      `Serving state machine introspection on port ${this.opts.port}\n` +
-        `Access URL: https://stately.ai/viz?inspect&server=ws://localhost:${this.opts.port}`
-    );
-    inspect({
-      server: new WebSocket.Server({
-        port: this.opts.port,
-      }),
-    });
+    if (this.opts.config.stateMachineInspectEnabled) {
+      const { port } = this.opts;
+      inspect({
+        server: new WebSocket.Server({ port }),
+      });
+      this.opts.logger.log(
+        `StateMachine introspection URL: https://stately.ai/viz?inspect&server=ws://localhost:${port}`
+      );
+    }
   }
 
   private createMachine(opts: MachineOpts): StateMachineType {
@@ -203,7 +203,7 @@ class ConnectionStateMachine {
   }
 
   static createHash(machine: StateMachineType) {
-    return crypto.createHash('sha256').update(JSON.stringify(machine.config.states)).digest('base64');
+    return createHash('sha256').update(JSON.stringify(machine.config.states)).digest('base64');
   }
 }
 

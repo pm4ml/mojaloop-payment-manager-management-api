@@ -14,14 +14,14 @@ import { oas } from 'koa-oas3';
 
 import http from 'http';
 import path from 'path';
+import assert from 'assert';
 
 import { Logger } from '@mojaloop/sdk-standard-components';
 
+import middlewares from '../UIAPIServer/middlewares';
+import { IConfig } from '../config';
+import { ConnectionStateMachine } from '../lib/model';
 import { createHandlers } from './handlers';
-import middlewares from '@app/UIAPIServer/middlewares';
-import { IConfig } from '@app/config';
-import assert from 'assert';
-import { ConnectionStateMachine } from '@app/lib/model';
 
 interface TestServerOptions {
   config: IConfig;
@@ -75,7 +75,7 @@ class TestServer {
       return;
     }
     await new Promise((resolve) => this.server.close(resolve));
-    console.log('inbound shut down complete');
+    this.logger.log('inbound shut down complete');
   }
 
   static _createLogger() {

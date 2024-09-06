@@ -9,9 +9,9 @@
  ************************************************************************* */
 
 import { assign, MachineConfig, send, DoneEventObject } from 'xstate';
+import { Subject } from '../../../../lib/vault';
 import { MachineOpts } from './MachineOpts';
 import { invokeRetry } from './invokeRetry';
-import { Subject } from '@app/lib/vault';
 
 export namespace DfspCA {
   export type Context = {

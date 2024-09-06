@@ -8,8 +8,6 @@
  *       Yevhen Kyriukha <yevhen.kyriukha@modusbox.com>                   *
  **************************************************************************/
 
-import 'tsconfig-paths/register';
-
 import Vault from '@app/lib/vault';
 import config from './config';
 import * as MCMClient from '@pm4ml/mcm-client';

@@ -8,8 +8,6 @@
  *       Yevhen Kyriukha <yevhen.kyriukha@modusbox.com>                   *
  **************************************************************************/
 
-import 'tsconfig-paths/register';
-
 import { DfspServerCert } from '@app/lib/model/stateMachine/states';
 import { createMachine, interpret } from 'xstate';
 import { createMachineOpts, createTestConfigState } from './commonMocks';

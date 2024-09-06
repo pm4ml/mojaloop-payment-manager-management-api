@@ -9,5 +9,8 @@ module.exports = {
     'ts-jest': {
       isolatedModules: true
     }
-  }
+  },
+  transform: {
+    '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.test.json' }],
+  },
 };

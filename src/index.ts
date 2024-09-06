@@ -8,8 +8,6 @@
  *       Murthy Kakarlamudi - murthy@modusbox.com                             *
  **************************************************************************/
 
-import 'tsconfig-paths/register';
-
 import process from 'node:process';
 import { hostname } from 'node:os';
 import { Logger } from '@mojaloop/sdk-standard-components';
@@ -21,14 +19,15 @@ import {
   HubEndpointModel,
 } from '@pm4ml/mcm-client';
 
-import Vault from '@app/lib/vault';
-import config from '@app/config';
-import { ConnectionStateMachine } from '@app/lib/model';
-import { createMemoryCache } from '@app/lib/cacheDatabase';
-import TestServer from '@app/TestServer';
+import Vault from './lib/vault';
+import config from './config';
+import { ConnectionStateMachine } from './lib/model';
+import { createMemoryCache } from './lib/cacheDatabase';
+import TestServer from './TestServer';
 import * as ControlServer from './ControlServer';
 import UIAPIServer from './UIAPIServer';
 import CertManager from './lib/model/CertManager';
+import { createMetricsServer, MetricsServer } from './lib/metrics';
 
 const LOG_ID = {
   CONTROL: { app: 'mojaloop-payment-manager-management-api-service-control-server' },
@@ -45,7 +44,7 @@ const LOG_ID = {
     stringify: Logger.buildStringify({ space: config.logIndent }) as Logger.Stringify,
   });
 
-  console.log(JSON.stringify(config));
+  logger.push({ config: JSON.stringify(config) }).info('config');
 
   const authModel = new AuthModel({
     logger,
@@ -135,6 +134,12 @@ const LOG_ID = {
     await testServer.start();
   }
 
+  let metricsServer: MetricsServer;
+  if (!config.instrumentation.metrics.disabled) {
+    metricsServer = createMetricsServer({ ...config.instrumentation.metrics, logger });
+    await metricsServer.start();
+  }
+
   // handle signals to exit gracefully
   ['SIGINT', 'SIGTERM'].forEach((signal) => {
     process.on(signal, async () => {
@@ -144,7 +149,8 @@ const LOG_ID = {
       await Promise.all([
         controlServer.stop(),
         uiApiServer?.stop(),
-        testServer?.stop()
+        testServer?.stop(),
+        metricsServer?.stop()
       ]);
       vault.disconnect();
 
