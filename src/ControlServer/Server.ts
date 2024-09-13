@@ -10,9 +10,10 @@
 
 import ws from 'ws';
 import jsonPatch from 'fast-json-patch';
-import randomPhrase from '@app/lib/randomphrase';
-import { getInternalEventEmitter, INTERNAL_EVENTS } from './events';
 import { Logger } from '@mojaloop/sdk-standard-components';
+
+import randomPhrase from '../lib/randomphrase';
+import { getInternalEventEmitter, INTERNAL_EVENTS } from './events';
 
 const ControlServerEventEmitter = getInternalEventEmitter();
 

@@ -10,8 +10,8 @@
 
 import util from 'util';
 import Router from 'koa-router';
-import randomPhrase from '@app/lib/randomphrase';
 import { HTTPResponseError } from '@pm4ml/mcm-client';
+import randomPhrase from '../lib/randomphrase';
 
 /**
  * Log raw to console as a last resort

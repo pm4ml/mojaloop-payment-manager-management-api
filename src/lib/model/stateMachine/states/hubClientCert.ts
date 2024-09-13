@@ -49,7 +49,15 @@ export namespace HubCert {
               retryInterval: opts.refreshIntervalSeconds * 1000,
               service: async () => opts.hubCertificateModel.getClientCerts(),
             }),
-          onDone: 'updatingCSR',
+          onDone: [
+            {
+              cond: 'missingDataMap',
+              target: 'retry',
+            },
+            {
+              target: 'updatingCSR',
+            },
+          ],
         },
       },
       updatingCSR: {
@@ -135,5 +143,6 @@ export namespace HubCert {
 
   export const createGuards = <TContext extends Context>() => ({
     hasUnprocessedCerts: (ctx: TContext) => ctx.hubClientCerts!.some((cert) => !cert.cert),
+    missingDataMap: (_ctx: TContext, event: AnyEventObject) => typeof event?.data?.map !== 'function',
   });
 }

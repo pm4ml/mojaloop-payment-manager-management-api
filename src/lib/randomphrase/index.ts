@@ -21,7 +21,7 @@
  --------------
  ******/
 
-const words = require('./words.json');
+import * as words from './words.json';
 
 const randomEl = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
 export default (separator = '-') =>

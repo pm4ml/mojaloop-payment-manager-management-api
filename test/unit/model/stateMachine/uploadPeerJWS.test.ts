@@ -8,11 +8,9 @@
  *       Vijay Kumar Guthi <vijaya.guthi@infitx.com>                   *
  ************************************************************************* */
 
-import 'tsconfig-paths/register';
-
 import { UploadPeerJWS } from '@app/lib/model/stateMachine/states';
 import { createMachine, interpret } from 'xstate';
-import { createMachineOpts, createTestConfigState } from './commonMocks';
+import { createMachineOpts } from './commonMocks';
 import { waitFor } from 'xstate/lib/waitFor';
 
 type Context = UploadPeerJWS.Context;

@@ -9,11 +9,11 @@
  **************************************************************************/
 
 import SDK from '@mojaloop/sdk-standard-components';
-import Vault from '@app/lib/vault';
 import { DFSPCertificateModel, DFSPEndpointModel, HubCertificateModel, HubEndpointModel } from '@pm4ml/mcm-client';
-import * as ControlServer from '@app/ControlServer';
-import { IConfig } from '@app/config';
-import { CertManager } from '@app/lib/model';
+import Vault from '../../../../lib/vault';
+import * as ControlServer from '../../../../ControlServer';
+import { IConfig } from '../../../../config';
+import { CertManager } from '../../../../lib/model';
 
 export interface MachineOpts {
   logger: SDK.Logger.Logger;

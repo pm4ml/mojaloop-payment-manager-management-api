@@ -9,10 +9,10 @@
  ************************************************************************* */
 
 import { assign, DoneEventObject, MachineConfig, send } from 'xstate';
+import { CsrParams } from '../../../../lib/vault';
 import { MachineOpts } from './MachineOpts';
 import { invokeRetry } from './invokeRetry';
 import { DfspCA } from './dfspCA';
-import { CsrParams } from '@app/lib/vault';
 
 export namespace DfspServerCert {
   export interface Context {

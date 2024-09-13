@@ -1,9 +1,8 @@
-## *Builder*
-FROM node:16.15.0-alpine as builder
+ARG NODE_VERSION=18.20.4-alpine
+
+FROM node:${NODE_VERSION} AS builder
 
 RUN apk add --no-cache git python3 build-base
-
-## Create app directory
 WORKDIR /opt/app
 
 ## Copy basic files for installing dependencies
@@ -15,7 +14,7 @@ COPY src /opt/app/src
 RUN npm run build
 
 ## *Application*
-FROM node:16.15.0-alpine
+FROM node:${NODE_VERSION}
 
 RUN apk add --no-cache git python3 g++ make
 WORKDIR /opt/app
@@ -33,14 +32,11 @@ LABEL org.label-schema.vcs-url=$VCS_URL
 LABEL org.label-schema.vcs-ref=$VCS_REF
 LABEL org.label-schema.version=$VERSION
 
-COPY tsconfig.json tsconfig-paths.js package*.json /opt/app/
+COPY tsconfig.json package*.json /opt/app/
 
 RUN npm ci --production
 
 ## Copy of dist directory from builder
 COPY --from=builder /opt/app/dist ./dist
-
-## Expose any application ports
-EXPOSE 3000
 
 CMD [ "npm" , "start" ]

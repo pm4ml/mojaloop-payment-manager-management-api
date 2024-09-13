@@ -8,8 +8,6 @@
  *       Yevhen Kyriukha <yevhen.kyriukha@modusbox.com>                   *
  **************************************************************************/
 
-import 'tsconfig-paths/register';
-
 import { PeerJWS } from '@app/lib/model/stateMachine/states';
 import { createMachine, interpret } from 'xstate';
 import { createMachineOpts, createTestConfigState } from './commonMocks';
@@ -66,7 +64,7 @@ describe('PeerJWS', () => {
       testfsp2JWS,
     ]);
     opts.ControlServer.notifyPeerJWS.mockImplementation(async () => {});
-    
+
     opts.refreshIntervalSeconds = 1;
     service = startMachine(opts, configUpdate);
     await waitFor(service, (state) => state.matches('pullingPeerJWS.retry'));
@@ -77,10 +75,10 @@ describe('PeerJWS', () => {
       testfsp2JWS,
     ]);
 
-    expect(configUpdate).toHaveBeenCalledWith({ 
+    expect(configUpdate).toHaveBeenCalledWith({
       peerJWSKeys: {
         [testfsp1JWS.dfspId]: testfsp1JWS.publicKey,
-        [testfsp2JWS.dfspId]: testfsp2JWS.publicKey 
+        [testfsp2JWS.dfspId]: testfsp2JWS.publicKey
       }
     });
 
@@ -113,12 +111,12 @@ describe('PeerJWS', () => {
     await waitFor(service, (state) => state.matches('pullingPeerJWS.retry'));
 
     expect(configUpdate).toHaveBeenCalledTimes(1);
-    expect(configUpdate).toHaveBeenCalledWith({ 
+    expect(configUpdate).toHaveBeenCalledWith({
       peerJWSKeys: {
         [testfsp1JWS.dfspId]: testfsp1JWS.publicKey,
         [testfsp2JWS.dfspId]: testfsp2JWS.publicKey,
         [testfsp3JWS.dfspId]: testfsp3JWS.publicKey,
-        [testfsp4JWS.dfspId]: testfsp4JWS.publicKey 
+        [testfsp4JWS.dfspId]: testfsp4JWS.publicKey
       }
     });
   });
@@ -166,12 +164,12 @@ describe('PeerJWS', () => {
     await waitFor(service, (state) => state.matches('pullingPeerJWS.retry'));
 
     expect(configUpdate).toHaveBeenCalledTimes(1);
-    expect(configUpdate).toHaveBeenCalledWith({ 
+    expect(configUpdate).toHaveBeenCalledWith({
       peerJWSKeys: {
         [testfsp1JWS.dfspId]: testfsp1JWS.publicKey,
         [testfsp2JWS.dfspId]: testfsp2JWS.publicKey,
         [testfsp3JWSUpdated.dfspId]: testfsp3JWSUpdated.publicKey,
-        [testfsp4JWSUpdated.dfspId]: testfsp4JWSUpdated.publicKey 
+        [testfsp4JWSUpdated.dfspId]: testfsp4JWSUpdated.publicKey
       }
     });
   });

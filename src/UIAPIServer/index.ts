@@ -14,16 +14,16 @@ import { oas } from 'koa-oas3';
 
 import http from 'http';
 import path from 'path';
+import assert from 'assert';
 
 import { Logger } from '@mojaloop/sdk-standard-components';
 
-import { MemoryCache } from '@app/lib/cacheDatabase';
+import Vault from '../lib/vault';
+import { MemoryCache } from '../lib/cacheDatabase';
+import { IConfig } from '../config';
+import { ConnectionStateMachine } from '../lib/model';
 import { createHandlers } from './handlers';
 import middlewares from './middlewares';
-import { IConfig } from '@app/config';
-import Vault from '@app/lib/vault';
-import assert from 'assert';
-import { ConnectionStateMachine } from '@app/lib/model';
 
 interface UIAPIServerOptions {
   config: IConfig;

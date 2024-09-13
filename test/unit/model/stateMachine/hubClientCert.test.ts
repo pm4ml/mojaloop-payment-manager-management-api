@@ -8,8 +8,6 @@
  *       Yevhen Kyriukha <yevhen.kyriukha@modusbox.com>                   *
  **************************************************************************/
 
-import 'tsconfig-paths/register';
-
 import { HubCert } from '@app/lib/model/stateMachine/states';
 import { createMachine, interpret } from 'xstate';
 import { createMachineOpts } from './commonMocks';
@@ -57,12 +55,12 @@ describe('HubCert', () => {
       if (csr === 'HUB CSR 4') return { certificate: 'HUB CERT 4' };
       return { certificate: 'UNKNOWN' };
     });
-  
+
     opts.vault.certIsValid.mockImplementation(() => true);
-  
+
     opts.refreshIntervalSeconds = 1;
     service = startMachine(opts);
-  
+
   });
 
   afterAll(() => {
