@@ -934,9 +934,12 @@ components:
       description: Error description string.
 
     MojaloopIdentifier:
-      pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$
+      pattern: ^[0-9a-f]{8}-[0-9a-f]{4}-[1-7][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|[0-9A-HJKMNP-TV-Z]{26}$
       type: string
-      description: A Mojaloop API identifier (UUID).
+      description: A Mojaloop API identifier.
+        The supported identifiers formats are for
+        lowercase [UUID](https://datatracker.ietf.org/doc/html/rfc9562) and
+        uppercase [ULID](https://github.com/ulid/spec)
 
     MojaloopRequest:
       type: object
