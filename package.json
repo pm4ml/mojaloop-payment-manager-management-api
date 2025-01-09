@@ -27,6 +27,9 @@
     "test": "npm run test:unit",
     "test:unit": "jest --ci --reporters=default --reporters=jest-junit --env=node test/unit",
     "test:int": "jest --ci --reporters=default --reporters=jest-junit --env=node test/integration --forceExit",
+    "test:xunit": "jest --ci --detectOpenHandles --reporters=jest-junit",
+    "test:coverage": "npx nyc --reporter=lcov --reporter=text-summary npm run test",
+    "test:coverage-check": "npm run test:coverage && nyc check-coverage",
     "release": "npx standard-version --no-verify --releaseCommitMessageFormat 'ci(release): {{currentTag}} [skip ci]'",
     "snapshot": "npx standard-version --no-verify --skip.changelog --prerelease snapshot --releaseCommitMessageFormat 'ci(snapshot): {{currentTag}}'",
     "backend:start": "docker compose up -d --wait",
@@ -36,7 +39,9 @@
     "dep:update": "npx ncu -u",
     "audit:resolve": "npx resolve-audit --production",
     "audit:check": "npx audit-ci --config ./audit-ci.jsonc",
-    "audit:fix": "npm audit fix"
+    "audit:fix": "npm audit fix",
+    "test:integration": "./test/scripts/test-integration.sh",
+    "test:functional": "./test/scripts/test-functional.sh"
   },
   "dependencies": {
     "@kubernetes/client-node": "^0.16.2",
@@ -89,7 +94,7 @@
     "eslint-import-resolver-typescript": "^2.7.1",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-prettier": "^4.0.0",
-    "jest": "^28.1.0",
+    "jest": "^28.1.3",
     "jest-junit": "^13.2.0",
     "mockdate": "^3.0.2",
     "nock": "^13.2.2",
