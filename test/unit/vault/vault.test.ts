@@ -74,7 +74,7 @@ describe('Vault', () => {
     jest.restoreAllMocks();
     jest.clearAllTimers();
   });
-  
+
   describe('constructor', () => {
     it('should initialize with the provided options', () => {
       expect(vaultInstance.opts).toEqual({
@@ -668,6 +668,7 @@ describe('Vault', () => {
       keyLength: 2048,
       keyAlgorithm: 'rsa',
       commonName: 'test-certificate',
+      auth:{}
     };
 
     afterEach(() => {
@@ -688,15 +689,22 @@ describe('Vault', () => {
       const mockCreds = {
         auth: {
           client_token: 'mock-token',
-          lease_duration: 60,
+          lease_duration: 6,
         },
       };
       mockVault.approleLogin.mockReturnValueOnce(Promise.resolve(mockCreds));
       await vaultApploginAuthInstance.connect();
 
+      expect(mockLogger.push).toHaveBeenCalledWith({ endpoint: mockEndpoint });
+      expect(mockLogger.push().log).toHaveBeenCalledWith('Connecting to Vault');
+
       expect(mockVault.approleLogin).toHaveBeenCalledWith({
         role_id: mockRoleId,
         secret_id: mockSecretId,
+      });
+      expect(NodeVault).toHaveBeenCalledWith({
+        endpoint: mockEndpoint,
+        token: mockCreds.auth.client_token,
       });
     });
 
@@ -713,20 +721,25 @@ describe('Vault', () => {
       const mockCreds = {
         auth: {
           client_token: 'mock-token',
-          lease_duration: 60,
+          lease_duration: 6,
         },
       };
       mockVault.kubernetesLogin.mockReturnValueOnce(Promise.resolve(mockCreds));
       await vaultK8sAuthInstance.connect();
 
+      expect(mockLogger.push).toHaveBeenCalledWith({ endpoint: mockEndpoint });
+      expect(mockLogger.push().log).toHaveBeenCalledWith('Connecting to Vault');
       expect(mockVault.kubernetesLogin).toHaveBeenCalledWith({
         role: 'k8s-role',
         jwt: 'jwt-token',
       });
+      expect(NodeVault).toHaveBeenCalledWith({
+        endpoint: mockEndpoint,
+        token: mockCreds.auth.client_token,
+      });
     });
     it('should throw an error for unsupported auth method', async () => {
-      vaultInstance.cfg.auth = {};
-
+      const vaultInstance = new Vault(vaultAuthInstance);
       await expect(vaultInstance.connect()).rejects.toThrow('Unsupported auth method');
     });
   });
@@ -750,14 +763,14 @@ describe('Vault', () => {
       expect(mockClearTimeout).not.toHaveBeenCalled();
     });
   });
-  
+
   it('should handle createPkiRoles', async () => {
-    // The createPkiRoles method is currently empty with the code commented out, 
-    // so it is expected to return `undefined`. 
-    // This test acts as a placeholder so that if the method is implemented in the future, 
+    // The createPkiRoles method is currently empty with the code commented out,
+    // so it is expected to return `undefined`.
+    // This test acts as a placeholder so that if the method is implemented in the future,
     // the test will fail, alerting us to update the test case accordingly.
     const result = await vaultInstance.createPkiRoles();
     expect(result).toBeUndefined();
   });
-  
+
 });
