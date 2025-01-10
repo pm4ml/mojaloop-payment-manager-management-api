@@ -107,7 +107,6 @@ class Vault {
     } else {
       throw new Error('Unsupported auth method');
     }
-
     this.client = NodeVault({
       endpoint,
       token: creds.auth.client_token,
@@ -344,4 +343,4 @@ class Vault {
   }
 }
 
-export default Vault;
+module.exports = Vault;
