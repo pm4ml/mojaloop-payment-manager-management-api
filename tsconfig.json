@@ -33,6 +33,8 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
+    "typeRoots": ["./node_modules/@types", "./types"],
+    "allowSyntheticDefaultImports": true,
     "paths": {
       "@app/*": [ "src/*" ]
     }
