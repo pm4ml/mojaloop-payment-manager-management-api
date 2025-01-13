@@ -12,7 +12,7 @@ jest.mock('redis');
 
 import * as uuid from 'uuid';
 import MockDate from 'mockdate';
-import { Transfer } from '@app/lib/model';
+import Transfer from '../../../../src/lib/model/Transfer';
 import { addTransferToCache, createTestDb } from '../utils';
 
 describe('Transfer', () => {
@@ -234,5 +234,60 @@ describe('Transfer', () => {
     ].sort((a, b) => a.status.localeCompare(b.status));
 
     expect(result).toMatchObject(expected);
+  });
+
+  test('/transfers by currency', async () => {
+    const now = Date.now();
+    await populateByMinutes(now, 5);
+
+    await db.sync();
+    const result = await transfer.findAll({
+      currency: 'EUR',
+    });
+
+    expect(result.length).toBe(25);
+    result.forEach((element) => expect(element.currency).toBe('EUR'));
+  });
+
+  test('/transfers by amount range', async () => {
+    const now = Date.now();
+    await populateByMinutes(now, 5);
+
+    await db.sync();
+    const result = await transfer.findAll({
+      minAmount: '60',
+      maxAmount: '80',
+    });
+
+    expect(result.length).toBe(30);
+    result.forEach((element) => {
+      expect(parseFloat(element.amount)).toBeGreaterThanOrEqual(60);
+      expect(parseFloat(element.amount)).toBeLessThanOrEqual(80);
+    });
+  });
+
+  test('/transfers by status', async () => {
+    const now = Date.now();
+    await populateByMinutes(now, 5);
+
+    await db.sync();
+    const result = await transfer.findAll({
+      status: 'SUCCESS',
+    });
+
+    expect(result.length).toBe(20);
+    result.forEach((element) => expect(element.status).toBe('SUCCESS'));
+  });
+
+  test.skip('/transfers by batchId', async () => {
+    const now = Date.now();
+    await populateByMinutes(now, 5);
+
+    await db.sync();
+    const result = await transfer.findAll({
+      batchId: 1,
+    });
+
+    expect(result.length).toBe(0);
   });
 });
