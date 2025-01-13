@@ -18,7 +18,6 @@ class DFSP {
   private _endpointModel: DFSPEndpointModel;
 
   constructor({ logger, dfspId, mcmServerEndpoint }) {
-
     this._logger = logger;
 
     this._dfspId = dfspId;
@@ -28,7 +27,6 @@ class DFSP {
     this._endpointModel = new DFSPEndpointModel({ dfspId, logger, hubEndpoint: mcmServerEndpoint });
 
     this._mcmDFSPConfigModel.dfspId = dfspId;
-
   }
 
   // constructor(opts) {
