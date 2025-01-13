@@ -1,170 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="43" failures="4" errors="0" time="9.943">
-  <testsuite name="index.js" errors="0" failures="0" skipped="1" timestamp="2025-01-06T14:21:13" time="2.677" tests="1">
-    <testcase classname="index.js Exports expected modules" name="index.js Exports expected modules" time="0">
-      <skipped/>
-    </testcase>
-  </testsuite>
-  <testsuite name="ControlServer" errors="0" failures="0" skipped="0" timestamp="2025-01-06T14:21:13" time="3.355" tests="3">
-    <testcase classname="ControlServer exposes a valid message API" name="ControlServer exposes a valid message API" time="0.018">
-    </testcase>
-    <testcase classname="ControlServer API supplies config when requested" name="ControlServer API supplies config when requested" time="0.076">
-    </testcase>
-    <testcase classname="ControlServer API broadcasts new config when received" name="ControlServer API broadcasts new config when received" time="0.012">
-    </testcase>
-  </testsuite>
-  <testsuite name="UploadPeerJWS" errors="0" failures="0" skipped="0" timestamp="2025-01-06T14:21:16" time="2.759" tests="5">
-    <testcase classname="UploadPeerJWS Start the state machine" name="UploadPeerJWS Start the state machine" time="0.031">
-    </testcase>
-    <testcase classname="UploadPeerJWS should call uploadExternalDfspJWS on event" name="UploadPeerJWS should call uploadExternalDfspJWS on event" time="0.014">
-    </testcase>
-    <testcase classname="UploadPeerJWS should call uploadExternalDfspJWS with only changed certs" name="UploadPeerJWS should call uploadExternalDfspJWS with only changed certs" time="0.007">
-    </testcase>
-    <testcase classname="UploadPeerJWS should not call uploadExternalDfspJWS if an older cert is passed" name="UploadPeerJWS should not call uploadExternalDfspJWS if an older cert is passed" time="0.005">
-    </testcase>
-    <testcase classname="UploadPeerJWS Stop state machine" name="UploadPeerJWS Stop state machine" time="0.001">
-    </testcase>
-  </testsuite>
-  <testsuite name="DfspCA" errors="0" failures="0" skipped="0" timestamp="2025-01-06T14:21:16" time="2.411" tests="3">
-    <testcase classname="DfspCA should upload builtin CA" name="DfspCA should upload builtin CA" time="0.061">
-    </testcase>
-    <testcase classname="DfspCA should create CA by provided subject and upload it" name="DfspCA should create CA by provided subject and upload it" time="0.018">
-    </testcase>
-    <testcase classname="DfspCA should create external CA upload it" name="DfspCA should create external CA upload it" time="0.011">
-    </testcase>
-  </testsuite>
-  <testsuite name="Transfer" errors="0" failures="0" skipped="2" timestamp="2025-01-06T14:21:13" time="6.977" tests="9">
+<testsuites name="jest tests" tests="13" failures="0" errors="0" time="2.432">
+  <testsuite name="Transfer" errors="0" failures="0" skipped="13" timestamp="2025-01-13T09:25:55" time="2.326" tests="13">
     <testcase classname="Transfer /transfers" name="Transfer /transfers" time="0">
       <skipped/>
     </testcase>
-    <testcase classname="Transfer /transfers by direction outbound" name="Transfer /transfers by direction outbound" time="0.187">
+    <testcase classname="Transfer /transfers by direction outbound" name="Transfer /transfers by direction outbound" time="0">
+      <skipped/>
     </testcase>
-    <testcase classname="Transfer /transfers by direction inbound" name="Transfer /transfers by direction inbound" time="0.105">
+    <testcase classname="Transfer /transfers by direction inbound" name="Transfer /transfers by direction inbound" time="0">
+      <skipped/>
     </testcase>
-    <testcase classname="Transfer /transfers by payee alias MSISDN" name="Transfer /transfers by payee alias MSISDN" time="0.12">
+    <testcase classname="Transfer /transfers by payee alias MSISDN" name="Transfer /transfers by payee alias MSISDN" time="0">
+      <skipped/>
     </testcase>
-    <testcase classname="Transfer /transfers by payee alias ACCOUNT_ID" name="Transfer /transfers by payee alias ACCOUNT_ID" time="0.079">
+    <testcase classname="Transfer /transfers by payee alias ACCOUNT_ID" name="Transfer /transfers by payee alias ACCOUNT_ID" time="0">
+      <skipped/>
     </testcase>
-    <testcase classname="Transfer /hourlyFlow" name="Transfer /hourlyFlow" time="0.091">
+    <testcase classname="Transfer /hourlyFlow" name="Transfer /hourlyFlow" time="0">
+      <skipped/>
     </testcase>
-    <testcase classname="Transfer /minuteSuccessfulTransferPerc" name="Transfer /minuteSuccessfulTransferPerc" time="0.122">
+    <testcase classname="Transfer /minuteSuccessfulTransferPerc" name="Transfer /minuteSuccessfulTransferPerc" time="0">
+      <skipped/>
     </testcase>
-    <testcase classname="Transfer /minuteAverageTransferResponseTime" name="Transfer /minuteAverageTransferResponseTime" time="0.134">
+    <testcase classname="Transfer /minuteAverageTransferResponseTime" name="Transfer /minuteAverageTransferResponseTime" time="0">
+      <skipped/>
     </testcase>
     <testcase classname="Transfer /transferStatusSummary" name="Transfer /transferStatusSummary" time="0">
       <skipped/>
     </testcase>
-  </testsuite>
-  <testsuite name="HubCA" errors="0" failures="0" skipped="0" timestamp="2025-01-06T14:21:13" time="7.043" tests="1">
-    <testcase classname="HubCA should download hub CA" name="HubCA should download hub CA" time="2.092">
+    <testcase classname="Transfer /transfers by currency" name="Transfer /transfers by currency" time="0">
+      <skipped/>
     </testcase>
-  </testsuite>
-  <testsuite name="DfspClientCert" errors="0" failures="0" skipped="0" timestamp="2025-01-06T14:21:13" time="7.441" tests="1">
-    <testcase classname="DfspClientCert should create client cert and handle cert changes" name="DfspClientCert should create client cert and handle cert changes" time="2.111">
+    <testcase classname="Transfer /transfers by amount range" name="Transfer /transfers by amount range" time="0">
+      <skipped/>
     </testcase>
-  </testsuite>
-  <testsuite name="ProgressMonitor" errors="0" failures="0" skipped="0" timestamp="2025-01-06T14:21:18" time="2.06" tests="1">
-    <testcase classname="ProgressMonitor should initialize context" name="ProgressMonitor should initialize context" time="0.061">
+    <testcase classname="Transfer /transfers by status" name="Transfer /transfers by status" time="0">
+      <skipped/>
     </testcase>
-  </testsuite>
-  <testsuite name="ConnectorConfig" errors="0" failures="0" skipped="0" timestamp="2025-01-06T14:21:19" time="2.079" tests="1">
-    <testcase classname="ConnectorConfig should create state machine and handle config changes" name="ConnectorConfig should create state machine and handle config changes" time="0.069">
-    </testcase>
-  </testsuite>
-  <testsuite name="Database" errors="0" failures="0" skipped="0" timestamp="2025-01-06T14:21:20" time="1.258" tests="1">
-    <testcase classname="Database Should cache Redis records" name="Database Should cache Redis records" time="0.125">
-    </testcase>
-  </testsuite>
-  <testsuite name="DfspJWS" errors="0" failures="0" skipped="0" timestamp="2025-01-06T14:21:20" time="1.452" tests="1">
-    <testcase classname="DfspJWS should create JWS and upload it" name="DfspJWS should create JWS and upload it" time="0.097">
-    </testcase>
-  </testsuite>
-  <testsuite name="HubCert" errors="0" failures="4" skipped="0" timestamp="2025-01-06T14:21:13" time="8.777" tests="8">
-    <testcase classname="HubCert should start with idle" name="HubCert should start with idle" time="0.002">
-    </testcase>
-    <testcase classname="HubCert should transit on CA propagation event" name="HubCert should transit on CA propagation event" time="0.019">
-    </testcase>
-    <testcase classname="HubCert should sign hub CSRs" name="HubCert should sign hub CSRs" time="0.006">
-      <failure>Error: expect(jest.fn()).toHaveBeenCalled()
-
-Expected number of calls: &gt;= 1
-Received number of calls:    0
-    at Object.&lt;anonymous&gt; (/home/naph/mojaloop-payment-manager-management-api/test/unit/model/stateMachine/hubClientCert.test.ts:86:53)
-    at Promise.then.completed (/home/naph/mojaloop-payment-manager-management-api/node_modules/jest-circus/build/utils.js:333:28)
-    at new Promise (&lt;anonymous&gt;)
-    at callAsyncCircusFn (/home/naph/mojaloop-payment-manager-management-api/node_modules/jest-circus/build/utils.js:259:10)
-    at _callCircusTest (/home/naph/mojaloop-payment-manager-management-api/node_modules/jest-circus/build/run.js:277:40)
-    at processTicksAndRejections (node:internal/process/task_queues:96:5)
-    at _runTest (/home/naph/mojaloop-payment-manager-management-api/node_modules/jest-circus/build/run.js:209:3)
-    at _runTestsForDescribeBlock (/home/naph/mojaloop-payment-manager-management-api/node_modules/jest-circus/build/run.js:97:9)
-    at _runTestsForDescribeBlock (/home/naph/mojaloop-payment-manager-management-api/node_modules/jest-circus/build/run.js:91:9)
-    at run (/home/naph/mojaloop-payment-manager-management-api/node_modules/jest-circus/build/run.js:31:3)
-    at runAndTransformResultsToJestFormat (/home/naph/mojaloop-payment-manager-management-api/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapterInit.js:135:21)
-    at jestAdapter (/home/naph/mojaloop-payment-manager-management-api/node_modules/jest-circus/build/legacy-code-todo-rewrite/jestAdapter.js:92:19)
-    at runTestInternal (/home/naph/mojaloop-payment-manager-management-api/node_modules/jest-runner/build/runTest.js:411:16)
-    at runTest (/home/naph/mojaloop-payment-manager-management-api/node_modules/jest-runner/build/runTest.js:499:34)
-    at Object.worker (/home/naph/mojaloop-payment-manager-management-api/node_modules/jest-runner/build/testWorker.js:133:12)</failure>
-    </testcase>
-    <testcase classname="HubCert should not sign already processed certificate" name="HubCert should not sign already processed certificate" time="0.953">
-    </testcase>
-    <testcase classname="HubCert should sign new Hub CSRs" name="HubCert should sign new Hub CSRs" time="1.013">
-    </testcase>
-    <testcase classname="HubCert should re-sign all Hub CSRs on DFSP CA change" name="HubCert should re-sign all Hub CSRs on DFSP CA change" time="0.018">
-      <failure>Error: expect(jest.fn()).toHaveBeenNthCalledWith(n, ...expected)
-
-n: 3
-Expected: &quot;HUB CSR 1&quot;
-Received
-       1: &quot;HUB CSR 1&quot;
--&gt;     3: &quot;HUB CSR 3&quot;
-       4: &quot;HUB CSR 4&quot;
-
-Number of calls: 4
-    at Object.&lt;anonymous&gt; (/home/naph/mojaloop-payment-manager-management-api/test/unit/model/stateMachine/hubClientCert.test.ts:152:35)</failure>
-    </testcase>
-    <testcase classname="HubCert should re-sign changed hub CSR" name="HubCert should re-sign changed hub CSR" time="1.02">
-      <failure>Error: expect(jest.fn()).toHaveBeenNthCalledWith(n, ...expected)
-
-n: 4
-Expected: &quot;HUB CSR 1 (NEW)&quot;
-Received
-       1: &quot;HUB CSR 1 (NEW)&quot;
-
-Number of calls: 1
-    at Object.&lt;anonymous&gt; (/home/naph/mojaloop-payment-manager-management-api/test/unit/model/stateMachine/hubClientCert.test.ts:186:35)</failure>
-    </testcase>
-    <testcase classname="HubCert should re-sign expired hub certificates" name="HubCert should re-sign expired hub certificates" time="0.997">
-      <failure>Error: expect(jest.fn()).toHaveBeenNthCalledWith(n, ...expected)
-
-n: 5
-Expected: &quot;HUB CSR 4&quot;
-Received
-       1: &quot;HUB CSR 4&quot;
-
-Number of calls: 1
-    at Object.&lt;anonymous&gt; (/home/naph/mojaloop-payment-manager-management-api/test/unit/model/stateMachine/hubClientCert.test.ts:210:35)</failure>
-    </testcase>
-  </testsuite>
-  <testsuite name="DfspServerCert" errors="0" failures="0" skipped="0" timestamp="2025-01-06T14:21:20" time="1.119" tests="1">
-    <testcase classname="DfspServerCert should create DFSP Server Cert and upload it" name="DfspServerCert should create DFSP Server Cert and upload it" time="0.078">
-    </testcase>
-  </testsuite>
-  <testsuite name="EndpointConfig" errors="0" failures="0" skipped="0" timestamp="2025-01-06T14:21:21" time="0.832" tests="1">
-    <testcase classname="EndpointConfig should upload endpoint config" name="EndpointConfig should upload endpoint config" time="0.046">
-    </testcase>
-  </testsuite>
-  <testsuite name="PeerJWS" errors="0" failures="0" skipped="0" timestamp="2025-01-06T14:21:13" time="9.039" tests="6">
-    <testcase classname="PeerJWS Start the state machine" name="PeerJWS Start the state machine" time="0.076">
-    </testcase>
-    <testcase classname="PeerJWS should not notify if there are no changes" name="PeerJWS should not notify if there are no changes" time="0.992">
-    </testcase>
-    <testcase classname="PeerJWS should notify when new peer JWS are available" name="PeerJWS should notify when new peer JWS are available" time="1.007">
-    </testcase>
-    <testcase classname="PeerJWS should not notify when a JWS cert with old timestamp passed" name="PeerJWS should not notify when a JWS cert with old timestamp passed" time="1.006">
-    </testcase>
-    <testcase classname="PeerJWS should notify when some keys are updated" name="PeerJWS should notify when some keys are updated" time="1.011">
-    </testcase>
-    <testcase classname="PeerJWS Stop state machine" name="PeerJWS Stop state machine" time="-0.152">
+    <testcase classname="Transfer /transfers by batchId" name="Transfer /transfers by batchId" time="0">
+      <skipped/>
     </testcase>
   </testsuite>
 </testsuites>
