@@ -2,7 +2,9 @@
   "include": [
     "src",
     "src/**/*.json",
-    "src/types/*.d.ts"
+    "src/types/*.d.ts",
+    "src/**/*", 
+    "test/**/*"
   ],
   "exclude": [
     "node_modules",
