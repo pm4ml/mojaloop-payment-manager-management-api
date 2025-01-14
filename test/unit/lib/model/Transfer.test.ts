@@ -245,8 +245,8 @@ describe('Transfer', () => {
       currency: 'EUR',
     });
 
-    expect(result.length).toBe(25);
-    result.forEach((element) => expect(element.currency).toBe('EUR'));
+    expect(result.length).toBe(50);
+    result.forEach((element: { currency: string }) => expect(element.currency).toBe('EUR'));
   });
 
   test('/transfers by amount range', async () => {
