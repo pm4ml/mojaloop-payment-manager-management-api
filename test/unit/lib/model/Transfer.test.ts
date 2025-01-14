@@ -309,8 +309,8 @@ describe('Transfer', () => {
   test('/transfers with mixed statuses', async () => {
     const now = Date.now();
     const MINUTE = 60 * 1000;
-    const populated = await populateByMinutes(now, 5);
 
+    await populateByMinutes(now, 5);
     await db.sync();
 
     const result = await transfer.findAll({
@@ -321,8 +321,8 @@ describe('Transfer', () => {
     expect(result.length).toBe(30);
 
     result.forEach((item) => {
-      console.log(item.currentState);
-      expect(['succeeded', 'errored']).toContain(item.currentState);
+      console.log(item.status);
+      expect(['SUCCESS', 'ERROR']).toContain(item.status);
     });
   });
   test('/transferStatusSummary', async () => {
