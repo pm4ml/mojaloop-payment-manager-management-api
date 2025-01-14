@@ -74,10 +74,10 @@
     "stoppable": "1.1.0",
     "uuid": "^8.3.0",
     "ws": "^8.7.0",
-    "xstate": "4.35.4"
+    "xstate": "^4.38.3"
   },
   "devDependencies": {
-    "@types/jest": "^28.1.0",
+    "@types/jest": "^28.1.8",
     "@types/koa": "^2.13.4",
     "@types/koa-bodyparser": "^4.3.7",
     "@types/node": "^17.0.39",

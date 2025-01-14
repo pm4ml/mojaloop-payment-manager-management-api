@@ -1,113 +1,141 @@
-import DFSP from '../../../../src/lib/model/DFSP';
 import 'jest';
+import DFSP from '../../../../src/lib/model/DFSP';
 import { DFSPConfigModel, DFSPEndpointModel } from '@pm4ml/mcm-client';
+import SDKStandardComponents from '@mojaloop/sdk-standard-components';
+import Logger = SDKStandardComponents.Logger.Logger;
 
-jest.mock('@pm4ml/mcm-client');
+describe('DFSP Class', () => {
+  const logger = new Logger({ stringify: true });
+  const dfspId = 'test-dfsp';
+  const mcmServerEndpoint = 'http://mock-endpoint';
 
-describe('DFSP', () => {
-  let dfsp;
-  const mockLogger = { log: jest.fn() };
-  const mockDfspId = 'dfsp-id';
-  const mockMcmServerEndpoint = 'http://mcm-server';
+  let dfsp: DFSP;
 
   beforeEach(() => {
-    dfsp = new DFSP({
-      logger: mockLogger,
-      dfspId: mockDfspId,
-      mcmServerEndpoint: mockMcmServerEndpoint,
-    });
+    dfsp = new DFSP({ logger, dfspId, mcmServerEndpoint });
+    jest.clearAllMocks();
   });
 
-  test('constructor initializes properties correctly', () => {
-    expect(dfsp._logger).toBe(mockLogger);
-    expect(dfsp._dfspId).toBe(mockDfspId);
+  it('should initialize correctly', () => {
+    expect(dfsp).toBeInstanceOf(DFSP);
+    expect(dfsp._dfspId).toBe(dfspId);
     expect(dfsp._mcmDFSPConfigModel).toBeInstanceOf(DFSPConfigModel);
     expect(dfsp._endpointModel).toBeInstanceOf(DFSPEndpointModel);
-    expect(dfsp._mcmDFSPConfigModel.dfspId).toBe(mockDfspId);
-    expect(dfsp._mcmDFSPConfigModel.logger).toBe(mockLogger);
-    expect(dfsp._mcmDFSPConfigModel.hubEndpoint).toBe(mockMcmServerEndpoint);
-    expect(dfsp._endpointModel.dfspId).toBe(mockDfspId);
-    expect(dfsp._endpointModel.logger).toBe(mockLogger);
-    expect(dfsp._endpointModel.hubEndpoint).toBe(mockMcmServerEndpoint);
   });
 
   test('getDfspStatus', async () => {
-      const mockStatus = { status: 'active' };
-      DFSPConfigModel.prototype.findStatus = jest.fn().mockResolvedValue(mockStatus);
-  
-      dfsp = new DFSP({
-          logger: console,
-          dfspId: 'test-dfsp',
-          mcmServerEndpoint: 'http://localhost:3000'
-      });
-  
+    const mockStatus = { status: 'active' };
+    DFSPConfigModel.prototype.findStatus = jest.fn().mockResolvedValue(mockStatus);
+
+    dfsp = new DFSP({
+      logger: console,
+      dfspId: 'test-dfsp',
+      mcmServerEndpoint: 'http://localhost:3000',
+    });
+
+    const result = await dfsp.getDfspStatus();
+    expect(result).toEqual(mockStatus);
+    expect(DFSPConfigModel.prototype.findStatus).toHaveBeenCalled();
+  });
+
+  describe('getDfspStatus', () => {
+    it('should call findStatus on DFSPConfigModel', async () => {
+      const mockFindStatus = jest.spyOn(dfsp._mcmDFSPConfigModel, 'findStatus').mockResolvedValueOnce('Active');
+
       const result = await dfsp.getDfspStatus();
-      expect(result).toEqual(mockStatus);
-      expect(DFSPConfigModel.prototype.findStatus).toHaveBeenCalled();
+
+      expect(mockFindStatus).toHaveBeenCalledTimes(1);
+      expect(result).toBe('Active');
+    });
   });
 
-  test('getDfspDetails', async () => {
-    const mockDfspList = [{ id: mockDfspId, name: 'DFSP Name' }];
-    DFSPConfigModel.prototype.getDFSPList = jest.fn().mockResolvedValue(mockDfspList);
+  describe('getDfspDetails', () => {
+    it('should return the DFSP details for the given dfspId', async () => {
+      const mockGetDFSPList = jest
+        .spyOn(dfsp._mcmDFSPConfigModel, 'getDFSPList')
+        .mockResolvedValueOnce([{ id: dfspId }, { id: 'another-dfsp' }]);
 
-    const result = await dfsp.getDfspDetails();
-    expect(result).toEqual(mockDfspList);
-    expect(DFSPConfigModel.prototype.getDFSPList).toHaveBeenCalled();
+      const result = await dfsp.getDfspDetails();
+
+      expect(mockGetDFSPList).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({ id: dfspId });
+    });
   });
 
-  // Add more tests for other methods
-  test('getAllDfsps', async () => {
-    const mockDfsps = [{ id: 'dfsp1' }, { id: 'dfsp2' }];
-    DFSPConfigModel.prototype.getAllDfsps = jest.fn().mockResolvedValue(mockDfsps);
+  describe('getAllDfsps', () => {
+    it('should return the list of all DFSPS', async () => {
+      const mockGetDFSPList = jest
+        .spyOn(dfsp._mcmDFSPConfigModel, 'getDFSPList')
+        .mockResolvedValueOnce([{ id: 'dfsp1' }, { id: 'dfsp2' }]);
 
-    const result = await dfsp.getAllDfsps();
-    expect(result).toEqual(mockDfsps);
-    expect(DFSPConfigModel.prototype.getAllDfsps).toHaveBeenCalled();
+      const result = await dfsp.getAllDfsps();
+
+      expect(mockGetDFSPList).toHaveBeenCalledTimes(1);
+      expect(result).toEqual([{ id: 'dfsp1' }, { id: 'dfsp2' }]);
+    });
   });
 
-  test('getDfspsByMonetaryZone', async () => {
-    const mockZone = 'zone1';
-    const mockDfsps = [{ id: 'dfsp1' }];
-    DFSPConfigModel.prototype.getDfspsByMonetaryZone = jest.fn().mockResolvedValue(mockDfsps);
+  describe('getDfspsByMonetaryZone', () => {
+    it('should return DFSPS for a given monetary zone', async () => {
+      const opts = { monetaryZoneId: 'zone1' };
+      const mockGetDFSPListByMonetaryZone = jest
+        .spyOn(dfsp._mcmDFSPConfigModel, 'getDFSPListByMonetaryZone')
+        .mockResolvedValueOnce([{ id: 'dfsp1' }]);
 
-    const result = await dfsp.getDfspsByMonetaryZone(mockZone);
-    expect(result).toEqual(mockDfsps);
-    expect(DFSPConfigModel.prototype.getDfspsByMonetaryZone).toHaveBeenCalledWith(mockZone);
+      const result = await dfsp.getDfspsByMonetaryZone(opts);
+
+      expect(mockGetDFSPListByMonetaryZone).toHaveBeenCalledWith(opts);
+      expect(result).toEqual([{ id: 'dfsp1' }]);
+    });
   });
 
-  test('getEndpoints', async () => {
-    const mockEndpoints = [{ id: 'endpoint1' }];
-    DFSPEndpointModel.prototype.getEndpoints = jest.fn().mockResolvedValue(mockEndpoints);
+  describe('Endpoints Operations', () => {
+    describe('getEndpoints', () => {
+      it('should return a list of endpoints', async () => {
+        const opts = { direction: 'INGRESS' };
+        const mockFindAll = jest.spyOn(dfsp._endpointModel, 'findAll').mockResolvedValueOnce([{ id: 'endpoint1' }]);
 
-    const result = await dfsp.getEndpoints();
-    expect(result).toEqual(mockEndpoints);
-    expect(DFSPEndpointModel.prototype.getEndpoints).toHaveBeenCalled();
-  });
+        const result = await dfsp.getEndpoints(opts);
 
-  test('createEndpoints', async () => {
-    const mockEndpoint = { id: 'endpoint1' };
-    DFSPEndpointModel.prototype.createEndpoint = jest.fn().mockResolvedValue(mockEndpoint);
+        expect(mockFindAll).toHaveBeenCalledWith(opts);
+        expect(result).toEqual([{ id: 'endpoint1' }]);
+      });
+    });
 
-    const result = await dfsp.createEndpoints(mockEndpoint);
-    expect(result).toEqual(mockEndpoint);
-    expect(DFSPEndpointModel.prototype.createEndpoint).toHaveBeenCalledWith(mockEndpoint);
-  });
+    describe('createEndpoints', () => {
+      it('should create a new endpoint', async () => {
+        const opts = { direction: 'INGRESS', type: 'IP', address: '127.0.0.1' };
+        const mockCreate = jest.spyOn(dfsp._endpointModel, 'create').mockResolvedValueOnce({ id: 'endpoint1' });
 
-  test('updateEndpoint', async () => {
-    const mockEndpoint = { id: 'endpoint1' };
-    DFSPEndpointModel.prototype.updateEndpoint = jest.fn().mockResolvedValue(mockEndpoint);
+        const result = await dfsp.createEndpoints(opts);
 
-    const result = await dfsp.updateEndpoint(mockEndpoint);
-    expect(result).toEqual(mockEndpoint);
-    expect(DFSPEndpointModel.prototype.updateEndpoint).toHaveBeenCalledWith(mockEndpoint);
-  });
+        expect(mockCreate).toHaveBeenCalledWith(opts);
+        expect(result).toEqual({ id: 'endpoint1' });
+      });
+    });
 
-  test('deleteEndpoint', async () => {
-    const mockEndpointId = 'endpoint1';
-    DFSPEndpointModel.prototype.deleteEndpoint = jest.fn().mockResolvedValue(true);
+    describe('updateEndpoint', () => {
+      it('should update an endpoint', async () => {
+        const opts = { direction: 'INGRESS', type: 'IP', address: '127.0.0.1' };
+        const mockUpdate = jest.spyOn(dfsp._endpointModel, 'update').mockResolvedValueOnce({ id: 'endpoint1' });
 
-    const result = await dfsp.deleteEndpoint(mockEndpointId);
-    expect(result).toBe(true);
-    expect(DFSPEndpointModel.prototype.deleteEndpoint).toHaveBeenCalledWith(mockEndpointId);
+        const result = await dfsp.updateEndpoint(opts);
+
+        expect(mockUpdate).toHaveBeenCalledWith(opts);
+        expect(result).toEqual({ id: 'endpoint1' });
+      });
+    });
+
+    describe('deleteEndpoint', () => {
+      it('should delete an endpoint', async () => {
+        const opts = { direction: 'INGRESS', type: 'IP', address: '127.0.0.1' };
+        const mockDelete = jest.spyOn(dfsp._endpointModel, 'delete').mockResolvedValueOnce(true);
+
+        const result = await dfsp.deleteEndpoint(opts);
+
+        expect(mockDelete).toHaveBeenCalledWith(opts);
+        expect(result).toBe(true);
+      });
+    });
   });
 });

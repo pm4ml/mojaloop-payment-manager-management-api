@@ -60,7 +60,6 @@ describe('HubCert', () => {
 
     opts.refreshIntervalSeconds = 1;
     service = startMachine(opts);
-
   });
 
   afterAll(() => {
