@@ -12,12 +12,6 @@ import { DFSPConfigModel, DFSPEndpointModel } from '@pm4ml/mcm-client';
 import Logger = SDKStandardComponents.Logger.Logger;
 
 class DFSP {
-  static _endpointModel(_endpointModel: any, arg1: string) {
-    throw new Error('Method not implemented.');
-  }
-  private _endpointModel(_endpointModel: any, DFSPEndpointModel: any, arg2: string) {
-    throw new Error('Method not implemented.');
-  }
   private _logger: Logger;
   private _dfspId: string;
   private _mcmDFSPConfigModel: DFSPConfigModel;
