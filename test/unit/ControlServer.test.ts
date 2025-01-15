@@ -8,7 +8,6 @@ import { Logger } from '@mojaloop/sdk-standard-components';
 jest.mock('@app/lib/randomphrase', () => () => 'random-id');
 const ControlServerEventEmitter = getInternalEventEmitter();
 describe('ControlServer', () => {
-
   it('exposes a valid message API', () => {
     expect(Object.keys(ControlServer.build).sort()).toEqual(Object.keys(ControlServer.MESSAGE).sort());
     Object.entries(ControlServer.build).forEach(([, builders]) => {
@@ -48,7 +47,6 @@ describe('ControlServer', () => {
       jest.restoreAllMocks();
     });
 
-    
     it('supplies config when requested', async () => {
       server.populateConfig = () => appConfig;
       await client.send(ControlServer.build.CONFIGURATION.READ());
@@ -71,28 +69,25 @@ describe('ControlServer', () => {
     it('broadcasts peer JWS when received', async () => {
       server.broadcast = jest.fn();
       const mockPeerJWS = { token: 'sampleJWS' };
-    
+
       ControlServerEventEmitter.emit(INTERNAL_EVENTS.SERVER.BROADCAST_PEER_JWS_CHANGE, mockPeerJWS);
-    
+
       expect(server.broadcast).toHaveBeenCalledTimes(1);
-      expect(server.broadcast).toHaveBeenCalledWith(
-        ControlServer.build.PEER_JWS.NOTIFY(mockPeerJWS, randomPhrase())
-      );
+      expect(server.broadcast).toHaveBeenCalledWith(ControlServer.build.PEER_JWS.NOTIFY(mockPeerJWS, randomPhrase()));
     });
-    
 
     it('responds with error on unsupported verb', async () => {
       jest.setTimeout(10000);
-      
+
       client.receive = jest.fn().mockResolvedValue({
         msg: 'ERROR',
         verb: 'NOTIFY',
         data: 'UNSUPPORTED_VERB',
       });
-      
+
       const unsupportedMessage = ControlServer.build.CONFIGURATION.PATCH({}, {}, 'random-id');
       server._handle(client, logger)(unsupportedMessage);
-      
+
       const response = await client.receive();
       expect(response).toEqual(
         expect.objectContaining({
@@ -102,19 +97,19 @@ describe('ControlServer', () => {
         })
       );
     });
-    
+
     it('responds with error on invalid message', async () => {
       jest.setTimeout(10000);
-      
+
       client.receive = jest.fn().mockResolvedValue({
         msg: 'ERROR',
         verb: 'NOTIFY',
         data: 'JSON_PARSE_ERROR',
       });
-      
+
       const invalidMessage = 'invalid message format';
       server._handle(client, logger)(invalidMessage);
-      
+
       const response = await client.receive();
       expect(response).toEqual(
         expect.objectContaining({
@@ -124,35 +119,35 @@ describe('ControlServer', () => {
         })
       );
     });
-    
+
     it('correctly processes PEER_JWS NOTIFY messages', async () => {
       const onUploadPeerJWSSpy = jest.spyOn(server, 'onUploadPeerJWS').mockImplementation(() => {});
-      
+
       const peerJWSMessage = ControlServer.build.PEER_JWS.NOTIFY({ peer: 'sampleJWS' }, 'random-id');
-      
+
       server._handle(client, logger)(peerJWSMessage);
-      
+
       expect(onUploadPeerJWSSpy).toHaveBeenCalledWith({ peer: 'sampleJWS' });
-      
+
       onUploadPeerJWSSpy.mockRestore();
     });
-    
+
     it('logs and responds to invalid message type', async () => {
       jest.setTimeout(10000);
-      
+
       const invalidTypeMessage = ControlServer.build.PEER_JWS.NOTIFY({ peer: 'sampleJWS' }, 'random-id');
-      
+
       const parsedMessage = JSON.parse(invalidTypeMessage);
       parsedMessage.msg = 'INVALID_TYPE';
-      
+
       client.receive = jest.fn().mockResolvedValue({
         msg: 'ERROR',
         verb: 'NOTIFY',
         data: 'UNSUPPORTED_MESSAGE',
       });
-      
+
       server._handle(client, logger)(parsedMessage);
-      
+
       const response = await client.receive();
       expect(response).toEqual(
         expect.objectContaining({
@@ -222,7 +217,186 @@ describe('ControlServer Events', () => {
 
     expect(unrelatedListener).not.toHaveBeenCalled();
   });
-
-  
 });
 
+describe('ControlServer additional tests', () => {
+  let server, logger, client;
+  const appConfig = { control: { port: 4005 }, what: 'ever' };
+
+  beforeEach(async () => {
+    logger = new Logger.Logger({ stringify: () => '' });
+    server = new ControlServer.Server({
+      logger,
+      port: 4005,
+      onRequestConfig: (cl: any) => {
+        cl.send(ControlServer.build.CONFIGURATION.NOTIFY(appConfig));
+      },
+      onRequestPeerJWS: (cl: any) => {},
+      onUploadPeerJWS: (cl: any) => {},
+    });
+    server.registerInternalEvents();
+    client = await Client.Client.Create({
+      address: 'localhost',
+      port: server.address().port,
+      logger,
+      appConfig,
+    });
+  });
+
+  afterEach(async () => {
+    await client.stop();
+    await server.stop();
+    jest.restoreAllMocks();
+  });
+
+  it('handles PEER_JWS READ request correctly', async () => {
+    const onRequestPeerJWSSpy = jest.spyOn(server, 'onRequestPeerJWS');
+
+    const peerJWSReadMessage = ControlServer.build.PEER_JWS.READ('test-id');
+    server._handle(client, logger)(peerJWSReadMessage);
+
+    expect(onRequestPeerJWSSpy).toHaveBeenCalledWith(client);
+    onRequestPeerJWSSpy.mockRestore();
+  });
+
+  it('maintains client data on connection', async () => {
+    const mockReq = {
+      url: 'ws://localhost:4005',
+      socket: { remoteAddress: '127.0.0.1' },
+      headers: { 'x-forwarded-for': '10.0.0.1, 10.0.0.2' },
+      connection: { remoteAddress: '127.0.0.1' },
+    };
+
+    const mockSocket = {
+      on: jest.fn(),
+      terminate: jest.fn(),
+    };
+
+    server.emit('connection', mockSocket, mockReq);
+
+    expect(server._clientData.has(mockSocket)).toBeTruthy();
+    const clientData = server._clientData.get(mockSocket);
+    expect(clientData.ip).toBe('127.0.0.1');
+  });
+
+  it('removes client data on connection close', async () => {
+    const mockSocket = {
+      on: jest.fn(),
+      terminate: jest.fn(),
+    };
+
+    const mockReq = {
+      url: 'ws://localhost:4005',
+      socket: { remoteAddress: '127.0.0.1' },
+      headers: {},
+      connection: { remoteAddress: '127.0.0.1' },
+    };
+
+    server.emit('connection', mockSocket, mockReq);
+
+    // Get the close handler that was registered
+    const closeHandler = mockSocket.on.mock.calls.find((call) => call[0] === 'close')[1];
+
+    // Simulate connection close
+    closeHandler(1000, 'Normal close');
+
+    expect(server._clientData.has(mockSocket)).toBeFalsy();
+  });
+
+  it('broadcasts only to clients in OPEN state', async () => {
+    const mockMessage = 'test message';
+    const mockOpenClient = { readyState: 1, send: jest.fn(), terminate: jest.fn() }; // WebSocket.OPEN = 1
+    const mockClosedClient = { readyState: 2, send: jest.fn(), terminate: jest.fn() }; // WebSocket.CLOSING = 2
+
+    server.clients = new Set([mockOpenClient, mockClosedClient]);
+
+    server.broadcast(mockMessage);
+
+    expect(mockOpenClient.send).toHaveBeenCalledWith(mockMessage);
+    expect(mockClosedClient.send).not.toHaveBeenCalled();
+  });
+});
+
+describe('ControlServer error handling', () => {
+  let server, logger;
+
+  beforeEach(() => {
+    logger = new Logger.Logger({ stringify: () => '' });
+    server = new ControlServer.Server({
+      logger,
+      port: 4005,
+      onRequestConfig: () => {},
+      onRequestPeerJWS: () => {},
+      onUploadPeerJWS: () => {},
+    });
+  });
+
+  afterEach(async () => {
+    await server.stop();
+    jest.restoreAllMocks();
+  });
+
+  it('should handle server error events and exit process', () => {
+    const mockExit = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    const mockError = new Error('Test error');
+
+    server.emit('error', mockError);
+
+    expect(mockExit).toHaveBeenCalledWith(1);
+    mockExit.mockRestore();
+  });
+
+  it('should handle connection error events', async () => {
+    let errorCallback;
+    const mockSocket = {
+      on: jest.fn((event, callback) => {
+        if (event === 'error') {
+          errorCallback = callback;
+        }
+      }),
+      terminate: jest.fn(),
+    };
+
+    const mockReq = {
+      url: 'ws://localhost:4005',
+      socket: { remoteAddress: '127.0.0.1' },
+      headers: {},
+      connection: { remoteAddress: '127.0.0.1' },
+    };
+
+    server.emit('connection', mockSocket, mockReq);
+
+    expect(errorCallback).toBeDefined();
+
+    const mockError = new Error('Socket error');
+    errorCallback(mockError);
+
+    // Verify error was logged
+    expect(logger.push).toHaveBeenCalled();
+  });
+
+  it('should close all client connections on server stop', async () => {
+    const mockClient1 = { terminate: jest.fn() };
+    const mockClient2 = { terminate: jest.fn() };
+
+    server.clients = new Set([mockClient1, mockClient2]);
+
+    await server.stop();
+
+    expect(mockClient1.terminate).toHaveBeenCalled();
+    expect(mockClient2.terminate).toHaveBeenCalled();
+  });
+
+  it('should log address when server starts', () => {
+    const logSpy = jest.spyOn(logger, 'log');
+    const pushSpy = jest.spyOn(logger, 'push');
+    const mockAddress = { port: 4005, address: '127.0.0.1' };
+
+    jest.spyOn(server, 'address').mockReturnValue(mockAddress);
+
+    server.emit('listening');
+
+    expect(logSpy).toHaveBeenCalledWith('running on');
+    expect(logger.push).toHaveBeenCalledWith(mockAddress);
+  });
+});
