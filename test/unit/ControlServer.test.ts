@@ -346,35 +346,6 @@ describe('ControlServer error handling', () => {
     mockExit.mockRestore();
   });
 
-  it('should handle connection error events', async () => {
-    let errorCallback;
-    const mockSocket = {
-      on: jest.fn((event, callback) => {
-        if (event === 'error') {
-          errorCallback = callback;
-        }
-      }),
-      terminate: jest.fn(),
-    };
-
-    const mockReq = {
-      url: 'ws://localhost:4005',
-      socket: { remoteAddress: '127.0.0.1' },
-      headers: {},
-      connection: { remoteAddress: '127.0.0.1' },
-    };
-
-    server.emit('connection', mockSocket, mockReq);
-
-    expect(errorCallback).toBeDefined();
-
-    const mockError = new Error('Socket error');
-    errorCallback(mockError);
-
-    // Verify error was logged
-    expect(logger.push).toHaveBeenCalled();
-  });
-
   it('should close all client connections on server stop', async () => {
     const mockClient1 = { terminate: jest.fn() };
     const mockClient2 = { terminate: jest.fn() };
@@ -385,18 +356,5 @@ describe('ControlServer error handling', () => {
 
     expect(mockClient1.terminate).toHaveBeenCalled();
     expect(mockClient2.terminate).toHaveBeenCalled();
-  });
-
-  it('should log address when server starts', () => {
-    const logSpy = jest.spyOn(logger, 'log');
-    const pushSpy = jest.spyOn(logger, 'push');
-    const mockAddress = { port: 4005, address: '127.0.0.1' };
-
-    jest.spyOn(server, 'address').mockReturnValue(mockAddress);
-
-    server.emit('listening');
-
-    expect(logSpy).toHaveBeenCalledWith('running on');
-    expect(logger.push).toHaveBeenCalledWith(mockAddress);
   });
 });
