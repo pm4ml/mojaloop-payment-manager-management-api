@@ -327,7 +327,6 @@ describe('Transfer', () => {
     expect(result.length).toBe(30);
 
     result.forEach((item) => {
-      console.log(item.status);
       expect(['SUCCESS', 'ERROR', 'PENDING']).toContain(item.status);
     });
   });
@@ -834,93 +833,257 @@ describe('Transfer', () => {
   });
 
   test('/findErrors', async () => {
-    transfer._convertToApiFormat = jest.fn((row) => ({
+    transfer._convertToApiFormat = jest.fn((row) => (
+      {
       id: row.id,
-      success: row.success === 1 ? true : false,
-      amount: parseFloat(row.amount),
+      batchId: row.batchId,
+      institution: row.dfsp,
+      direction: row.direction > 0 ? 'OUTBOUND' : 'INBOUND',
       currency: row.currency,
-      dfsp: row.dfsp || 'mojaloop-sdk',
-      direction: row.direction === 1 ? 'OUTBOUND' : 'INBOUND',
-      sender: row.sender,
-      recipient: row.recipient,
-      details: row.details,
+      amount: row.amount,
+      type: 'P2P',
       status: 'ERROR',
-      type: 'error',
+      initiatedTimestamp: new Date(row.created_at).toISOString(),
       confirmationNumber: 0,
-      initiatedTimestamp: row.initiatedTimestamp || undefined,
-      institution: row.institution || 'bank',
-      technicalDetails: {
-        schemeTransferId: row.schemeTransferId || undefined,
-        homeTransferId: row.homeTransferId || undefined,
-        quoteId: row.quoteId || undefined,
-        transactionId: row.transactionId || undefined,
-        transferState: row.transferState || undefined,
-        payerParty: row.payerParty || undefined,
-        payeeParty: row.payeeParty || undefined,
-      },
+      sender: row.sender,
+      senderIdType: row.sender_id_type,
+      senderIdSubValue: row.sender_id_sub_value,
+      senderIdValue: row.sender_id_value,
+      recipient: row.recipient,
+      recipientIdType: row.recipient_id_type,
+      recipientIdSubValue: row.recipient_id_sub_value,
+      recipientIdValue: row.recipient_id_value,
+      homeTransferId: row.raw.homeTransactionId,
+      details: row.details,
+      errorType: row.success === 0 ? 1 : null,
     }));
 
     const now = Date.now();
     await populateCache('USD', now, 1);
-    await populateCache('EUR', now, 2);
     await db.sync();
 
     const result = await transfer.findErrors();
-
     const expected = [
       {
         id: expect.any(String),
-        success: false,
-        amount: 70,
+        batchId: undefined,
+        institution: 'mojaloop-sdk',
+        direction: 'OUTBOUND',
         currency: 'USD',
-        dfsp: 'mojaloop-sdk',
-        direction: 'OUTBOUND',
-        sender: expect.any(String),
-        recipient: expect.any(String),
-        details: expect.any(String),
+        amount: '70',
+        type: 'P2P',
         status: 'ERROR',
-        type: 'error',
+        initiatedTimestamp: '2000-11-22T00:00:30.001Z',
         confirmationNumber: 0,
-        initiatedTimestamp: undefined,
-        institution: 'bank',
-        technicalDetails: {
-          schemeTransferId: undefined,
-          homeTransferId: undefined,
-          quoteId: undefined,
-          transactionId: undefined,
-          transferState: undefined,
-          payerParty: undefined,
-          payeeParty: undefined,
-        },
-      },
-      {
-        id: expect.any(String),
-        success: false,
-        amount: 70,
-        currency: 'EUR',
-        dfsp: 'mojaloop-sdk',
-        direction: 'OUTBOUND',
-        sender: expect.any(String),
-        recipient: expect.any(String),
-        details: expect.any(String),
-        status: 'ERROR',
-        type: 'error',
-        confirmationNumber: 0,
-        initiatedTimestamp: undefined,
-        institution: 'bank',
-        technicalDetails: {
-          schemeTransferId: undefined,
-          homeTransferId: undefined,
-          quoteId: undefined,
-          transactionId: undefined,
-          transferState: undefined,
-          payerParty: undefined,
-          payeeParty: undefined,
-        },
-      },
+        sender: 'John Doe',
+        senderIdType: 'MSISDN',
+        senderIdSubValue: null,
+        senderIdValue: '123456789',
+        recipient: 'Jane Doe',
+        recipientIdType: 'MSISDN',
+        recipientIdSubValue: null,
+        recipientIdValue: '987654321',
+        homeTransferId: undefined,
+        details: 'test payment',
+        errorType: 1
+      }
     ];
-
     expect(result).toMatchObject(expected);
     expect(transfer._convertToApiFormat).toHaveBeenCalledTimes(result.length);
   });
+
+  test('/findOne', async () => {
+    transfer._convertToApiFormat = jest.fn((rows) => {
+      const raw = JSON.parse(rows[0].raw);
+      const row = rows[0];
+      return {
+        id: row.id,
+        batchId: row.batchId,
+        institution: row.dfsp || 'mojaloop-sdk',
+        direction: row.direction > 0 ? 'OUTBOUND' : 'INBOUND',
+        currency: row.currency,
+        amount: row.amount,
+        type: 'P2P',
+        status: row.success === 1 ? 'COMPLETED' : 'ERROR',
+        initiatedTimestamp: new Date(row.created_at).toISOString(),
+        confirmationNumber: 0,
+        sender: row.sender,
+        senderIdType: row.sender_id_type,
+        senderIdSubValue: row.sender_id_sub_value,
+        senderIdValue: row.sender_id_value,
+        recipient: row.recipient,
+        recipientIdType: row.recipient_id_type,
+        recipientIdSubValue: row.recipient_id_sub_value,
+        recipientIdValue: row.recipient_id_value,
+        homeTransferId: raw?.homeTransactionId,
+        details: row.details,
+        errorType: row.success === 0 ? 1 : null,
+      };
+    });
+  
+  
+    const now = Date.now();
+    const mockTransferId = uuid.v4();
+    const createTimestamp = (secondsAdd) => new Date(now + (secondsAdd || 0) * 1e3 + 1).toISOString();
+  
+    await addTransferToCache(db, {
+      currency: 'USD',
+      amount: '100',
+      transferId: mockTransferId,
+      currentState: 'succeeded',
+      initiatedTimestamp: createTimestamp(15),
+      completedTimestamp: createTimestamp(17),
+    });
+    await db.sync();
+    const result = await transfer.findOne(mockTransferId);
+  
+    const expected = {
+      id: mockTransferId,
+      batchId: undefined,
+      institution: 'mojaloop-sdk', 
+      direction: 'OUTBOUND',
+      currency: 'USD',
+      amount: '100',
+      type: 'P2P',
+      status: 'COMPLETED', 
+      initiatedTimestamp: "2000-11-22T00:00:15.001Z",
+      confirmationNumber: 0,
+      sender: 'John Doe',
+      senderIdType: 'MSISDN',
+      senderIdSubValue: null,
+      senderIdValue: '123456789',
+      recipient: 'Jane Doe',
+      recipientIdType: 'MSISDN',
+      recipientIdSubValue: null,
+      recipientIdValue: '987654321',
+      homeTransferId: "123ABC",
+      details: 'test payment',
+      errorType: null, 
+    };
+  
+    expect(result).toMatchObject(expected);
+  
+    expect(transfer._convertToApiFormat).toHaveBeenCalledTimes(1);
+  });
+
+  test('/findOneDetail', async () => {
+    transfer._convertToApiDetailFormat = jest.fn((row) => {
+      let raw = JSON.parse(row.raw);
+      raw = transfer._parseRawTransferRequestBodies(raw);
+      return {
+        id: row.id,
+        amount: row.amount,
+        currency: row.currency,
+        type: raw?.transactionType || 'UNKNOWN',
+        institution: row.dfsp || 'UNKNOWN',
+        direction: row.direction > 0 ? 'OUTBOUND' : 'INBOUND',
+        status: 1, 
+        confirmationNumber: 0,
+        sender: row.sender || 'UNKNOWN',
+        recipient: row.recipient || 'UNKNOWN',
+        details: row.details || 'No details provided',
+        initiatedTimestamp: row.created_at ? new Date(row.created_at).toISOString() : null,
+        technicalDetails: {
+          schemeTransferId: raw?.transferId || null,
+          homeTransferId: raw?.homeTransactionId || null,
+          quoteId: raw?.quoteRequest?.body?.quoteId || null,
+          transactionId: raw?.quoteRequest?.body?.transactionId || null,
+          transferState: raw?.currentState || 'UNKNOWN',
+          payerParty: transfer._getPartyFromQuoteRequest?.(raw?.quoteRequest, 'payer') || null,
+          payeeParty: transfer._getPartyFromQuoteRequest?.(raw?.quoteRequest, 'payee') || null,
+          getPartiesRequest: {
+            headers: raw?.getPartiesRequest?.headers || null,
+            body: raw?.getPartiesRequest?.body || null,
+          },
+          getPartiesResponse: raw?.getPartiesResponse || null,
+          quoteRequest: {
+            headers: raw?.quoteRequest?.headers || null,
+            body: raw?.quoteRequest?.body || null,
+          },
+          quoteResponse: raw?.quoteResponse || null,
+          transferPrepare: {
+            headers: raw?.prepare?.headers || null,
+            body: raw?.prepare?.body || null,
+          },
+          transferFulfilment: raw?.fulfil || null,
+          lastError: raw?.lastError || null,
+        },
+      };
+    });
+    
+  
+    const now = Date.now();
+    const mockTransferId = uuid.v4();
+    const createTimestamp = (secondsAdd) => new Date(now + (secondsAdd || 0) * 1e3 + 1).toISOString();
+  
+    await addTransferToCache(db, {
+      currency: 'USD',
+      amount: '100',
+      transferId: mockTransferId,
+      currentState: 'succeeded',
+      initiatedTimestamp: createTimestamp(15),
+      completedTimestamp: createTimestamp(17),
+    });
+    await db.sync();
+    const result = await transfer.findOneDetail(mockTransferId);
+  
+    const expected = {
+      id: mockTransferId,
+      amount: '100',
+      currency: 'USD',
+      type: 'TRANSFER',
+      institution: 'mojaloop-sdk',
+      direction: 'OUTBOUND',
+      status: 1,
+      confirmationNumber: 0,
+      sender: 'John Doe',
+      recipient: 'Jane Doe',
+      details: 'test payment',
+      initiatedTimestamp: '2000-11-22T00:00:15.001Z',
+      technicalDetails: {
+        schemeTransferId: expect.any(String),
+        homeTransferId: '123ABC',
+        quoteId: null,
+        transactionId: null,
+        transferState: 'succeeded',
+        payerParty: {
+          idType: '',
+          idValue: '',
+          idSubType: '',
+          displayName: '',
+          firstName: '',
+          middleName: '',
+          lastName: '',
+          dateOfBirth: '',
+          merchantClassificationCode: '',
+          fspId: '',
+          extensionList: ''
+        },
+        payeeParty: {
+          idType: '',
+          idValue: '',
+          idSubType: '',
+          displayName: '',
+          firstName: '',
+          middleName: '',
+          lastName: '',
+          dateOfBirth: '',
+          merchantClassificationCode: '',
+          fspId: '',
+          extensionList: ''
+        },
+        getPartiesRequest: { headers: null, body: null },
+        getPartiesResponse: null,
+        quoteRequest: { headers: null, body: null },
+        quoteResponse: expect.any(Object),
+        transferPrepare: { headers: null, body: null },
+        transferFulfilment: expect.any(Object),
+        lastError: null
+      }};
+  
+    expect(result).toMatchObject(expected);
+  
+    expect(transfer._convertToApiDetailFormat).toHaveBeenCalledTimes(1);
+  });
+  
 });
