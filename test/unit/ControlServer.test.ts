@@ -157,6 +157,81 @@ describe('ControlServer', () => {
         })
       );
     });
+
+    it('logs error messages when MESSAGE.ERROR is received', async () => {
+      jest.setTimeout(10000);
+    
+      const errorMessage = {
+        msg: 'ERROR',
+        verb: 'NOTIFY',
+        data: {
+          severity: 'critical',
+          details: 'A critical error occurred',
+        },
+        id: 'random-id',
+      };
+    
+      const loggerSpy = jest.spyOn(logger, 'push').mockReturnValue(logger);
+      const logSpy = jest.spyOn(logger, 'log');
+    
+      client.send = jest.fn();
+    
+      server._handle(client, logger)(JSON.stringify(errorMessage));
+    
+      expect(loggerSpy).toHaveBeenCalledWith({ msg: errorMessage });
+      expect(logSpy).toHaveBeenCalledWith('Received error message');
+      expect(client.send).not.toHaveBeenCalled();
+    });
+
+    it('sends an error response for unsupported message type', async () => {
+      jest.setTimeout(10000);
+    
+      const unsupportedMessage = {
+        msg: 'UNKNOWN_MESSAGE',
+        verb: 'UNKNOWN_VERB',
+        data: {},
+        id: 'random-id',
+      };
+    
+      const loggerSpy = jest.spyOn(logger, 'push').mockReturnValue(logger);
+      const logSpy = jest.spyOn(logger, 'log');
+    
+      client.send = jest.fn();
+    
+      server._handle(client, logger)(JSON.stringify(unsupportedMessage));
+    
+      expect(loggerSpy).toHaveBeenCalledWith({ msg: unsupportedMessage });
+      expect(logSpy).toHaveBeenCalledWith('Handling received message');
+      expect(client.send).toHaveBeenCalledWith(ControlServer.build.ERROR.NOTIFY.UNSUPPORTED_MESSAGE(unsupportedMessage.id));
+    });
+    
+    
+    it('sends an error response for unsupported verb', async () => {
+      jest.setTimeout(10000);
+    
+      const unsupportedVerbMessage = {
+        msg: 'PEER_JWS',
+        verb: 'UNKNOWN_VERB',
+        data: {},
+        id: 'random-id',
+      };
+    
+      const loggerSpy = jest.spyOn(logger, 'push').mockReturnValue(logger);
+      const logSpy = jest.spyOn(logger, 'log');
+    
+      client.send = jest.fn();
+    
+      server._handle(client, logger)(JSON.stringify(unsupportedVerbMessage));
+    
+      expect(loggerSpy).toHaveBeenCalledWith({ msg: unsupportedVerbMessage });
+      expect(logSpy).toHaveBeenCalledWith('Handling received message');
+      expect(client.send).toHaveBeenCalledWith(ControlServer.build.ERROR.NOTIFY.UNSUPPORTED_VERB(unsupportedVerbMessage.id));
+    });
+    
+    
+    
+    
+    
   });
 });
 
