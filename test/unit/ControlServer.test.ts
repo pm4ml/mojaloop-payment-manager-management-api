@@ -1,6 +1,6 @@
 import randomPhrase from '@app/lib/randomphrase';
 import * as ControlServer from '@app/ControlServer';
-import { getInternalEventEmitter, INTERNAL_EVENTS, changeConfig, notifyPeerJWS, deserialise } from '@app/ControlServer';
+import { getInternalEventEmitter, INTERNAL_EVENTS, changeConfig, notifyPeerJWS } from '@app/ControlServer';
 
 import Client from './ControlClient';
 import { Logger } from '@mojaloop/sdk-standard-components';
@@ -29,8 +29,8 @@ describe('ControlServer', () => {
         onRequestConfig: (cl: any) => {
           cl.send(ControlServer.build.CONFIGURATION.NOTIFY(appConfig));
         },
-        onRequestPeerJWS: (cl: any) => {},
-        onUploadPeerJWS: (cl: any) => {},
+        onRequestPeerJWS: () => {},
+        onUploadPeerJWS: () => {},
       });
       server.registerInternalEvents();
       client = await Client.Client.Create({
@@ -63,7 +63,7 @@ describe('ControlServer', () => {
 
       expect(server.broadcast).toHaveBeenCalledTimes(1);
       expect(server.broadcast).toHaveBeenCalledWith(
-        ControlServer.build.CONFIGURATION.NOTIFY(changedConfig, randomPhrase())
+        ControlServer.build.CONFIGURATION.NOTIFY(changedConfig, randomPhrase()),
       );
     });
     it('broadcasts peer JWS when received', async () => {
@@ -94,7 +94,7 @@ describe('ControlServer', () => {
           msg: 'ERROR',
           verb: 'NOTIFY',
           data: 'UNSUPPORTED_VERB',
-        })
+        }),
       );
     });
 
@@ -116,7 +116,7 @@ describe('ControlServer', () => {
           msg: 'ERROR',
           verb: 'NOTIFY',
           data: 'JSON_PARSE_ERROR',
-        })
+        }),
       );
     });
 
@@ -154,13 +154,13 @@ describe('ControlServer', () => {
           msg: 'ERROR',
           verb: 'NOTIFY',
           data: 'UNSUPPORTED_MESSAGE',
-        })
+        }),
       );
     });
 
     it('logs error messages when MESSAGE.ERROR is received', async () => {
       jest.setTimeout(10000);
-    
+
       const errorMessage = {
         msg: 'ERROR',
         verb: 'NOTIFY',
@@ -170,14 +170,14 @@ describe('ControlServer', () => {
         },
         id: 'random-id',
       };
-    
+
       const loggerSpy = jest.spyOn(logger, 'push').mockReturnValue(logger);
       const logSpy = jest.spyOn(logger, 'log');
-    
+
       client.send = jest.fn();
-    
+
       server._handle(client, logger)(JSON.stringify(errorMessage));
-    
+
       expect(loggerSpy).toHaveBeenCalledWith({ msg: errorMessage });
       expect(logSpy).toHaveBeenCalledWith('Received error message');
       expect(client.send).not.toHaveBeenCalled();
@@ -185,53 +185,51 @@ describe('ControlServer', () => {
 
     it('sends an error response for unsupported message type', async () => {
       jest.setTimeout(10000);
-    
+
       const unsupportedMessage = {
         msg: 'UNKNOWN_MESSAGE',
         verb: 'UNKNOWN_VERB',
         data: {},
         id: 'random-id',
       };
-    
+
       const loggerSpy = jest.spyOn(logger, 'push').mockReturnValue(logger);
       const logSpy = jest.spyOn(logger, 'log');
-    
+
       client.send = jest.fn();
-    
+
       server._handle(client, logger)(JSON.stringify(unsupportedMessage));
-    
+
       expect(loggerSpy).toHaveBeenCalledWith({ msg: unsupportedMessage });
       expect(logSpy).toHaveBeenCalledWith('Handling received message');
-      expect(client.send).toHaveBeenCalledWith(ControlServer.build.ERROR.NOTIFY.UNSUPPORTED_MESSAGE(unsupportedMessage.id));
+      expect(client.send).toHaveBeenCalledWith(
+        ControlServer.build.ERROR.NOTIFY.UNSUPPORTED_MESSAGE(unsupportedMessage.id),
+      );
     });
-    
-    
+
     it('sends an error response for unsupported verb', async () => {
       jest.setTimeout(10000);
-    
+
       const unsupportedVerbMessage = {
         msg: 'PEER_JWS',
         verb: 'UNKNOWN_VERB',
         data: {},
         id: 'random-id',
       };
-    
+
       const loggerSpy = jest.spyOn(logger, 'push').mockReturnValue(logger);
       const logSpy = jest.spyOn(logger, 'log');
-    
+
       client.send = jest.fn();
-    
+
       server._handle(client, logger)(JSON.stringify(unsupportedVerbMessage));
-    
+
       expect(loggerSpy).toHaveBeenCalledWith({ msg: unsupportedVerbMessage });
       expect(logSpy).toHaveBeenCalledWith('Handling received message');
-      expect(client.send).toHaveBeenCalledWith(ControlServer.build.ERROR.NOTIFY.UNSUPPORTED_VERB(unsupportedVerbMessage.id));
+      expect(client.send).toHaveBeenCalledWith(
+        ControlServer.build.ERROR.NOTIFY.UNSUPPORTED_VERB(unsupportedVerbMessage.id),
+      );
     });
-    
-    
-    
-    
-    
   });
 });
 
@@ -306,8 +304,8 @@ describe('ControlServer additional tests', () => {
       onRequestConfig: (cl: any) => {
         cl.send(ControlServer.build.CONFIGURATION.NOTIFY(appConfig));
       },
-      onRequestPeerJWS: (cl: any) => {},
-      onUploadPeerJWS: (cl: any) => {},
+      onRequestPeerJWS: () => {},
+      onUploadPeerJWS: () => {},
     });
     server.registerInternalEvents();
     client = await Client.Client.Create({

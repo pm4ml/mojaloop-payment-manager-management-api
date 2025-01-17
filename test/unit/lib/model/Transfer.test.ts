@@ -833,8 +833,7 @@ describe('Transfer', () => {
   });
 
   test('/findErrors', async () => {
-    transfer._convertToApiFormat = jest.fn((row) => (
-      {
+    transfer._convertToApiFormat = jest.fn((row) => ({
       id: row.id,
       batchId: row.batchId,
       institution: row.dfsp,
@@ -885,8 +884,8 @@ describe('Transfer', () => {
         recipientIdValue: '987654321',
         homeTransferId: undefined,
         details: 'test payment',
-        errorType: 1
-      }
+        errorType: 1,
+      },
     ];
     expect(result).toMatchObject(expected);
     expect(transfer._convertToApiFormat).toHaveBeenCalledTimes(result.length);
@@ -920,12 +919,11 @@ describe('Transfer', () => {
         errorType: row.success === 0 ? 1 : null,
       };
     });
-  
-  
+
     const now = Date.now();
     const mockTransferId = uuid.v4();
     const createTimestamp = (secondsAdd) => new Date(now + (secondsAdd || 0) * 1e3 + 1).toISOString();
-  
+
     await addTransferToCache(db, {
       currency: 'USD',
       amount: '100',
@@ -936,17 +934,17 @@ describe('Transfer', () => {
     });
     await db.sync();
     const result = await transfer.findOne(mockTransferId);
-  
+
     const expected = {
       id: mockTransferId,
       batchId: undefined,
-      institution: 'mojaloop-sdk', 
+      institution: 'mojaloop-sdk',
       direction: 'OUTBOUND',
       currency: 'USD',
       amount: '100',
       type: 'P2P',
-      status: 'COMPLETED', 
-      initiatedTimestamp: "2000-11-22T00:00:15.001Z",
+      status: 'COMPLETED',
+      initiatedTimestamp: '2000-11-22T00:00:15.001Z',
       confirmationNumber: 0,
       sender: 'John Doe',
       senderIdType: 'MSISDN',
@@ -956,13 +954,13 @@ describe('Transfer', () => {
       recipientIdType: 'MSISDN',
       recipientIdSubValue: null,
       recipientIdValue: '987654321',
-      homeTransferId: "123ABC",
+      homeTransferId: '123ABC',
       details: 'test payment',
-      errorType: null, 
+      errorType: null,
     };
-  
+
     expect(result).toMatchObject(expected);
-  
+
     expect(transfer._convertToApiFormat).toHaveBeenCalledTimes(1);
   });
 
@@ -977,7 +975,7 @@ describe('Transfer', () => {
         type: raw?.transactionType || 'UNKNOWN',
         institution: row.dfsp || 'UNKNOWN',
         direction: row.direction > 0 ? 'OUTBOUND' : 'INBOUND',
-        status: 1, 
+        status: 1,
         confirmationNumber: 0,
         sender: row.sender || 'UNKNOWN',
         recipient: row.recipient || 'UNKNOWN',
@@ -1010,12 +1008,11 @@ describe('Transfer', () => {
         },
       };
     });
-    
-  
+
     const now = Date.now();
     const mockTransferId = uuid.v4();
     const createTimestamp = (secondsAdd) => new Date(now + (secondsAdd || 0) * 1e3 + 1).toISOString();
-  
+
     await addTransferToCache(db, {
       currency: 'USD',
       amount: '100',
@@ -1026,7 +1023,7 @@ describe('Transfer', () => {
     });
     await db.sync();
     const result = await transfer.findOneDetail(mockTransferId);
-  
+
     const expected = {
       id: mockTransferId,
       amount: '100',
@@ -1057,7 +1054,7 @@ describe('Transfer', () => {
           dateOfBirth: '',
           merchantClassificationCode: '',
           fspId: '',
-          extensionList: ''
+          extensionList: '',
         },
         payeeParty: {
           idType: '',
@@ -1070,7 +1067,7 @@ describe('Transfer', () => {
           dateOfBirth: '',
           merchantClassificationCode: '',
           fspId: '',
-          extensionList: ''
+          extensionList: '',
         },
         getPartiesRequest: { headers: null, body: null },
         getPartiesResponse: null,
@@ -1078,12 +1075,12 @@ describe('Transfer', () => {
         quoteResponse: expect.any(Object),
         transferPrepare: { headers: null, body: null },
         transferFulfilment: expect.any(Object),
-        lastError: null
-      }};
-  
+        lastError: null,
+      },
+    };
+
     expect(result).toMatchObject(expected);
-  
+
     expect(transfer._convertToApiDetailFormat).toHaveBeenCalledTimes(1);
   });
-  
 });

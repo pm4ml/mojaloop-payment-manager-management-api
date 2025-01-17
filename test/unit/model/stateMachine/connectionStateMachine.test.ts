@@ -1,4 +1,4 @@
-import { interpret, State } from 'xstate';
+import { State } from 'xstate';
 import { ConnectionStateMachine } from '../../../../src/lib/model/stateMachine/ConnectionStateMachine';
 
 import WebSocket from 'ws';
@@ -61,7 +61,7 @@ describe('ConnectionStateMachine', () => {
 
   describe('serve', () => {
     it('should not serve state machine inspection if disabled', () => {
-      connectionStateMachine['serve']();
+      connectionStateMachine.serve();
 
       expect(WebSocket.Server).not.toHaveBeenCalled();
       expect(inspect).not.toHaveBeenCalled();
@@ -71,7 +71,7 @@ describe('ConnectionStateMachine', () => {
     it('should serve state machine inspection if enabled', () => {
       opts.config.stateMachineInspectEnabled = true;
       connectionStateMachine = new ConnectionStateMachine(opts);
-      connectionStateMachine['serve']();
+      connectionStateMachine.serve();
       expect(WebSocket.Server).toHaveBeenCalledWith({ port: opts.port });
       expect(inspect).toHaveBeenCalledWith({
         server: expect.objectContaining({
@@ -80,7 +80,7 @@ describe('ConnectionStateMachine', () => {
         }),
       });
       expect(loggerMock.log).toHaveBeenCalledWith(
-        `StateMachine introspection URL: https://stately.ai/viz?inspect&server=ws://localhost:${opts.port}`
+        `StateMachine introspection URL: https://stately.ai/viz?inspect&server=ws://localhost:${opts.port}`,
       );
     });
   });
@@ -90,14 +90,14 @@ describe('ConnectionStateMachine', () => {
       await connectionStateMachine.start();
 
       expect(opts.vault.getStateMachineState).toHaveBeenCalled();
-      expect(connectionStateMachine['service'].start).toHaveBeenCalled();
+      expect(connectionStateMachine.service.start).toHaveBeenCalled();
       expect(loggerMock.log).toHaveBeenCalledWith(expect.stringContaining('Starting state machine from scratch'));
     });
 
     it('should start the state machine from scratch when the version is different', async () => {
       const previousState = {
         state: { value: 'previousState' },
-        hash: connectionStateMachine['hash'],
+        hash: connectionStateMachine.hash,
         version: 2,
         actions: {},
       };
@@ -105,15 +105,15 @@ describe('ConnectionStateMachine', () => {
       opts.vault.getStateMachineState.mockResolvedValueOnce(previousState);
       await connectionStateMachine.start();
       expect(loggerMock.log).toHaveBeenCalledWith(
-        expect.stringContaining('Starting state machine from scratch because state machine changed')
+        expect.stringContaining('Starting state machine from scratch because state machine changed'),
       );
-      expect(connectionStateMachine['service'].start).toHaveBeenCalled();
+      expect(connectionStateMachine.service.start).toHaveBeenCalled();
     });
 
     it('should restore the state machine if previous state exists', async () => {
       vaultMock.getStateMachineState.mockResolvedValueOnce({
         state: { value: 'someState' },
-        hash: connectionStateMachine['hash'],
+        hash: connectionStateMachine.hash,
         version: 3,
         actions: {},
       });
@@ -121,12 +121,12 @@ describe('ConnectionStateMachine', () => {
       await connectionStateMachine.start();
 
       expect(loggerMock.log).toHaveBeenCalledWith(
-        expect.stringContaining('Restoring state machine from previous state')
+        expect.stringContaining('Restoring state machine from previous state'),
       );
-      expect(connectionStateMachine['service'].start).toHaveBeenCalledWith(
+      expect(connectionStateMachine.service.start).toHaveBeenCalledWith(
         expect.objectContaining({
           actions: expect.any(Array),
-        })
+        }),
       );
     });
 
@@ -137,33 +137,31 @@ describe('ConnectionStateMachine', () => {
       await connectionStateMachine.start();
 
       expect(loggerMock.log).toHaveBeenCalledWith(
-        expect.stringContaining('Starting state machine from scratch because no previous state found')
+        expect.stringContaining('Starting state machine from scratch because no previous state found'),
       );
-      expect(connectionStateMachine['service'].start).toHaveBeenCalled();
+      expect(connectionStateMachine.service.start).toHaveBeenCalled();
     });
   });
 
   describe('updateActions', () => {
-    let connectionStateMachine: ConnectionStateMachine;
-
     beforeEach(() => {
       connectionStateMachine = new ConnectionStateMachine(opts);
-      connectionStateMachine['actions'] = {};
+      connectionStateMachine.actions = {};
     });
 
     it('should remove actions with type "xstate.cancel"', () => {
-      connectionStateMachine['actions'] = { testActionId: { type: 'test' } };
-      connectionStateMachine['updateActions']([{ type: 'xstate.cancel', sendId: 'testActionId' }]);
+      connectionStateMachine.actions = { testActionId: { type: 'test' } };
+      connectionStateMachine.updateActions([{ type: 'xstate.cancel', sendId: 'testActionId' }]);
 
-      expect(connectionStateMachine['actions']['testActionId']).toBeUndefined();
+      expect(connectionStateMachine.actions.testActionId).toBeUndefined();
     });
 
     it('should add actions with type "xstate.after"', () => {
-      connectionStateMachine['updateActions']([
+      connectionStateMachine.updateActions([
         { type: 'xstate.after', id: 'afterActionId', event: { type: 'xstate.after(1000)' } },
       ]);
 
-      expect(connectionStateMachine['actions']['afterActionId']).toEqual({
+      expect(connectionStateMachine.actions.afterActionId).toEqual({
         type: 'xstate.after',
         id: 'afterActionId',
         event: { type: 'xstate.after(1000)' },
@@ -171,26 +169,26 @@ describe('ConnectionStateMachine', () => {
     });
 
     it('should handle "xstate.invoke" actions with type "xstate.stop"', () => {
-      connectionStateMachine['actions'] = { invokeActionId: { type: 'xstate.invoke' } };
-      connectionStateMachine['updateActions']([
+      connectionStateMachine.actions = { invokeActionId: { type: 'xstate.invoke' } };
+      connectionStateMachine.updateActions([
         {
           type: 'xstate.stop',
           activity: { id: 'invokeActionId', type: 'xstate.invoke' },
         },
       ]);
 
-      expect(connectionStateMachine['actions']['invokeActionId']).toBeUndefined();
+      expect(connectionStateMachine.actions.invokeActionId).toBeUndefined();
     });
 
     it('should handle "xstate.invoke" actions with type "xstate.start"', () => {
-      connectionStateMachine['updateActions']([
+      connectionStateMachine.updateActions([
         {
           type: 'xstate.start',
           activity: { id: 'newInvokeActionId', type: 'xstate.invoke' },
         },
       ]);
 
-      expect(connectionStateMachine['actions']['newInvokeActionId']).toEqual({
+      expect(connectionStateMachine.actions.newInvokeActionId).toEqual({
         type: 'xstate.start',
         activity: { id: 'newInvokeActionId', type: 'xstate.invoke' },
       });
@@ -212,10 +210,10 @@ describe('ConnectionStateMachine', () => {
       actions: [],
     };
 
-    connectionStateMachine['handleTransition'](stateMock as unknown as State<any, any>);
+    connectionStateMachine.handleTransition(stateMock as unknown as State<any, any>);
 
     expect(loggerMock.push).toHaveBeenCalledWith({ state: 'newState' });
-    expect(connectionStateMachine['context']).toEqual(stateMock.context);
+    expect(connectionStateMachine.context).toEqual(stateMock.context);
   });
 
   it('should send events to the state machine', () => {
@@ -223,12 +221,12 @@ describe('ConnectionStateMachine', () => {
 
     connectionStateMachine.sendEvent(event);
 
-    expect(connectionStateMachine['service'].send).toHaveBeenCalledWith(event);
+    expect(connectionStateMachine.service.send).toHaveBeenCalledWith(event);
   });
 
   it('should stop the state machine', () => {
     connectionStateMachine.stop();
 
-    expect(connectionStateMachine['service'].stop).toHaveBeenCalled();
+    expect(connectionStateMachine.service.stop).toHaveBeenCalled();
   });
 });

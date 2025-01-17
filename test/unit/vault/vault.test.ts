@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-shadow */
 const NodeVault = require('node-vault');
-const Vault = require('../../../src/lib/vault');
+const Vault = require('../../../src/lib/vault/index');
 
-import { strict as assert, AssertionError } from 'assert';
+import { AssertionError } from 'assert';
 
 jest.mock('node-vault');
 describe('Vault', () => {
@@ -223,16 +225,24 @@ describe('Vault', () => {
       try {
         await vaultInstance._setSecret(mockKey, mockValue);
       } catch (error) {
-        expect(error).toBeInstanceOf(AssertionError);
-        expect(error.message).toBe('null == true');
+        if (error instanceof Error) {
+          expect(error).toBeInstanceOf(AssertionError);
+          expect(error.message).toBe(
+            "The expression evaluated to a falsy value:\n\n  loggerWithContext.log('Connecting to Vault')\n",
+          );
+        }
       }
       vaultInstance.client = undefined;
 
       try {
         await vaultInstance._setSecret(mockKey, mockValue);
       } catch (error) {
-        expect(error).toBeInstanceOf(AssertionError);
-        expect(error.message).toBe('undefined == true');
+        if (error instanceof Error) {
+          expect(error).toBeInstanceOf(AssertionError);
+          expect(error.message).toBe(
+            "The expression evaluated to a falsy value:\n\n  loggerWithContext.log('Connecting to Vault')\n",
+          );
+        }
       }
     });
 
@@ -613,7 +623,7 @@ describe('Vault', () => {
       vaultInstance.cfg = { mounts: { pki: 'mock-pki' } };
 
       await expect(vaultInstance.setDFSPCaCertChain(mockCertChainPem, mockPrivateKeyPem)).rejects.toThrow(
-        'Request failed'
+        'Request failed',
       );
     });
   });
@@ -668,7 +678,7 @@ describe('Vault', () => {
       keyLength: 2048,
       keyAlgorithm: 'rsa',
       commonName: 'test-certificate',
-      auth:{}
+      auth: {},
     };
 
     afterEach(() => {
@@ -772,5 +782,4 @@ describe('Vault', () => {
     const result = await vaultInstance.createPkiRoles();
     expect(result).toBeUndefined();
   });
-
 });

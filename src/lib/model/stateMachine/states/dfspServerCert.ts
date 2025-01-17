@@ -72,7 +72,7 @@ export namespace DfspServerCert {
               retryInterval: opts.refreshIntervalSeconds * 1000,
               service: async () =>
                 opts.vault.createDFSPServerCert(
-                  (event as CreateDfspServerCertEvent).csr || opts.config.dfspServerCsrParameters
+                  (event as CreateDfspServerCertEvent).csr || opts.config.dfspServerCsrParameters,
                 ),
             }),
           onDone: {
@@ -122,7 +122,7 @@ export namespace DfspServerCert {
   });
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  export const createGuards = <TContext extends Context>(opts: MachineOpts) => ({
+  export const createGuards = (opts: MachineOpts) => ({
     managedByCertManager: () => !!opts.certManager,
   });
 }
