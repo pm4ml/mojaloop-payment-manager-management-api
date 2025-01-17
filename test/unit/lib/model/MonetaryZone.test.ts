@@ -21,8 +21,8 @@ describe('MonetaryZone', () => {
 
   test('should initialize correctly', () => {
     expect(monetaryZone).toBeInstanceOf(MonetaryZone);
-    expect(monetaryZone['_logger']).toBe(mockLogger);
-    expect(monetaryZone['_requests']).toBeInstanceOf(MonetaryZoneModel);
+    expect(monetaryZone._logger).toBe(mockLogger);
+    expect(monetaryZone._requests).toBeInstanceOf(MonetaryZoneModel);
     expect(MonetaryZoneModel).toHaveBeenCalledWith({
       logger: mockLogger,
       hubEndpoint: mockMcmServerEndpoint,
@@ -31,7 +31,7 @@ describe('MonetaryZone', () => {
 
   test('getMonetaryZones should call getMonetaryZones on MonetaryZoneModel', async () => {
     const mockGetMonetaryZones = jest.fn().mockResolvedValue(['USD', 'EUR']);
-    monetaryZone['_requests'].getMonetaryZones = mockGetMonetaryZones;
+    monetaryZone._requests.getMonetaryZones = mockGetMonetaryZones;
 
     const result = await monetaryZone.getMonetaryZones();
 

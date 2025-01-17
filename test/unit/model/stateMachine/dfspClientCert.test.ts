@@ -32,7 +32,7 @@ const startMachine = (opts: ReturnType<typeof createMachineOpts>, onConfigChange
         ...DfspClientCert.createGuards<Context>(),
       },
       actions: {},
-    }
+    },
   );
 
   const service = interpret(machine); // .onTransition((state) => console.log(state.changed, state.value));

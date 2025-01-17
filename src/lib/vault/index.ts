@@ -87,12 +87,19 @@ class Vault {
 
   async connect() {
     const { auth, endpoint } = this.cfg;
-    this.logger.push({ endpoint }).log('Connecting to Vault');
+    // Safely handle logger calls
+    try {
+      const loggerWithContext = this.logger.push({ endpoint });
+      if (typeof loggerWithContext.log === 'function') {
+        loggerWithContext.log('Connecting to Vault');
+      }
+    } catch (err) {
+      console.error('Logger error:', err);
+    }
 
     if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
 
     let creds;
-
     const vault = NodeVault({ endpoint });
     if (auth.appRole) {
       creds = await vault.approleLogin({

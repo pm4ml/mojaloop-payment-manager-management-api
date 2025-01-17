@@ -1,7 +1,6 @@
-const { Client, EVENT, VERB, MESSAGE, buildPatchConfiguration, build } = require('../ControlClient');
-const randomPhrase = require('@app/lib/randomphrase');
-const jsonPatch = require('fast-json-patch');
-const ws = require('ws');
+import { Client, EVENT, VERB, MESSAGE, buildPatchConfiguration, build } from '../ControlClient';
+import jsonPatch from 'fast-json-patch';
+import ws from 'ws';
 jest.mock('ws');
 jest.mock('@app/lib/randomphrase', () => () => 'random-id');
 
@@ -51,7 +50,7 @@ describe('Control Client', () => {
     });
 
     await expect(Client.Create({ address: 'example.com', port: 1234, logger: loggerMock, appConfig })).rejects.toThrow(
-      'Connection failed'
+      'Connection failed',
     );
   });
 

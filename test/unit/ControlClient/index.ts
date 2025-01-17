@@ -157,7 +157,7 @@ class Client extends ws {
         const msg = deserialise(data);
         this._logger.push({ msg }).log('Received');
         resolve(msg);
-      })
+      }),
     );
   }
 
@@ -192,7 +192,8 @@ class Client extends ws {
     switch (msg.msg) {
       case MESSAGE.CONFIGURATION:
         switch (msg.verb) {
-          case VERB.NOTIFY:break;
+          case VERB.NOTIFY:
+            break;
           case VERB.PATCH: {
             const dup = JSON.parse(JSON.stringify(this._appConfig)); // fast-json-patch explicitly mutates
             jsonPatch.applyPatch(dup, msg.data);
@@ -219,5 +220,5 @@ module.exports = {
   VERB,
   ERROR,
   EVENT,
-  buildPatchConfiguration
+  buildPatchConfiguration,
 };
