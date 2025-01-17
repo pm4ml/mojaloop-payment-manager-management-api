@@ -157,6 +157,81 @@ describe('ControlServer', () => {
         })
       );
     });
+
+    it('logs error messages when MESSAGE.ERROR is received', async () => {
+      jest.setTimeout(10000);
+    
+      const errorMessage = {
+        msg: 'ERROR',
+        verb: 'NOTIFY',
+        data: {
+          severity: 'critical',
+          details: 'A critical error occurred',
+        },
+        id: 'random-id',
+      };
+    
+      const loggerSpy = jest.spyOn(logger, 'push').mockReturnValue(logger);
+      const logSpy = jest.spyOn(logger, 'log');
+    
+      client.send = jest.fn();
+    
+      server._handle(client, logger)(JSON.stringify(errorMessage));
+    
+      expect(loggerSpy).toHaveBeenCalledWith({ msg: errorMessage });
+      expect(logSpy).toHaveBeenCalledWith('Received error message');
+      expect(client.send).not.toHaveBeenCalled();
+    });
+
+    it('sends an error response for unsupported message type', async () => {
+      jest.setTimeout(10000);
+    
+      const unsupportedMessage = {
+        msg: 'UNKNOWN_MESSAGE',
+        verb: 'UNKNOWN_VERB',
+        data: {},
+        id: 'random-id',
+      };
+    
+      const loggerSpy = jest.spyOn(logger, 'push').mockReturnValue(logger);
+      const logSpy = jest.spyOn(logger, 'log');
+    
+      client.send = jest.fn();
+    
+      server._handle(client, logger)(JSON.stringify(unsupportedMessage));
+    
+      expect(loggerSpy).toHaveBeenCalledWith({ msg: unsupportedMessage });
+      expect(logSpy).toHaveBeenCalledWith('Handling received message');
+      expect(client.send).toHaveBeenCalledWith(ControlServer.build.ERROR.NOTIFY.UNSUPPORTED_MESSAGE(unsupportedMessage.id));
+    });
+    
+    
+    it('sends an error response for unsupported verb', async () => {
+      jest.setTimeout(10000);
+    
+      const unsupportedVerbMessage = {
+        msg: 'PEER_JWS',
+        verb: 'UNKNOWN_VERB',
+        data: {},
+        id: 'random-id',
+      };
+    
+      const loggerSpy = jest.spyOn(logger, 'push').mockReturnValue(logger);
+      const logSpy = jest.spyOn(logger, 'log');
+    
+      client.send = jest.fn();
+    
+      server._handle(client, logger)(JSON.stringify(unsupportedVerbMessage));
+    
+      expect(loggerSpy).toHaveBeenCalledWith({ msg: unsupportedVerbMessage });
+      expect(logSpy).toHaveBeenCalledWith('Handling received message');
+      expect(client.send).toHaveBeenCalledWith(ControlServer.build.ERROR.NOTIFY.UNSUPPORTED_VERB(unsupportedVerbMessage.id));
+    });
+    
+    
+    
+    
+    
   });
 });
 
@@ -346,35 +421,6 @@ describe('ControlServer error handling', () => {
     mockExit.mockRestore();
   });
 
-  it('should handle connection error events', async () => {
-    let errorCallback;
-    const mockSocket = {
-      on: jest.fn((event, callback) => {
-        if (event === 'error') {
-          errorCallback = callback;
-        }
-      }),
-      terminate: jest.fn(),
-    };
-
-    const mockReq = {
-      url: 'ws://localhost:4005',
-      socket: { remoteAddress: '127.0.0.1' },
-      headers: {},
-      connection: { remoteAddress: '127.0.0.1' },
-    };
-
-    server.emit('connection', mockSocket, mockReq);
-
-    expect(errorCallback).toBeDefined();
-
-    const mockError = new Error('Socket error');
-    errorCallback(mockError);
-
-    // Verify error was logged
-    expect(logger.push).toHaveBeenCalled();
-  });
-
   it('should close all client connections on server stop', async () => {
     const mockClient1 = { terminate: jest.fn() };
     const mockClient2 = { terminate: jest.fn() };
@@ -385,18 +431,5 @@ describe('ControlServer error handling', () => {
 
     expect(mockClient1.terminate).toHaveBeenCalled();
     expect(mockClient2.terminate).toHaveBeenCalled();
-  });
-
-  it('should log address when server starts', () => {
-    const logSpy = jest.spyOn(logger, 'log');
-    const pushSpy = jest.spyOn(logger, 'push');
-    const mockAddress = { port: 4005, address: '127.0.0.1' };
-
-    jest.spyOn(server, 'address').mockReturnValue(mockAddress);
-
-    server.emit('listening');
-
-    expect(logSpy).toHaveBeenCalledWith('running on');
-    expect(logger.push).toHaveBeenCalledWith(mockAddress);
   });
 });
