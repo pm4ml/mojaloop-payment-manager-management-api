@@ -125,7 +125,6 @@ describe('Vault', () => {
 
       await expect(vaultInstance.setStateMachineState(mockValue)).rejects.toThrow('Failed to set secret');
       expect(mockSetSecret).toHaveBeenCalledWith('state-machine-state', mockValue);
-
     });
   });
 
@@ -146,7 +145,6 @@ describe('Vault', () => {
 
       await expect(vaultInstance.getStateMachineState()).rejects.toThrow('Failed to get secret');
       expect(mockGetSecret).toHaveBeenCalledWith('state-machine-state');
-
     });
   });
 
@@ -281,7 +279,7 @@ describe('Vault', () => {
       } catch (error) {
         if (error instanceof Error) {
           expect(error).toBeInstanceOf(AssertionError);
-            expect(error.message).toBe('null == true');
+          expect(error.message).toBe('null == true');
         }
       }
 
@@ -292,7 +290,7 @@ describe('Vault', () => {
       } catch (error) {
         if (error instanceof Error) {
           expect(error).toBeInstanceOf(AssertionError);
-            expect(error.message).toBe('undefined == true');
+          expect(error.message).toBe('undefined == true');
         }
       }
     });
@@ -350,7 +348,7 @@ describe('Vault', () => {
         if (error instanceof Error) {
           expect(error).toBeInstanceOf(AssertionError);
           expect(error.message).toBe('undefined == true');
-      }
+        }
       }
     });
 
@@ -383,7 +381,7 @@ describe('Vault', () => {
         if (error instanceof Error) {
           expect(error).toBeInstanceOf(AssertionError);
           expect(error.message).toBe('null == true');
-      }
+        }
       }
 
       vaultInstance.client = undefined;
@@ -394,7 +392,7 @@ describe('Vault', () => {
         if (error instanceof Error) {
           expect(error).toBeInstanceOf(AssertionError);
           expect(error.message).toBe('undefined == true');
-      }
+        }
       }
     });
 
@@ -439,7 +437,7 @@ describe('Vault', () => {
         if (error instanceof Error) {
           expect(error).toBeInstanceOf(AssertionError);
           expect(error.message).toBe('null == true');
-      }
+        }
       }
 
       vaultInstance.client = undefined;
@@ -450,7 +448,7 @@ describe('Vault', () => {
         if (error instanceof Error) {
           expect(error).toBeInstanceOf(AssertionError);
           expect(error.message).toBe('undefined == true');
-      }
+        }
       }
     });
 
