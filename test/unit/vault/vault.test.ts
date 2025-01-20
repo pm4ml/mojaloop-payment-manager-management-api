@@ -124,6 +124,8 @@ describe('Vault', () => {
         .mockRejectedValue(new Error('Failed to set secret'));
 
       await expect(vaultInstance.setStateMachineState(mockValue)).rejects.toThrow('Failed to set secret');
+      expect(mockSetSecret).toHaveBeenCalledWith('state-machine-state', mockValue);
+
     });
   });
 
@@ -143,6 +145,8 @@ describe('Vault', () => {
         .mockRejectedValue(new Error('Failed to get secret'));
 
       await expect(vaultInstance.getStateMachineState()).rejects.toThrow('Failed to get secret');
+      expect(mockGetSecret).toHaveBeenCalledWith('state-machine-state');
+
     });
   });
 
@@ -206,15 +210,19 @@ describe('Vault', () => {
       try {
         await vaultInstance._setSecret(null, mockValue);
       } catch (error) {
-        expect(error).toBeInstanceOf(AssertionError);
-        expect(error.message).toBe('Cannot set key: [null]');
+        if (error instanceof Error) {
+          expect(error).toBeInstanceOf(AssertionError);
+          expect(error.message).toBe('Cannot set key: [null]');
+        }
       }
 
       try {
         await vaultInstance._setSecret(undefined, mockValue);
       } catch (error) {
-        expect(error).toBeInstanceOf(AssertionError);
-        expect(error.message).toBe('Cannot set key: [undefined]');
+        if (error instanceof Error) {
+          expect(error).toBeInstanceOf(AssertionError);
+          expect(error.message).toBe('Cannot set key: [undefined]');
+        }
       }
     });
 
@@ -271,8 +279,10 @@ describe('Vault', () => {
       try {
         await vaultInstance.mountAll();
       } catch (error) {
-        expect(error).toBeInstanceOf(AssertionError);
-        expect(error.message).toBe('null == true');
+        if (error instanceof Error) {
+          expect(error).toBeInstanceOf(AssertionError);
+            expect(error.message).toBe('null == true');
+        }
       }
 
       vaultInstance.client = undefined;
@@ -280,8 +290,10 @@ describe('Vault', () => {
       try {
         await vaultInstance.mountAll();
       } catch (error) {
-        expect(error).toBeInstanceOf(AssertionError);
-        expect(error.message).toBe('undefined == true');
+        if (error instanceof Error) {
+          expect(error).toBeInstanceOf(AssertionError);
+            expect(error.message).toBe('undefined == true');
+        }
       }
     });
 
@@ -324,8 +336,10 @@ describe('Vault', () => {
       try {
         await vaultInstance._deleteSecret('test-key');
       } catch (error) {
-        expect(error).toBeInstanceOf(AssertionError);
-        expect(error.message).toBe('null == true');
+        if (error instanceof Error) {
+          expect(error).toBeInstanceOf(AssertionError);
+          expect(error.message).toBe('null == true');
+        }
       }
 
       vaultInstance.client = undefined;
@@ -333,8 +347,10 @@ describe('Vault', () => {
       try {
         await vaultInstance._deleteSecret('test-key');
       } catch (error) {
-        expect(error).toBeInstanceOf(AssertionError);
-        expect(error.message).toBe('undefined == true');
+        if (error instanceof Error) {
+          expect(error).toBeInstanceOf(AssertionError);
+          expect(error.message).toBe('undefined == true');
+      }
       }
     });
 
@@ -364,8 +380,10 @@ describe('Vault', () => {
       try {
         await vaultInstance.deleteCA();
       } catch (error) {
-        expect(error).toBeInstanceOf(AssertionError);
-        expect(error.message).toBe('null == true');
+        if (error instanceof Error) {
+          expect(error).toBeInstanceOf(AssertionError);
+          expect(error.message).toBe('null == true');
+      }
       }
 
       vaultInstance.client = undefined;
@@ -373,8 +391,10 @@ describe('Vault', () => {
       try {
         await vaultInstance.deleteCA();
       } catch (error) {
-        expect(error).toBeInstanceOf(AssertionError);
-        expect(error.message).toBe('undefined == true');
+        if (error instanceof Error) {
+          expect(error).toBeInstanceOf(AssertionError);
+          expect(error.message).toBe('undefined == true');
+      }
       }
     });
 
@@ -416,8 +436,10 @@ describe('Vault', () => {
       try {
         await vaultInstance.createCA(mockSubject);
       } catch (error) {
-        expect(error).toBeInstanceOf(AssertionError);
-        expect(error.message).toBe('null == true');
+        if (error instanceof Error) {
+          expect(error).toBeInstanceOf(AssertionError);
+          expect(error.message).toBe('null == true');
+      }
       }
 
       vaultInstance.client = undefined;
@@ -425,8 +447,10 @@ describe('Vault', () => {
       try {
         await vaultInstance.createCA(mockSubject);
       } catch (error) {
-        expect(error).toBeInstanceOf(AssertionError);
-        expect(error.message).toBe('undefined == true');
+        if (error instanceof Error) {
+          expect(error).toBeInstanceOf(AssertionError);
+          expect(error.message).toBe('undefined == true');
+      }
       }
     });
 
