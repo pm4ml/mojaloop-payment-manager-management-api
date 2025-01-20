@@ -17,9 +17,7 @@
     "url": "https://github.com/pm4ml/mojaloop-payment-manager-management-api.git"
   },
   "scripts": {
-    "build": "tsup && npm run copy-files",
     "start": "node dist/index.js",
-    "start:build": "npm run build && npm start",
     "start:dev": "DOTENV_CONFIG_PATH=.env.example ts-node -r dotenv/config -P ./tsconfig.json src/index.ts",
     "copy-files": "copyfiles -u 1 src/**/*.yaml src/**/*.json dist",
     "lint": "eslint .",
