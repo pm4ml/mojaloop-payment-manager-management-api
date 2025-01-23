@@ -15,7 +15,10 @@ module.exports = {
   testEnvironment: 'jest-environment-node',
 
   // Configure reporters for test results
-  reporters: ['default', ['jest-junit', { outputDirectory: 'reports', outputName: 'report.xml' }]],
+  reporters: [
+    'default',
+    ['jest-junit', {outputDirectory: './test/results/', outputName: 'xunit.xml'}],
+  ],
 
   // Automatically clear mock calls and instances between tests
   clearMocks: true,
