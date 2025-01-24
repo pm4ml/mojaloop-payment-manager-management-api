@@ -50,7 +50,7 @@ describe('Control Client', () => {
     });
 
     await expect(Client.Create({ address: 'example.com', port: 1234, logger: loggerMock, appConfig })).rejects.toThrow(
-      'Connection failed'
+      'Connection failed',
     );
   });
 

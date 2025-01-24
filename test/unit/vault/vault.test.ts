@@ -234,7 +234,7 @@ describe('Vault', () => {
         if (error instanceof Error) {
           expect(error).toBeInstanceOf(AssertionError);
           expect(error.message).toBe(
-            "The expression evaluated to a falsy value:\n\n  loggerWithContext.log('Connecting to Vault')\n"
+            "The expression evaluated to a falsy value:\n\n  loggerWithContext.log('Connecting to Vault')\n",
           );
         }
       }
@@ -246,7 +246,7 @@ describe('Vault', () => {
         if (error instanceof Error) {
           expect(error).toBeInstanceOf(AssertionError);
           expect(error.message).toBe(
-            "The expression evaluated to a falsy value:\n\n  loggerWithContext.log('Connecting to Vault')\n"
+            "The expression evaluated to a falsy value:\n\n  loggerWithContext.log('Connecting to Vault')\n",
           );
         }
       }
@@ -645,7 +645,7 @@ describe('Vault', () => {
       vaultInstance.cfg = { mounts: { pki: 'mock-pki' } };
 
       await expect(vaultInstance.setDFSPCaCertChain(mockCertChainPem, mockPrivateKeyPem)).rejects.toThrow(
-        'Request failed'
+        'Request failed',
       );
     });
   });

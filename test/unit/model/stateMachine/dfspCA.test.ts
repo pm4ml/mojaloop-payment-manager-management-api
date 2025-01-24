@@ -30,7 +30,7 @@ const startMachine = (opts: ReturnType<typeof createMachineOpts>) => {
       guards: {},
       actions: {},
       predictableActionArguments: true,
-    }
+    },
   );
 
   const service = interpret(machine); // .onTransition((state) => console.log(state.changed, state.value));

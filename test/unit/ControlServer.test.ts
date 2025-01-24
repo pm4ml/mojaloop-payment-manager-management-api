@@ -63,7 +63,7 @@ describe('ControlServer', () => {
 
       expect(server.broadcast).toHaveBeenCalledTimes(1);
       expect(server.broadcast).toHaveBeenCalledWith(
-        ControlServer.build.CONFIGURATION.NOTIFY(changedConfig, randomPhrase())
+        ControlServer.build.CONFIGURATION.NOTIFY(changedConfig, randomPhrase()),
       );
     });
     it('broadcasts peer JWS when received', async () => {
@@ -94,7 +94,7 @@ describe('ControlServer', () => {
           msg: 'ERROR',
           verb: 'NOTIFY',
           data: 'UNSUPPORTED_VERB',
-        })
+        }),
       );
     });
 
@@ -116,7 +116,7 @@ describe('ControlServer', () => {
           msg: 'ERROR',
           verb: 'NOTIFY',
           data: 'JSON_PARSE_ERROR',
-        })
+        }),
       );
     });
 
@@ -154,7 +154,7 @@ describe('ControlServer', () => {
           msg: 'ERROR',
           verb: 'NOTIFY',
           data: 'UNSUPPORTED_MESSAGE',
-        })
+        }),
       );
     });
 
@@ -203,7 +203,7 @@ describe('ControlServer', () => {
       expect(loggerSpy).toHaveBeenCalledWith({ msg: unsupportedMessage });
       expect(logSpy).toHaveBeenCalledWith('Handling received message');
       expect(client.send).toHaveBeenCalledWith(
-        ControlServer.build.ERROR.NOTIFY.UNSUPPORTED_MESSAGE(unsupportedMessage.id)
+        ControlServer.build.ERROR.NOTIFY.UNSUPPORTED_MESSAGE(unsupportedMessage.id),
       );
     });
 
@@ -227,7 +227,7 @@ describe('ControlServer', () => {
       expect(loggerSpy).toHaveBeenCalledWith({ msg: unsupportedVerbMessage });
       expect(logSpy).toHaveBeenCalledWith('Handling received message');
       expect(client.send).toHaveBeenCalledWith(
-        ControlServer.build.ERROR.NOTIFY.UNSUPPORTED_VERB(unsupportedVerbMessage.id)
+        ControlServer.build.ERROR.NOTIFY.UNSUPPORTED_VERB(unsupportedVerbMessage.id),
       );
     });
   });
