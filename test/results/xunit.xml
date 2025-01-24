@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="96" failures="0" errors="0" time="7.534">
+  <testsuite name="index.js" errors="0" failures="0" skipped="0" timestamp="2025-01-24T10:37:45" time="1.149" tests="6">
+    <testcase classname="index.js Exports expected modules" name="index.js Exports expected modules" time="0.009">
+    </testcase>
+    <testcase classname="RandomPhrase Generator should generate a phrase with 5 parts by default" name="RandomPhrase Generator should generate a phrase with 5 parts by default" time="0.002">
+    </testcase>
+    <testcase classname="RandomPhrase Generator should generate a phrase with custom separator" name="RandomPhrase Generator should generate a phrase with custom separator" time="0.001">
+    </testcase>
+    <testcase classname="RandomPhrase Generator should generate different phrases on subsequent calls" name="RandomPhrase Generator should generate different phrases on subsequent calls" time="0">
+    </testcase>
+    <testcase classname="RandomPhrase Generator should handle empty separator" name="RandomPhrase Generator should handle empty separator" time="0.001">
+    </testcase>
+    <testcase classname="RandomPhrase Generator should handle special characters as separators" name="RandomPhrase Generator should handle special characters as separators" time="0.005">
+    </testcase>
+  </testsuite>
+  <testsuite name="Control Client" errors="0" failures="0" skipped="0" timestamp="2025-01-24T10:37:45" time="1.332" tests="15">
+    <testcase classname="Control Client should construct a Client with the correct properties" name="Control Client should construct a Client with the correct properties" time="0.014">
+    </testcase>
+    <testcase classname="Control Client should expose the Build getter" name="Control Client should expose the Build getter" time="0.002">
+    </testcase>
+    <testcase classname="Control Client should create a new Client instance using the Create static method" name="Control Client should create a new Client instance using the Create static method" time="0.005">
+    </testcase>
+    <testcase classname="Control Client should throw an error if the websocket fails to open during Create" name="Control Client should throw an error if the websocket fails to open during Create" time="0.041">
+    </testcase>
+    <testcase classname="Control Client should log and send a message through the websocket" name="Control Client should log and send a message through the websocket" time="0.007">
+    </testcase>
+    <testcase classname="Control Client should handle string messages in send" name="Control Client should handle string messages in send" time="0.003">
+    </testcase>
+    <testcase classname="Control Client should correctly receive and deserialise a single message" name="Control Client should correctly receive and deserialise a single message" time="0.004">
+    </testcase>
+    <testcase classname="Control Client should reconfigure the client with new logger and appConfig" name="Control Client should reconfigure the client with new logger and appConfig" time="0.004">
+    </testcase>
+    <testcase classname="Control Client should handle valid configuration notify message" name="Control Client should handle valid configuration notify message" time="0.004">
+    </testcase>
+    <testcase classname="Control Client should handle valid configuration patch message" name="Control Client should handle valid configuration patch message" time="0.009">
+    </testcase>
+    <testcase classname="Control Client should handle unsupported verb" name="Control Client should handle unsupported verb" time="0.004">
+    </testcase>
+    <testcase classname="Control Client should handle unsupported message" name="Control Client should handle unsupported message" time="0.006">
+    </testcase>
+    <testcase classname="Control Client should handle JSON parsing error" name="Control Client should handle JSON parsing error" time="0.004">
+    </testcase>
+    <testcase classname="Control Client should log a shutdown message and call close() on stop" name="Control Client should log a shutdown message and call close() on stop" time="0.003">
+    </testcase>
+    <testcase classname="Control Client should generate a PATCH message with correct structure" name="Control Client should generate a PATCH message with correct structure" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="Utils" errors="0" failures="0" skipped="0" timestamp="2025-01-24T10:37:45" time="1.351" tests="21">
+    <testcase classname="Utils createTestDb should create a test database with correct configuration" name="Utils createTestDb should create a test database with correct configuration" time="0.012">
+    </testcase>
+    <testcase classname="Utils addTransferToCache should add transfer with default values" name="Utils addTransferToCache should add transfer with default values" time="0.002">
+    </testcase>
+    <testcase classname="Utils addTransferToCache should handle error state correctly" name="Utils addTransferToCache should handle error state correctly" time="0.001">
+    </testcase>
+    <testcase classname="Utils addTransferToCache should handle pending transfers" name="Utils addTransferToCache should handle pending transfers" time="0.002">
+    </testcase>
+    <testcase classname="Utils addTransferToCache should update custom amount configurations" name="Utils addTransferToCache should update custom amount configurations" time="0.001">
+    </testcase>
+    <testcase classname="Utils addTransferToCache should handle custom timestamps" name="Utils addTransferToCache should handle custom timestamps" time="0.001">
+    </testcase>
+    <testcase classname="Database Should cache Redis records" name="Database Should cache Redis records" time="0.002">
+    </testcase>
+    <testcase classname="Cache connect should connect to Redis and handle the ready event" name="Cache connect should connect to Redis and handle the ready event" time="0.002">
+    </testcase>
+    <testcase classname="Cache connect should throw an error if already connected" name="Cache connect should throw an error if already connected" time="0.033">
+    </testcase>
+    <testcase classname="Cache disconnect should disconnect the Redis client if connected" name="Cache disconnect should disconnect the Redis client if connected" time="0.001">
+    </testcase>
+    <testcase classname="Cache disconnect should do nothing if the Redis client is not connected" name="Cache disconnect should do nothing if the Redis client is not connected" time="0">
+    </testcase>
+    <testcase classname="Cache set should set a string value in the cache" name="Cache set should set a string value in the cache" time="0.001">
+    </testcase>
+    <testcase classname="Cache set should stringify non-string values before setting them" name="Cache set should stringify non-string values before setting them" time="0.001">
+    </testcase>
+    <testcase classname="Cache set should throw an error if the client is not connected" name="Cache set should throw an error if the client is not connected" time="0.07">
+    </testcase>
+    <testcase classname="Cache get should retrieve a value from the cache" name="Cache get should retrieve a value from the cache" time="0.003">
+    </testcase>
+    <testcase classname="Cache get should throw an error if the client is not connected" name="Cache get should throw an error if the client is not connected" time="0.008">
+    </testcase>
+    <testcase classname="Cache del should delete a key from the cache" name="Cache del should delete a key from the cache" time="0.002">
+    </testcase>
+    <testcase classname="Cache del should throw an error if the client is not connected" name="Cache del should throw an error if the client is not connected" time="0.014">
+    </testcase>
+    <testcase classname="Cache keys should retrieve keys based on a pattern" name="Cache keys should retrieve keys based on a pattern" time="0.002">
+    </testcase>
+    <testcase classname="Cache keys should throw an error if the client is not connected" name="Cache keys should throw an error if the client is not connected" time="0.011">
+    </testcase>
+    <testcase classname="Cache error handling should log errors from the Redis client" name="Cache error handling should log errors from the Redis client" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="ConnectionStateMachine" errors="0" failures="0" skipped="0" timestamp="2025-01-24T10:37:45" time="1.42" tests="15">
+    <testcase classname="ConnectionStateMachine getContext should return the correct context" name="ConnectionStateMachine getContext should return the correct context" time="0.044">
+    </testcase>
+    <testcase classname="ConnectionStateMachine serve should not serve state machine inspection if disabled" name="ConnectionStateMachine serve should not serve state machine inspection if disabled" time="0.01">
+    </testcase>
+    <testcase classname="ConnectionStateMachine serve should serve state machine inspection if enabled" name="ConnectionStateMachine serve should serve state machine inspection if enabled" time="0.015">
+    </testcase>
+    <testcase classname="ConnectionStateMachine start should initialize and start the state machine" name="ConnectionStateMachine start should initialize and start the state machine" time="0.006">
+    </testcase>
+    <testcase classname="ConnectionStateMachine start should start the state machine from scratch when the version is different" name="ConnectionStateMachine start should start the state machine from scratch when the version is different" time="0.005">
+    </testcase>
+    <testcase classname="ConnectionStateMachine start should restore the state machine if previous state exists" name="ConnectionStateMachine start should restore the state machine if previous state exists" time="0.013">
+    </testcase>
+    <testcase classname="ConnectionStateMachine start should start the state machine from scratch when no previous state is found" name="ConnectionStateMachine start should start the state machine from scratch when no previous state is found" time="0.007">
+    </testcase>
+    <testcase classname="ConnectionStateMachine updateActions should remove actions with type &quot;xstate.cancel&quot;" name="ConnectionStateMachine updateActions should remove actions with type &quot;xstate.cancel&quot;" time="0.026">
+    </testcase>
+    <testcase classname="ConnectionStateMachine updateActions should add actions with type &quot;xstate.after&quot;" name="ConnectionStateMachine updateActions should add actions with type &quot;xstate.after&quot;" time="0.007">
+    </testcase>
+    <testcase classname="ConnectionStateMachine updateActions should handle &quot;xstate.invoke&quot; actions with type &quot;xstate.stop&quot;" name="ConnectionStateMachine updateActions should handle &quot;xstate.invoke&quot; actions with type &quot;xstate.stop&quot;" time="0.017">
+    </testcase>
+    <testcase classname="ConnectionStateMachine updateActions should handle &quot;xstate.invoke&quot; actions with type &quot;xstate.start&quot;" name="ConnectionStateMachine updateActions should handle &quot;xstate.invoke&quot; actions with type &quot;xstate.start&quot;" time="0.007">
+    </testcase>
+    <testcase classname="ConnectionStateMachine should log an error if setStateMachineState fails" name="ConnectionStateMachine should log an error if setStateMachineState fails" time="0.01">
+    </testcase>
+    <testcase classname="ConnectionStateMachine should handle state transitions" name="ConnectionStateMachine should handle state transitions" time="0.023">
+    </testcase>
+    <testcase classname="ConnectionStateMachine should send events to the state machine" name="ConnectionStateMachine should send events to the state machine" time="0.015">
+    </testcase>
+    <testcase classname="ConnectionStateMachine should stop the state machine" name="ConnectionStateMachine should stop the state machine" time="0.005">
+    </testcase>
+  </testsuite>
+  <testsuite name="Vault" errors="0" failures="0" skipped="0" timestamp="2025-01-24T10:37:45" time="2.164" tests="39">
+    <testcase classname="Vault constructor should initialize with the provided options" name="Vault constructor should initialize with the provided options" time="0.011">
+    </testcase>
+    <testcase classname="Vault setStateMachineState should call _setSecret with the correct arguments" name="Vault setStateMachineState should call _setSecret with the correct arguments" time="0.003">
+    </testcase>
+    <testcase classname="Vault setStateMachineState should throw an error if _setSecret fails" name="Vault setStateMachineState should throw an error if _setSecret fails" time="0.004">
+    </testcase>
+    <testcase classname="Vault getStateMachineState should call _getSecret and return the state machine state" name="Vault getStateMachineState should call _getSecret and return the state machine state" time="0.001">
+    </testcase>
+    <testcase classname="Vault getStateMachineState should throw an error if _getSecret fails" name="Vault getStateMachineState should throw an error if _getSecret fails" time="0.001">
+    </testcase>
+    <testcase classname="Vault _getSecret should retrieve secret data successfully" name="Vault _getSecret should retrieve secret data successfully" time="0.001">
+    </testcase>
+    <testcase classname="Vault _getSecret should call the client read method with the correct path" name="Vault _getSecret should call the client read method with the correct path" time="0">
+    </testcase>
+    <testcase classname="Vault _getSecret should return undefined if 404 error is thrown" name="Vault _getSecret should return undefined if 404 error is thrown" time="0.001">
+    </testcase>
+    <testcase classname="Vault _getSecret should throw an error if any other error is thrown" name="Vault _getSecret should throw an error if any other error is thrown" time="0.001">
+    </testcase>
+    <testcase classname="Vault _setSecret should call the client write method with the correct path and value" name="Vault _setSecret should call the client write method with the correct path and value" time="0.001">
+    </testcase>
+    <testcase classname="Vault _setSecret should throw an error if the key is null or undefined" name="Vault _setSecret should throw an error if the key is null or undefined" time="0.047">
+    </testcase>
+    <testcase classname="Vault _setSecret should throw an error if the client is null or undefined" name="Vault _setSecret should throw an error if the client is null or undefined" time="0.019">
+    </testcase>
+    <testcase classname="Vault _setSecret should successfully set the secret and return the result" name="Vault _setSecret should successfully set the secret and return the result" time="0.001">
+    </testcase>
+    <testcase classname="Vault _setSecret should throw an error if the client write method fails" name="Vault _setSecret should throw an error if the client write method fails" time="0.001">
+    </testcase>
+    <testcase classname="Vault mountAll should throw an error if the client is null or undefined" name="Vault mountAll should throw an error if the client is null or undefined" time="0.006">
+    </testcase>
+    <testcase classname="Vault mountAll should call client.mount with correct arguments for pki and kv mounts" name="Vault mountAll should call client.mount with correct arguments for pki and kv mounts" time="0.003">
+    </testcase>
+    <testcase classname="Vault mountAll should return a resolved promise when both mounts succeed" name="Vault mountAll should return a resolved promise when both mounts succeed" time="0.001">
+    </testcase>
+    <testcase classname="Vault mountAll should throw an error if one of the mounts fails" name="Vault mountAll should throw an error if one of the mounts fails" time="0.002">
+    </testcase>
+    <testcase classname="Vault _deleteSecret should throw an error if the client is null or undefined" name="Vault _deleteSecret should throw an error if the client is null or undefined" time="0.002">
+    </testcase>
+    <testcase classname="Vault _deleteSecret should call client.delete with the correct path" name="Vault _deleteSecret should call client.delete with the correct path" time="0.001">
+    </testcase>
+    <testcase classname="Vault _deleteSecret should throw an error if client.delete rejects" name="Vault _deleteSecret should throw an error if client.delete rejects" time="0.001">
+    </testcase>
+    <testcase classname="Vault deleteCA should throw an error if the client is null or undefined" name="Vault deleteCA should throw an error if the client is null or undefined" time="0.005">
+    </testcase>
+    <testcase classname="Vault deleteCA should call client.request with the correct parameters" name="Vault deleteCA should call client.request with the correct parameters" time="0.001">
+    </testcase>
+    <testcase classname="Vault deleteCA should throw an error if client.request rejects" name="Vault deleteCA should throw an error if client.request rejects" time="0.002">
+    </testcase>
+    <testcase classname="Vault createCA should throw an error if the client is null or undefined" name="Vault createCA should throw an error if the client is null or undefined" time="0.004">
+    </testcase>
+    <testcase classname="Vault createCA should call deleteCA before creating a new CA" name="Vault createCA should call deleteCA before creating a new CA" time="0.005">
+    </testcase>
+    <testcase classname="Vault getCA should return CA certificate when the request is successful" name="Vault getCA should return CA certificate when the request is successful" time="0.002">
+    </testcase>
+    <testcase classname="Vault getCA should throw an error if the client.request fails" name="Vault getCA should throw an error if the client.request fails" time="0.001">
+    </testcase>
+    <testcase classname="Vault createDFSPServerCert should return certificates and private key when request is successful" name="Vault createDFSPServerCert should return certificates and private key when request is successful" time="0.002">
+    </testcase>
+    <testcase classname="Vault createDFSPServerCert should throw an error if the client.request fails" name="Vault createDFSPServerCert should throw an error if the client.request fails" time="0.002">
+    </testcase>
+    <testcase classname="Vault signHubCSR should return signed certificate when request is successful" name="Vault signHubCSR should return signed certificate when request is successful" time="0.004">
+    </testcase>
+    <testcase classname="Vault signHubCSR should throw an error if the client.request fails" name="Vault signHubCSR should throw an error if the client.request fails" time="0.003">
+    </testcase>
+    <testcase classname="Vault setDFSPCaCertChain should send a request to set the DFSP CA cert chain successfully" name="Vault setDFSPCaCertChain should send a request to set the DFSP CA cert chain successfully" time="0.001">
+    </testcase>
+    <testcase classname="Vault setDFSPCaCertChain should throw an error if client.request fails" name="Vault setDFSPCaCertChain should throw an error if client.request fails" time="0.028">
+    </testcase>
+    <testcase classname="Vault getDFSPCaCertChain should send a request to get the DFSP CA cert chain successfully" name="Vault getDFSPCaCertChain should send a request to get the DFSP CA cert chain successfully" time="0.002">
+    </testcase>
+    <testcase classname="Vault getDFSPCaCertChain should throw an error if client.request fails" name="Vault getDFSPCaCertChain should throw an error if client.request fails" time="0.003">
+    </testcase>
+    <testcase classname="Vault disconnect method should clear reconnectTimer if set" name="Vault disconnect method should clear reconnectTimer if set" time="0.002">
+    </testcase>
+    <testcase classname="Vault disconnect method should not call clearTimeout if reconnectTimer is not set" name="Vault disconnect method should not call clearTimeout if reconnectTimer is not set" time="0.001">
+    </testcase>
+    <testcase classname="Vault should handle createPkiRoles" name="Vault should handle createPkiRoles" time="0.002">
+    </testcase>
+  </testsuite>
+</testsuites>
