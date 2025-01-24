@@ -43,7 +43,7 @@ const startMachine = (opts: ReturnType<typeof createMachineOpts>) => {
       },
       actions: {},
       predictableActionArguments: true, // This ensures the warning is addressed
-    },
+    }
   );
 
   const service = interpret(machine); // .onTransition((state) => console.log(state.changed, state.value));

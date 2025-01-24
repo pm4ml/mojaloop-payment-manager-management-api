@@ -157,7 +157,7 @@ class Client extends ws {
         const msg = deserialise(data);
         this._logger.push({ msg }).log('Received');
         resolve(msg);
-      }),
+      })
     );
   }
 

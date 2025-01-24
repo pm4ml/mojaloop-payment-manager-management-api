@@ -80,7 +80,7 @@ describe('ConnectionStateMachine', () => {
         }),
       });
       expect(loggerMock.log).toHaveBeenCalledWith(
-        `StateMachine introspection URL: https://stately.ai/viz?inspect&server=ws://localhost:${opts.port}`,
+        `StateMachine introspection URL: https://stately.ai/viz?inspect&server=ws://localhost:${opts.port}`
       );
     });
   });
@@ -105,7 +105,7 @@ describe('ConnectionStateMachine', () => {
       opts.vault.getStateMachineState.mockResolvedValueOnce(previousState);
       await connectionStateMachine.start();
       expect(loggerMock.log).toHaveBeenCalledWith(
-        expect.stringContaining('Starting state machine from scratch because state machine changed'),
+        expect.stringContaining('Starting state machine from scratch because state machine changed')
       );
       expect(connectionStateMachine.service.start).toHaveBeenCalled();
     });
@@ -121,12 +121,12 @@ describe('ConnectionStateMachine', () => {
       await connectionStateMachine.start();
 
       expect(loggerMock.log).toHaveBeenCalledWith(
-        expect.stringContaining('Restoring state machine from previous state'),
+        expect.stringContaining('Restoring state machine from previous state')
       );
       expect(connectionStateMachine.service.start).toHaveBeenCalledWith(
         expect.objectContaining({
           actions: expect.any(Array),
-        }),
+        })
       );
     });
 
@@ -137,7 +137,7 @@ describe('ConnectionStateMachine', () => {
       await connectionStateMachine.start();
 
       expect(loggerMock.log).toHaveBeenCalledWith(
-        expect.stringContaining('Starting state machine from scratch because no previous state found'),
+        expect.stringContaining('Starting state machine from scratch because no previous state found')
       );
       expect(connectionStateMachine.service.start).toHaveBeenCalled();
     });
