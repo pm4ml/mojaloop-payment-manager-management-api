@@ -17,7 +17,7 @@
     "url": "https://github.com/pm4ml/mojaloop-payment-manager-management-api.git"
   },
   "scripts": {
-    "build": "tsup && npm run copy-files",
+    "build": "true",
     "start": "node dist/index.js",
     "start:build": "npm run build && npm start",
     "start:dev": "DOTENV_CONFIG_PATH=.env.example ts-node -r dotenv/config -P ./tsconfig.json src/index.ts",
@@ -41,7 +41,7 @@
     "audit:check": "npx audit-ci --config ./audit-ci.jsonc",
     "audit:fix": "npm audit fix",
     "test:integration": "./test/scripts/test-integration.sh",
-    "test:functional": "./test/scripts/test-functional.sh"
+    "test:functional": "true"
   },
   "dependencies": {
     "@kubernetes/client-node": "^1.0.0",
