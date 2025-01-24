@@ -1,4 +1,4 @@
-ARG NODE_VERSION=16.15.0-alpine
+ARG NODE_VERSION=16.15.0-alpine3.15
 
 FROM node:${NODE_VERSION} AS builder
 
