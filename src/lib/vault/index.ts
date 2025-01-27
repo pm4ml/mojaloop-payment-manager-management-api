@@ -7,7 +7,7 @@
  *  ORIGINAL AUTHOR:                                                      *
  *       Yevhen Kyriukha - yevhen.kyriukha@modusbox.com                   *
  **************************************************************************/
-import NodeVault from 'node-vault';
+const NodeVault = require('node-vault');
 import { strict as assert } from 'assert';
 import SDK from '@mojaloop/sdk-standard-components';
 import forge from 'node-forge';
@@ -90,7 +90,7 @@ class Vault {
     // Safely handle logger calls
     try {
       const loggerWithContext = this.logger.push({ endpoint });
-      if (typeof loggerWithContext.log === 'function') {
+      if (typeof loggerWithContext === 'function') {
         loggerWithContext.log('Connecting to Vault');
       }
     } catch (err) {
@@ -100,20 +100,37 @@ class Vault {
     if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
 
     let creds;
-    const vault = NodeVault({ endpoint });
-    if (auth.appRole) {
-      creds = await vault.approleLogin({
-        role_id: auth.appRole.roleId,
-        secret_id: auth.appRole.roleSecretId,
-      });
-    } else if (auth.k8s) {
-      creds = await vault.kubernetesLogin({
-        role: auth.k8s.role,
-        jwt: auth.k8s.token,
-      });
-    } else {
-      throw new Error('Unsupported auth method');
+    try {
+      const vault = NodeVault({ endpoint });
+
+      // Verify vault initialization
+      if (!vault) {
+        throw new Error('Failed to initialize Vault client');
+      }
+
+      if (auth.appRole) {
+        if (typeof vault.approleLogin !== 'function') {
+          throw new Error('approleLogin method not available');
+        }
+        creds = await vault.approleLogin({
+          role_id: auth.appRole.roleId,
+          secret_id: auth.appRole.roleSecretId,
+        });
+      } else if (auth.k8s) {
+        if (typeof vault.kubernetesLogin !== 'function') {
+          throw new Error('kubernetesLogin method not available');
+        }
+        creds = await vault.kubernetesLogin({
+          role: auth.k8s.role,
+          jwt: auth.k8s.token,
+        });
+      } else {
+        throw new Error('Unsupported auth method');
+      }
+    } catch (error) {
+      throw new Error(`Vault connection failed: ${error.message}`);
     }
+
     this.client = NodeVault({
       endpoint,
       token: creds.auth.client_token,
