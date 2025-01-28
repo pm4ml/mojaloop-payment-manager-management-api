@@ -26,5 +26,5 @@ import * as words from './words.json';
 const randomEl = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
 export default (separator = '-') =>
   [randomEl(words.adjectives), randomEl(words.nouns), randomEl(words.adjectives), randomEl(words.nouns)].join(
-    separator
+    separator,
   );
