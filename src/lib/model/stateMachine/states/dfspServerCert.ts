@@ -73,7 +73,7 @@ export namespace DfspServerCert {
               retryInterval: opts.refreshIntervalSeconds * 1000,
               service: async () =>
                 opts.vault.createDFSPServerCert(
-                  (event as CreateDfspServerCertEvent).csr || opts.config.dfspServerCsrParameters,
+                  (event as CreateDfspServerCertEvent).csr || opts.config.dfspServerCsrParameters
                 ),
             }),
           onDone: {
