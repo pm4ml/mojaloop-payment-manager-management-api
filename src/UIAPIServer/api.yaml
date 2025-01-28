@@ -606,7 +606,6 @@ paths:
                 $ref: "#/components/schemas/CAInfo"
       x-swagger-router-controller: DfspCA
   /hub/ca:
-
     get:
       tags:
       - DFSP-hub-ca-configuration
