@@ -10,4 +10,4 @@ workflows:
             tags:
               only: /v\d+(\.\d+){2}(-[a-zA-Z-][0-9a-zA-Z-]*\.\d+)?/
           # optionally supply the base image for the image scan
-          base_image: node:16.15.0-alpine
+          base_image: node:16-alpine
