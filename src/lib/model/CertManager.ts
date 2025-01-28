@@ -60,7 +60,7 @@ class CertManager {
         undefined,
         undefined,
         undefined,
-        options,
+        options
       )
       .then(() => {
         this.logger.log('Server cert renewal successful');

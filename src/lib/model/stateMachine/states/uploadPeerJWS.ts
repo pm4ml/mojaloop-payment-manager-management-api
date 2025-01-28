@@ -40,7 +40,7 @@ export namespace UploadPeerJWS {
             const changes = _.differenceWith(
               peerJWS as JWS[],
               context.peerJWS!,
-              (a, b) => a.dfspId === b.dfspId && a.createdAt <= b.createdAt,
+              (a, b) => a.dfspId === b.dfspId && a.createdAt <= b.createdAt
             );
             if (changes.length === 0) {
               throw new Error('No changes detected');

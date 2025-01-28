@@ -90,7 +90,7 @@ class Vault {
     // Safely handle logger calls
     try {
       const loggerWithContext = this.logger.push({ endpoint });
-      if (typeof loggerWithContext === 'function') {
+      if (typeof loggerWithContext.log === 'function') {
         loggerWithContext.log('Connecting to Vault');
       }
     } catch (err) {
