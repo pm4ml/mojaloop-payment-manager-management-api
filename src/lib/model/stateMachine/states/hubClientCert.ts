@@ -70,7 +70,7 @@ export namespace HubCert {
                 (processedCsr) =>
                   processedCsr.csr === remoteCsr.csr &&
                   remoteCsr.certificate &&
-                  opts.vault.certIsValid(remoteCsr.certificate)
+                  opts.vault.certIsValid(remoteCsr.certificate),
               ) && {
                 cert: remoteCsr.certificate,
               }),
@@ -98,7 +98,7 @@ export namespace HubCert {
                     if (hubCert.cert) return hubCert;
                     const { certificate } = await opts.vault.signHubCSR(hubCert.csr);
                     return { ...hubCert, cert: certificate };
-                  })
+                  }),
                 ),
             }),
           onDone: { actions: assign({ hubClientCerts: (context, { data }) => data }), target: 'uploadingHubCert' },
@@ -118,8 +118,8 @@ export namespace HubCert {
                     opts.hubCertificateModel.uploadServerCertificate({
                       enId: cert.id,
                       entry: { certificate: cert.cert },
-                    })
-                  )
+                    }),
+                  ),
                 ),
             }),
           onDone: {
