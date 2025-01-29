@@ -5,6 +5,7 @@ import SDKStandardComponents from '@mojaloop/sdk-standard-components';
 const logger = new SDKStandardComponents.Logger.Logger();
 
 describe('invokeRetry', () => {
+  jest.useFakeTimers();
   const mockServiceSuccess = jest.fn(async () => 'Success');
   const mockServiceFail = jest.fn(async () => {
     throw new Error('Service Error');
