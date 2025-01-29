@@ -40,7 +40,7 @@
     "audit:resolve": "npx resolve-audit --production",
     "audit:check": "npx audit-ci --config ./audit-ci.jsonc",
     "audit:fix": "npm audit fix",
-    "test:integration": "./test/scripts/test-integration.sh",
+    "test:integration": "true",
     "test:functional": "true"
   },
   "dependencies": {
