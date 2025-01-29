@@ -700,6 +700,56 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DfspStatus'
+  /recreate/{SecurityType}:
+    post:
+      tags:
+        - recreate
+      summary: recreate client certificates / keys
+      operationId: recreate
+      parameters:
+        - name: X-User
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: SecurityType
+          in: path
+          required: true
+          description: The security type to be revoked
+          schema:
+            type: string
+            enum:
+              - outboundTLS
+              - JWS
+      requestBody:
+        description: Participant information to be created.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: "string"
+                    enum:
+                      - "SUCCESS"
+                      - "FAILED"
+        "401":
+          description: unauthorised
+        "404":
+          description: security type is not found
+        "500":
+          description: internal error
 components:
   schemas:
     Statuses:
