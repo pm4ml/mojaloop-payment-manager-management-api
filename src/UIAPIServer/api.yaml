@@ -746,10 +746,34 @@ paths:
                       - "FAILED"
         "401":
           description: unauthorised
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: "string"
+                    example: "Unauthorized"
         "404":
           description: security type is not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: "string"
+                    example: "Security Type Not Found"
         "500":
           description: internal error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: "string"
+                    example: "Internal Server Error"
 components:
   schemas:
     Statuses:
