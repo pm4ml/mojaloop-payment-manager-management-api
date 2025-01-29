@@ -7,6 +7,7 @@ import { Logger } from '@mojaloop/sdk-standard-components';
 
 jest.mock('@app/lib/randomphrase', () => () => 'random-id');
 const ControlServerEventEmitter = getInternalEventEmitter();
+ControlServerEventEmitter.setMaxListeners(20);
 describe('ControlServer', () => {
   it('exposes a valid message API', () => {
     expect(Object.keys(ControlServer.build).sort()).toEqual(Object.keys(ControlServer.MESSAGE).sort());
@@ -242,6 +243,7 @@ describe('ControlServer Events', () => {
 
   afterEach(() => {
     eventEmitter.removeAllListeners();
+    jest.restoreAllMocks();
   });
 
   test('should emit BROADCAST_CONFIG_CHANGE with the correct payload', () => {

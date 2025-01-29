@@ -4,13 +4,10 @@ module.exports = {
   moduleNameMapper: {
     '^@app/(.*)$': '<rootDir>/src/$1',
   },
-  globals: {
-    'ts-jest': {
-      isolatedModules: true
-    }
-  },
   transform: {
-    '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.test.json' }],
+    '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.test.json',
+      isolatedModules: true 
+    }],
   },
   testEnvironment: 'jest-environment-node',
 
@@ -40,7 +37,6 @@ module.exports = {
 
   transformIgnorePatterns: [
     '/node_modules/',
-// "\\.pnp\\.[^\\/]+$"
 ],
 
 };
