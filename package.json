@@ -27,7 +27,7 @@
     "test": "npm run test:unit",
     "test:unit": "jest --ci --reporters=default --reporters=jest-junit --env=node test/unit",
     "test:int": "jest --ci --reporters=default --reporters=jest-junit --env=node test/integration --forceExit",
-    "test:xunit": "jest --ci --detectOpenHandles test/unit",
+    "test:xunit": "jest --ci --detectOpenHandles --reporters=jest-junit",
     "test:coverage": "npx nyc --reporter=lcov npm run test",
     "test:coverage-check": "npm run test:coverage && nyc check-coverage",
     "release": "npx standard-version --no-verify --releaseCommitMessageFormat 'ci(release): {{currentTag}} [skip ci]'",
