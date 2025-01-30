@@ -41,7 +41,8 @@
     "audit:check": "npx audit-ci --config ./audit-ci.jsonc",
     "audit:fix": "npm audit fix",
     "test:integration": "true",
-    "test:functional": "true"
+    "test:functional": "true",
+    "test:deprecations":  "npx @mojaloop/ml-depcheck-utility check-deprecations || true"
   },
   "dependencies": {
     "@kubernetes/client-node": "^1.0.0",
