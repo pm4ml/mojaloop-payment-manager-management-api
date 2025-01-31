@@ -6,6 +6,7 @@ const logger = new SDKStandardComponents.Logger.Logger();
 
 describe('invokeRetry', () => {
   jest.useFakeTimers();
+  const retryInterval = 1000;
   const mockServiceSuccess = jest.fn(async () => 'Success');
   const mockServiceFail = jest.fn(async () => {
     throw new Error('Service Error');
@@ -25,11 +26,12 @@ describe('invokeRetry', () => {
       id: 'testService',
       service: mockServiceSuccess,
       maxRetries: 3,
-      retryInterval: 1000,
+      retryInterval,
       logger: mockLogger,
     });
 
     const service = interpret(machine).start();
+    jest.advanceTimersByTime(retryInterval);
 
     service.onTransition((state) => {
       if (state.matches('success')) {
@@ -46,11 +48,12 @@ describe('invokeRetry', () => {
       id: 'testService',
       service: mockServiceFail,
       maxRetries: 3,
-      retryInterval: 10, // Short interval for testing
+      retryInterval,
       logger: mockLogger,
     });
 
     const service = interpret(machine).start();
+    jest.advanceTimersByTime(retryInterval);
 
     service.onTransition((state) => {
       if (state.matches('error')) {
@@ -66,12 +69,11 @@ describe('invokeRetry', () => {
       id: 'testService',
       service: mockServiceFail,
       maxRetries: 1,
-      retryInterval: 10,
+      retryInterval,
       logger: mockLogger,
     });
 
     const service = interpret(machine).start();
-
     service.onTransition((state) => {
       if (state.matches('error')) {
         expect(mockLogger.push).toHaveBeenCalled();
@@ -82,7 +84,6 @@ describe('invokeRetry', () => {
   });
 
   it('should respect the retry interval between attempts', async () => {
-    const retryInterval = 50;
     const machine = invokeRetry({
       id: 'testService',
       service: mockServiceFail,
@@ -93,7 +94,7 @@ describe('invokeRetry', () => {
 
     const service = interpret(machine).start();
     const startTime = Date.now();
-
+    jest.advanceTimersByTime(retryInterval);
     service.onTransition((state) => {
       if (state.matches('error')) {
         const elapsed = Date.now() - startTime;
@@ -108,12 +109,12 @@ describe('invokeRetry', () => {
       id: 'testService',
       service: mockServiceFail,
       maxRetries: 0,
-      retryInterval: 10,
+      retryInterval,
       logger: mockLogger,
     });
 
     const service = interpret(machine).start();
-
+    jest.advanceTimersByTime(retryInterval);
     service.onTransition((state) => {
       if (state.matches('error')) {
         expect(mockServiceFail).toHaveBeenCalledTimes(1);

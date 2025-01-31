@@ -708,7 +708,6 @@ describe('Vault', () => {
 
     afterEach(() => {
       jest.useRealTimers();
-      jest.useFakeTimers();
       jest.clearAllMocks();
       jest.restoreAllMocks();
     });
@@ -730,10 +729,12 @@ describe('Vault', () => {
         },
       };
       mockVault.approleLogin.mockReturnValueOnce(Promise.resolve(mockCreds));
-
+      jest.spyOn(global, 'setTimeout');
       await vaultApploginAuthInstance.connect();
       expect(mockLogger.push).toHaveBeenCalledWith({ endpoint: mockEndpoint });
       const tokenRefreshMs = Math.min((mockCreds.auth.lease_duration - 10) * 1000, MAX_TIMEOUT);
+      expect(setTimeout).toHaveBeenCalledWith(expect.any(Function), tokenRefreshMs);
+      jest.advanceTimersByTime(1000);
       expect(mockLogger.push().log).toHaveBeenCalledWith('Connecting to Vault');
       expect(mockLogger.push().log).toHaveBeenCalledWith(`Connected to Vault  [reconnect after: ${tokenRefreshMs} ms]`);
 
