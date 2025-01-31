@@ -42,7 +42,7 @@
     "audit:fix": "npm audit fix",
     "test:integration": "true",
     "test:functional": "true",
-    "test:deprecations":  "true"
+    "test:deprecations": "true"
   },
   "dependencies": {
     "@kubernetes/client-node": "^1.0.0",
