@@ -606,7 +606,6 @@ paths:
                 $ref: "#/components/schemas/CAInfo"
       x-swagger-router-controller: DfspCA
   /hub/ca:
-
     get:
       tags:
       - DFSP-hub-ca-configuration
@@ -701,6 +700,80 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DfspStatus'
+  /recreate/{SecurityType}:
+    post:
+      tags:
+        - recreate
+      summary: recreate client certificates / keys
+      operationId: recreate
+      parameters:
+        - name: X-User
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: SecurityType
+          in: path
+          required: true
+          description: The security type to be revoked
+          schema:
+            type: string
+            enum:
+              - outboundTLS
+              - JWS
+      requestBody:
+        description: Participant information to be created.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: "string"
+                    enum:
+                      - "SUCCESS"
+                      - "FAILED"
+        "401":
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: "string"
+                    example: "Unauthorized"
+        "404":
+          description: security type is not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: "string"
+                    example: "Security Type Not Found"
+        "500":
+          description: internal error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: "string"
+                    example: "Internal Server Error"
 components:
   schemas:
     Statuses:
