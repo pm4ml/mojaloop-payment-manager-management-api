@@ -27,7 +27,7 @@ describe('RandomPhrase Generator', () => {
   const randomPhrase = require('../../../../src/lib/randomphrase').default;
   const words = require('../../../../src/lib/randomphrase/words.json');
 
-  test('should generate a phrase with 5 parts by default', () => {
+  test('should generate a phrase with 4 parts by default', () => {
     const phrase = randomPhrase();
     const parts = phrase.split('-');
     expect(parts.length).toBe(4);
