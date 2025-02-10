@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-shadow */
 const NodeVault = require('node-vault');
-const Vault = require('../../../src/lib/vault/index');
+const Vault = require('../../../src/lib/vault/index').default;
 const MAX_TIMEOUT = Math.pow(2, 31) / 2 - 1;
 import { AssertionError } from 'assert';
 
