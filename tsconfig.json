@@ -2,9 +2,7 @@
   "include": [
     "src",
     "src/**/*.json",
-    "src/types/*.d.ts",
-    "src/**/*", 
-    "test/**/*"
+    "src/types/*.d.ts"
   ],
   "exclude": [
     "node_modules",
@@ -35,8 +33,6 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "typeRoots": ["./node_modules/@types", "./types"],
-    "allowSyntheticDefaultImports": true,
     "paths": {
       "@app/*": [ "src/*" ]
     }

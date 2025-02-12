@@ -12,10 +12,8 @@ module.exports = {
   },
   plugins: ['@typescript-eslint', 'prettier', 'import'],
   rules: {
-    "no-unused-vars": "warn",
     'prettier/prettier': 'error',
     'import/prefer-default-export': 'off',
-    "@typescript-eslint/no-explicit-any": "off",
     '@typescript-eslint/lines-between-class-members': 'off'
   },
 };

@@ -102,7 +102,7 @@ declare module '@mojaloop/central-services-error-handling' {
     error: Record<string, unknown>,
     apiErrorCode?: FSPIOPErrorCode,
     replyTo?: string,
-    extensions?: Record<string, unknown>,
+    extensions?: Record<string, unknown>
   ): FSPIOPError;
 
   export function CreateFSPIOPError(
@@ -111,7 +111,7 @@ declare module '@mojaloop/central-services-error-handling' {
     cause?: Record<string, unknown>,
     replyTo?: string,
     extensions?: Record<string, unknown>,
-    useDescriptionAsMessage?: boolean,
+    useDescriptionAsMessage?: boolean
   ): FSPIOPError;
 }
 declare module '@mojaloop/central-services-shared' {
@@ -276,7 +276,7 @@ declare module '@mojaloop/central-services-shared' {
       switchUrl: string,
       fsp: string,
       endpointType: FspEndpointTypesEnum,
-      options?: { [id: string]: string | number | boolean },
+      options?: { [id: string]: string | number | boolean }
     ): Promise<string>;
 
     public initializeCache(policyOptions: Record<string, unknown>): Promise<boolean>;
@@ -299,7 +299,7 @@ declare module '@mojaloop/central-services-shared' {
       payload?: Record<string, unknown>,
       responseType?: string,
       span?: SpawnSyncOptions,
-      jwsSigner?: any,
+      jwsSigner?: any
     ): Promise<any>;
   }
 
@@ -313,7 +313,7 @@ declare module '@mojaloop/central-services-shared' {
         definitionPath: string,
         handlers: { [handler: string]: Handler },
         ajvOpts?: any,
-        regexFlags?: string,
+        regexFlags?: string
       ): Promise<OpenAPIBackend>;
 
       validationFail(context: Context): void;

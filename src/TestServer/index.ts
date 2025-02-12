@@ -30,11 +30,7 @@ interface TestServerOptions {
 }
 
 class TestServer {
-  private constructor(
-    private server: http.Server,
-    private logger: Logger.Logger,
-    private port: number,
-  ) {}
+  private constructor(private server: http.Server, private logger: Logger.Logger, private port: number) {}
 
   static async create(opts: TestServerOptions) {
     const api = new Koa();

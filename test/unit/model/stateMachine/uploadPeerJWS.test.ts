@@ -29,8 +29,7 @@ const startMachine = (opts: ReturnType<typeof createMachineOpts>) => {
     {
       guards: {},
       actions: {},
-      predictableActionArguments: true, // Add this option
-    },
+    }
   );
 
   const service = interpret(machine); // .onTransition((state) => console.log(state.changed, state.value));
@@ -45,6 +44,7 @@ describe('UploadPeerJWS', () => {
   const testfsp1JWS = { dfspId: 'testfsp1', publicKey: 'TEST KEY 1', createdAt };
   const testfsp2JWS = { dfspId: 'testfsp2', publicKey: 'TEST KEY 2', createdAt };
   const testfsp3JWS = { dfspId: 'testfsp3', publicKey: 'TEST KEY 3', createdAt };
+  const testfsp4JWS = { dfspId: 'testfsp4', publicKey: 'TEST KEY 4', createdAt };
   let service: ReturnType<typeof startMachine>;
 
   beforeAll(() => {
@@ -63,7 +63,7 @@ describe('UploadPeerJWS', () => {
   test('should call uploadExternalDfspJWS on event', async () => {
     const sampleData = [testfsp1JWS, testfsp2JWS];
     opts.dfspCertificateModel.uploadExternalDfspJWS.mockImplementation(async () => true);
-    service.send({ type: 'UPLOAD_PEER_JWS', data: sampleData });
+    service.send({ type: 'UPLOAD_PEER_JWS' , data: sampleData });
     await waitFor(service, (state) => state.matches('uploadingPeerJWS.comparePeerJWS'));
     await waitFor(service, (state) => state.matches('uploadingPeerJWS.uploadingPeerJWS'));
     await waitFor(service, (state) => state.matches('uploadingPeerJWS.idle'));
@@ -77,7 +77,7 @@ describe('UploadPeerJWS', () => {
   test('should call uploadExternalDfspJWS with only changed certs', async () => {
     const sampleData = [testfsp1JWS, testfsp2JWS, testfsp3JWS];
     opts.dfspCertificateModel.uploadExternalDfspJWS.mockImplementation(async () => true);
-    service.send({ type: 'UPLOAD_PEER_JWS', data: sampleData });
+    service.send({ type: 'UPLOAD_PEER_JWS' , data: sampleData });
     await waitFor(service, (state) => state.matches('uploadingPeerJWS.comparePeerJWS'));
     await waitFor(service, (state) => state.matches('uploadingPeerJWS.uploadingPeerJWS'));
     await waitFor(service, (state) => state.matches('uploadingPeerJWS.idle'));
@@ -96,10 +96,10 @@ describe('UploadPeerJWS', () => {
         ...testfsp3JWS,
         createdAt: createdAt - 1,
         publicKey: 'TEST KEY 3 OLD',
-      },
+      }
     ];
     opts.dfspCertificateModel.uploadExternalDfspJWS.mockImplementation(async () => true);
-    service.send({ type: 'UPLOAD_PEER_JWS', data: sampleData });
+    service.send({ type: 'UPLOAD_PEER_JWS' , data: sampleData });
     await waitFor(service, (state) => state.matches('uploadingPeerJWS.comparePeerJWS'));
     await waitFor(service, (state) => state.matches('uploadingPeerJWS.idle'));
     expect(opts.dfspCertificateModel.uploadExternalDfspJWS).not.toHaveBeenCalled();
@@ -127,4 +127,5 @@ describe('UploadPeerJWS', () => {
   test('Stop state machine', async () => {
     service.stop();
   });
+
 });

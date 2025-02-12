@@ -36,7 +36,7 @@ export const createMetricsServer = ({ port, config, logger }: MetricsOptions): M
         res.end('Not Found');
       }
     }),
-    1000,
+    1000
   );
 
   return {
