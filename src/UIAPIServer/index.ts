@@ -34,7 +34,11 @@ interface UIAPIServerOptions {
 }
 
 class UIAPIServer {
-  private constructor(private server: http.Server, private logger: Logger.Logger, private port: number) {}
+  private constructor(
+    private server: http.Server,
+    private logger: Logger.Logger,
+    private port: number,
+  ) {}
 
   static async create(opts: UIAPIServerOptions) {
     const api = new Koa();

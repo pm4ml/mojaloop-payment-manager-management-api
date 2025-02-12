@@ -30,7 +30,8 @@ const startMachine = (opts: ReturnType<typeof createMachineOpts>, onConfigChange
     {
       guards: {},
       actions: {},
-    }
+      predictableActionArguments: true,
+    },
   );
 
   const service = interpret(machine); // .onTransition((state) => console.log(state.changed, state.value));
@@ -60,7 +61,11 @@ describe('DfspJWS', () => {
 
     // recreate JWS
     const createdAt = Math.floor(Date.now() / 1000);
-    opts.vault.createJWS.mockImplementation(() => ({ publicKey: 'JWS PUBKEY NEW', privateKey: 'JWS PRIVKEY NEW', createdAt }));
+    opts.vault.createJWS.mockImplementation(() => ({
+      publicKey: 'JWS PUBKEY NEW',
+      privateKey: 'JWS PRIVKEY NEW',
+      createdAt,
+    }));
     service.send({ type: 'CREATE_JWS' });
     await waitFor(service, (state) => state.matches('creatingJWS.idle'));
     expect(opts.vault.createJWS).toHaveBeenCalledTimes(2);

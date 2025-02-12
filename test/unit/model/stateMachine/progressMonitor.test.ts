@@ -20,7 +20,18 @@ const startMachine = (opts: ReturnType<typeof createMachineOpts>) => {
   const machine = createMachine<Context, Event>(
     {
       id: 'testMachine',
-      context: {},
+      context: {
+        progressMonitor: {
+          PEER_JWS: false,
+          DFSP_JWS: false,
+          DFSP_CA: false,
+          DFSP_SERVER_CERT: false,
+          DFSP_CLIENT_CERT: false,
+          HUB_CA: false,
+          HUB_CERT: false,
+          ENDPOINT_CONFIG: false,
+        },
+      },
       type: 'parallel',
       states: {
         progressMonitor: ProgressMonitor.createState<Context>(opts),
@@ -31,7 +42,8 @@ const startMachine = (opts: ReturnType<typeof createMachineOpts>) => {
         ...ProgressMonitor.createGuards<Context>(),
       },
       actions: {},
-    }
+      predictableActionArguments: true, // This ensures the warning is addressed
+    },
   );
 
   const service = interpret(machine); // .onTransition((state) => console.log(state.changed, state.value));
@@ -62,6 +74,68 @@ describe('ProgressMonitor', () => {
     service.send('ENDPOINT_CONFIG_PROPAGATED');
 
     await waitFor(service, (state) => state.matches('progressMonitor.notifyingCompleted'));
+
+    service.stop();
+  });
+
+  test('should handle partial progress updates', async () => {
+    const service = startMachine(opts);
+
+    await waitFor(service, (state) => state.matches('progressMonitor.idle'));
+
+    service.send('NEW_HUB_CA_FETCHED');
+    service.send('DFSP_CA_PROPAGATED');
+
+    // Verify partial updates are recorded but not all flags are set
+    expect(service.state.context.progressMonitor?.HUB_CA).toBe(true);
+    expect(service.state.context.progressMonitor?.DFSP_CA).toBe(true);
+    expect(service.state.context.progressMonitor?.PEER_JWS).toBe(false);
+    expect(service.state.context.progressMonitor?.DFSP_JWS).toBe(false);
+
+    service.stop();
+  });
+
+  test('should maintain progress state between updates', async () => {
+    const service = startMachine(opts);
+
+    await waitFor(service, (state) => state.matches('progressMonitor.idle'));
+
+    service.send('NEW_HUB_CA_FETCHED');
+    expect(service.state.context.progressMonitor?.HUB_CA).toBe(true);
+
+    service.send('DFSP_CA_PROPAGATED');
+    expect(service.state.context.progressMonitor?.DFSP_CA).toBe(true);
+    expect(service.state.context.progressMonitor?.HUB_CA).toBe(true);
+
+    service.stop();
+  });
+
+  test('should initialize with all progress flags false', async () => {
+    const service = startMachine(opts);
+
+    await waitFor(service, (state) => state.matches('progressMonitor.idle'));
+
+    expect(service.state.context.progressMonitor).toEqual({
+      PEER_JWS: false,
+      DFSP_JWS: false,
+      DFSP_CA: false,
+      DFSP_SERVER_CERT: false,
+      DFSP_CLIENT_CERT: false,
+      HUB_CA: false,
+      HUB_CERT: false,
+      ENDPOINT_CONFIG: false,
+    });
+
+    service.stop();
+  });
+
+  test('should transition back to idle after handling progress change', async () => {
+    const service = startMachine(opts);
+
+    await waitFor(service, (state) => state.matches('progressMonitor.idle'));
+
+    service.send('NEW_HUB_CA_FETCHED');
+    await waitFor(service, (state) => state.matches('progressMonitor.idle'));
 
     service.stop();
   });

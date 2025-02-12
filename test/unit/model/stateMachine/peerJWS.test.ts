@@ -21,6 +21,7 @@ const startMachine = (opts: ReturnType<typeof createMachineOpts>, onConfigChange
     {
       id: 'testMachine',
       context: {},
+      predictableActionArguments: true, // Add this line
       type: 'parallel',
       states: {
         pullingPeerJWS: PeerJWS.createState<Context>(opts),
@@ -32,7 +33,7 @@ const startMachine = (opts: ReturnType<typeof createMachineOpts>, onConfigChange
         ...PeerJWS.createGuards<Context>(),
       },
       actions: {},
-    }
+    },
   );
 
   const service = interpret(machine); // .onTransition((state) => console.log(state.changed, state.value));
@@ -59,10 +60,7 @@ describe('PeerJWS', () => {
   });
 
   test('Start the state machine', async () => {
-    opts.dfspCertificateModel.getAllJWSCertificates.mockImplementation(async () => [
-      testfsp1JWS,
-      testfsp2JWS,
-    ]);
+    opts.dfspCertificateModel.getAllJWSCertificates.mockImplementation(async () => [testfsp1JWS, testfsp2JWS]);
     opts.ControlServer.notifyPeerJWS.mockImplementation(async () => {});
 
     opts.refreshIntervalSeconds = 1;
@@ -70,25 +68,18 @@ describe('PeerJWS', () => {
     await waitFor(service, (state) => state.matches('pullingPeerJWS.retry'));
 
     expect(opts.dfspCertificateModel.getAllJWSCertificates).toHaveBeenCalled();
-    expect(opts.ControlServer.notifyPeerJWS).toHaveBeenCalledWith([
-      testfsp1JWS,
-      testfsp2JWS,
-    ]);
+    expect(opts.ControlServer.notifyPeerJWS).toHaveBeenCalledWith([testfsp1JWS, testfsp2JWS]);
 
     expect(configUpdate).toHaveBeenCalledWith({
       peerJWSKeys: {
         [testfsp1JWS.dfspId]: testfsp1JWS.publicKey,
-        [testfsp2JWS.dfspId]: testfsp2JWS.publicKey
-      }
+        [testfsp2JWS.dfspId]: testfsp2JWS.publicKey,
+      },
     });
-
   });
 
   test('should not notify if there are no changes', async () => {
-    opts.dfspCertificateModel.getAllJWSCertificates.mockImplementation(async () => [
-      testfsp1JWS,
-      testfsp2JWS,
-    ]);
+    opts.dfspCertificateModel.getAllJWSCertificates.mockImplementation(async () => [testfsp1JWS, testfsp2JWS]);
     opts.ControlServer.notifyPeerJWS.mockImplementation(async () => {});
     // No changes
     await waitFor(service, (state) => state.matches('pullingPeerJWS.fetchingPeerJWS'));
@@ -116,8 +107,8 @@ describe('PeerJWS', () => {
         [testfsp1JWS.dfspId]: testfsp1JWS.publicKey,
         [testfsp2JWS.dfspId]: testfsp2JWS.publicKey,
         [testfsp3JWS.dfspId]: testfsp3JWS.publicKey,
-        [testfsp4JWS.dfspId]: testfsp4JWS.publicKey
-      }
+        [testfsp4JWS.dfspId]: testfsp4JWS.publicKey,
+      },
     });
   });
 
@@ -147,12 +138,12 @@ describe('PeerJWS', () => {
       ...testfsp3JWS,
       publicKey: 'TEST KEY 3 UPDATED',
       createdAt: createdAtUpdated,
-    }
+    };
     const testfsp4JWSUpdated = {
       ...testfsp4JWS,
       publicKey: 'TEST KEY 4 UPDATED',
       createdAt: createdAtUpdated,
-    }
+    };
     opts.dfspCertificateModel.getAllJWSCertificates.mockImplementation(async () => [
       testfsp1JWS,
       testfsp2JWS,
@@ -169,8 +160,8 @@ describe('PeerJWS', () => {
         [testfsp1JWS.dfspId]: testfsp1JWS.publicKey,
         [testfsp2JWS.dfspId]: testfsp2JWS.publicKey,
         [testfsp3JWSUpdated.dfspId]: testfsp3JWSUpdated.publicKey,
-        [testfsp4JWSUpdated.dfspId]: testfsp4JWSUpdated.publicKey
-      }
+        [testfsp4JWSUpdated.dfspId]: testfsp4JWSUpdated.publicKey,
+      },
     });
   });
 
@@ -183,5 +174,4 @@ describe('PeerJWS', () => {
 
     service.stop();
   });
-
 });

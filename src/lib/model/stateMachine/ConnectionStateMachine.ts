@@ -158,7 +158,7 @@ class ConnectionStateMachine {
         server: new WebSocket.Server({ port }),
       });
       this.opts.logger.log(
-        `StateMachine introspection URL: https://stately.ai/viz?inspect&server=ws://localhost:${port}`
+        `StateMachine introspection URL: https://stately.ai/viz?inspect&server=ws://localhost:${port}`,
       );
     }
   }
@@ -198,7 +198,7 @@ class ConnectionStateMachine {
         actions: {
           // ...ConnectorConfig.createActions<Context>(),
         },
-      }
+      },
     );
   }
 

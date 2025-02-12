@@ -118,7 +118,6 @@ class Vault {
 
     this.logger.log(`Connected to Vault  [reconnect after: ${tokenRefreshMs} ms]`);
   }
-
   disconnect() {
     if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
   }
@@ -344,4 +343,5 @@ class Vault {
   }
 }
 
+// module.exports = Vault;
 export default Vault;

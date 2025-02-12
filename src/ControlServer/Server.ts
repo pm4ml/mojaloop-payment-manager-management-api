@@ -231,10 +231,10 @@ class Server extends ws.Server {
    */
   registerInternalEvents() {
     ControlServerEventEmitter.on(INTERNAL_EVENTS.SERVER.BROADCAST_CONFIG_CHANGE, (params) =>
-      this.broadcastConfigChange(params)
+      this.broadcastConfigChange(params),
     );
     ControlServerEventEmitter.on(INTERNAL_EVENTS.SERVER.BROADCAST_PEER_JWS_CHANGE, (params) =>
-      this.broadcastPeerJWS(params)
+      this.broadcastPeerJWS(params),
     );
   }
 

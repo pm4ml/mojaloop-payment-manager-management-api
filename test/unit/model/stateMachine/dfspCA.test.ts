@@ -29,7 +29,8 @@ const startMachine = (opts: ReturnType<typeof createMachineOpts>) => {
     {
       guards: {},
       actions: {},
-    }
+      predictableActionArguments: true,
+    },
   );
 
   const service = interpret(machine); // .onTransition((state) => console.log(state.changed, state.value));
@@ -105,6 +106,56 @@ describe('DfspCA', () => {
     expect(opts.dfspCertificateModel.uploadDFSPCA).toHaveBeenLastCalledWith({
       rootCertificate: 'ROOT CA',
       intermediateChain: 'CA CHAIN',
+    });
+
+    service.stop();
+  });
+
+  test('should handle failed CA creation', async () => {
+    opts.vault.getCA.mockImplementation(async () => {
+      throw new Error('CA creation failed');
+    });
+    const service = startMachine(opts);
+
+    await waitFor(service, (state) => state.matches('creatingDFSPCA.gettingPrebuiltCA'));
+
+    expect(opts.vault.getCA).toHaveBeenCalled();
+    expect(opts.dfspCertificateModel.uploadDFSPCA).not.toHaveBeenCalled();
+
+    service.stop();
+  });
+
+  test('should handle failed CA upload', async () => {
+    opts.vault.getCA.mockImplementation(async () => 'MOCK CA');
+    opts.dfspCertificateModel.uploadDFSPCA.mockImplementation(async () => {
+      throw new Error('Upload failed');
+    });
+
+    const service = startMachine(opts);
+
+    await waitFor(service, (state) => state.matches('creatingDFSPCA.uploadingToHub'));
+
+    expect(opts.vault.getCA).toHaveBeenCalled();
+    expect(opts.dfspCertificateModel.uploadDFSPCA).toHaveBeenCalledWith({
+      rootCertificate: 'MOCK CA',
+    });
+
+    service.stop();
+  });
+
+  test('should handle empty intermediate chain in external CA', async () => {
+    opts.vault.getCA.mockImplementation(async () => 'MOCK CA');
+    const service = startMachine(opts);
+
+    await waitFor(service, (state) => state.matches('creatingDFSPCA.idle'));
+
+    service.send({ type: 'CREATE_EXT_CA', rootCert: 'ROOT CA', intermediateChain: '', privateKey: 'PKEY' });
+
+    await waitFor(service, (state) => state.matches('creatingDFSPCA.idle'));
+    expect(opts.vault.setDFSPCaCertChain).toHaveBeenCalledWith('ROOT CA\n', 'PKEY');
+    expect(opts.dfspCertificateModel.uploadDFSPCA).toHaveBeenLastCalledWith({
+      rootCertificate: 'ROOT CA',
+      intermediateChain: '',
     });
 
     service.stop();

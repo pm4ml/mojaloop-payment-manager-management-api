@@ -10,6 +10,9 @@
 
 const redisMock = require('redis-mock');
 const { promisify } = require('util');
+const { EventEmitter } = require('events');
+EventEmitter.defaultMaxListeners = 45;
+
 
 // redis-mock currently ignores callback arguments, the following class fixes that
 class RedisClient extends redisMock.RedisClient {
