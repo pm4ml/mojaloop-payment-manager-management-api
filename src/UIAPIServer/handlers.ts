@@ -14,6 +14,10 @@ const healthCheck = async (ctx) => {
   ctx.body = { status: 'ok' };
 };
 
+const getStates = async (ctx) => {
+  ctx.body = { status: 'ok' };
+};
+
 const revokeDfspClientCSR = async (ctx) => {
   const { dfspId } = ctx.params;
   ctx.body = {
@@ -249,6 +253,9 @@ const generateDfspServerCerts = async (ctx) => {
 export const createHandlers = () => ({
   '/health': {
     get: healthCheck,
+  },
+  '/states': {
+    get: getStates,
   },
   '/dfsp/ca/revoke/{dfspId}': {
     post: revokeDfspClientCSR,
