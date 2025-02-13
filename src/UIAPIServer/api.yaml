@@ -861,7 +861,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StateObject"
+                $ref: "#/components/schemas/State"
       x-swagger-router-controller: DfspCA
   /dfsp/ca/recreate/{dfspId}:
     parameters:
@@ -882,7 +882,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StateObject"
+                $ref: "#/components/schemas/State"
       x-swagger-router-controller: DfspCA
   /dfsp/servercerts/revoke/{dfspId}:
     parameters:
@@ -903,7 +903,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StateObject"
+                $ref: "#/components/schemas/State"
       x-swagger-router-controller: DfspServerCerts
   /dfsp/servercerts/recreate/{dfspId}:
     parameters:
@@ -924,7 +924,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StateObject"
+                $ref: "#/components/schemas/State"
       x-swagger-router-controller: DfspServerCerts
   /dfsp/jwscerts/revoke/{dfspId}:
     parameters:
@@ -945,7 +945,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/StateObject"
+                $ref: "#/components/schemas/State"
       x-swagger-router-controller: DfspJWS
   /dfsp/jwscerts/recreate/{dfspId}:
     parameters:
@@ -966,7 +966,7 @@ paths:
           content:
             application/json:
               schema:
-                  $ref: "#/components/schemas/StateObject"
+                  $ref: "#/components/schemas/State"
       x-swagger-router-controller: DfspJWS
 
 components:
@@ -2242,24 +2242,6 @@ components:
         monetaryZoneId: "EUR"
         name: "Euro"
     State:
-      title: State
-      type: object
-      properties:
-        status:
-          type: string
-          description: Indicates the current status of the state.
-          enum:
-            - pending
-            - inProgress
-            - completed
-            - inError
-        stateDescription:
-          type: string
-          description: Describes the current state.
-        errorDescription:
-          type: string
-          description: Provides details in case of an error.
-    StateObject:
       title: State
       type: object
       properties:
