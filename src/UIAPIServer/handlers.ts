@@ -15,7 +15,7 @@ const healthCheck = async (ctx) => {
 };
 
 const getStates = async (ctx) => {
-  ctx.body = { status: 'ok' };
+  ctx.body = ctx.state.stateMachine.getState();
 };
 
 const revokeDfspClientCSR = async (ctx) => {
