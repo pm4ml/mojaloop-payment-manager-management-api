@@ -19,12 +19,12 @@ import {
   HubEndpointModel,
 } from '@pm4ml/mcm-client';
 
-import Vault from './lib/vault';
+import Vault from '@pm4ml/mcm-client';
 import config from './config';
-import { ConnectionStateMachine } from './lib/model';
+import { ConnectionStateMachine } from '@pm4ml/mcm-client';
 import { createMemoryCache } from './lib/cacheDatabase';
 import TestServer from './TestServer';
-import * as ControlServer from './ControlServer';
+import { ControlServer } from '@pm4ml/mcm-client';
 import UIAPIServer from './UIAPIServer';
 import CertManager from './lib/model/CertManager';
 import { createMetricsServer, MetricsServer } from './lib/metrics';
