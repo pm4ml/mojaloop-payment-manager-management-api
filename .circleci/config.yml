@@ -172,8 +172,7 @@ jobs:
       - image: jdrouet/docker-with-buildx:stable
     steps:
       - checkout
-      - setup_remote_docker:
-          version: 18.09.3
+      - setup_remote_docker
       - run: docker login -u "$DOCKER_USER" -p "$DOCKER_PASSWORD"
       - run: |
           export IMAGE_TAG=$(echo $CIRCLE_TAG | tr -d v)
