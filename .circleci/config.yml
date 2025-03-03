@@ -177,7 +177,7 @@ jobs:
       - run: |
           export IMAGE_TAG=$(echo $CIRCLE_TAG | tr -d v)
           echo "tag is $IMAGE_TAG"
-          docker buildx create --use --platform=linux/arm/v7,linux/arm64/v8,linux/amd64 --name multi-platform-builder
+          docker buildx create --use --platform=linux/arm/v7,linux/arm64/v8,linux/amd64 --name multi-platform-builder \
           docker buildx build --push \
             --platform linux/arm/v7,linux/arm64/v8,linux/amd64 \
             --tag $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME:$IMAGE_TAG .
