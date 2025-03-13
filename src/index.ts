@@ -17,14 +17,14 @@ import {
   DFSPEndpointModel,
   HubCertificateModel, // with getHubJWSCertificate() method
   HubEndpointModel,
+  Vault,
+  ConnectionStateMachine,
+  ControlServer,
 } from '@pm4ml/mcm-client';
 
-import Vault from './lib/vault';
 import config from './config';
-import { ConnectionStateMachine } from './lib/model';
 import { createMemoryCache } from './lib/cacheDatabase';
 import TestServer from './TestServer';
-import * as ControlServer from './ControlServer';
 import UIAPIServer from './UIAPIServer';
 import CertManager from './lib/model/CertManager';
 import { createMetricsServer, MetricsServer } from './lib/metrics';

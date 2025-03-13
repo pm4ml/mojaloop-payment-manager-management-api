@@ -18,10 +18,10 @@ import assert from 'assert';
 
 import { Logger } from '@mojaloop/sdk-standard-components';
 
-import Vault from '../lib/vault';
+import Vault from '@pm4ml/mcm-client';
 import { MemoryCache } from '../lib/cacheDatabase';
 import { IConfig } from '../config';
-import { ConnectionStateMachine } from '../lib/model';
+import { ConnectionStateMachine } from '@pm4ml/mcm-client';
 import { createHandlers } from './handlers';
 import middlewares from './middlewares';
 

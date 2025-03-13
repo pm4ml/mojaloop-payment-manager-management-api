@@ -20,7 +20,7 @@ import { Logger } from '@mojaloop/sdk-standard-components';
 
 import middlewares from '../UIAPIServer/middlewares';
 import { IConfig } from '../config';
-import { ConnectionStateMachine } from '../lib/model';
+import { ConnectionStateMachine } from '@pm4ml/mcm-client';
 import { createHandlers } from './handlers';
 
 interface TestServerOptions {
