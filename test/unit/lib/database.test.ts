@@ -13,7 +13,7 @@ jest.mock('redis');
 import { addTransferToCache, createTestDb } from './utils';
 import * as redis from 'redis';
 import 'jest';
-import { Logger } from '@mojaloop/sdk-standard-components';
+import SDK, { Logger } from '@mojaloop/sdk-standard-components';
 import * as CacheDatabase from '../../../src/lib/cacheDatabase';
 import Cache from '../../../src/lib/cacheDatabase/cache';
 
@@ -252,9 +252,14 @@ describe('Cache', () => {
 
   describe('connect', () => {
     it('should connect to Redis and handle the ready event', async () => {
-      mockRedisClient.on.mockImplementation((event, callback) => {
-        if (event === 'ready') callback();
-      });
+      (mockRedisClient.on as jest.MockedFunction<typeof mockRedisClient.on>).mockImplementation(
+        (event: string | symbol, callback: (...args: any[]) => void) => {
+          if (event === 'ready') {
+            callback();
+          }
+          return mockRedisClient as any;
+        },
+      );
 
       await cache.connect();
 
@@ -322,7 +327,7 @@ describe('Cache', () => {
 
   describe('del', () => {
     it('should delete a key from the cache', async () => {
-      mockRedisClient.del.mockResolvedValue(1);
+      (mockRedisClient.del as jest.Mock).mockResolvedValue(1);
       await cache.connect();
 
       const result = await cache.del('testKey');
@@ -337,7 +342,7 @@ describe('Cache', () => {
 
   describe('keys', () => {
     it('should retrieve keys based on a pattern', async () => {
-      mockRedisClient.keys.mockResolvedValue(['key1', 'key2']);
+      (mockRedisClient.keys as jest.Mock).mockResolvedValue(['key1', 'key2']);
       await cache.connect();
 
       const keys = await cache.keys('test*');
@@ -352,7 +357,7 @@ describe('Cache', () => {
 
   describe('error handling', () => {
     it('should log errors from the Redis client', async () => {
-      mockRedisClient.on.mockImplementation((event, callback) => {
+      (mockRedisClient.on as jest.Mock).mockImplementation((event, callback) => {
         if (event === 'error') callback(new Error('Test Redis Error'));
       });
 
