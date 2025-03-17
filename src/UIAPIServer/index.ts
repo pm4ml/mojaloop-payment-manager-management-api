@@ -11,6 +11,8 @@
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';
 import { oas } from 'koa-oas3';
+import cors from '@koa/cors';
+
 
 import http from 'http';
 import path from 'path';
@@ -59,6 +61,11 @@ class UIAPIServer {
       };
       await next();
     });
+
+    if(opts.config.enableCors) {
+      api.use(cors({ credentials: true }));
+    }
+
     api.use(middlewares.createErrorHandler());
     api.use(middlewares.createLogger(logger));
     api.use(bodyParser());
