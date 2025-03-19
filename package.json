@@ -45,6 +45,10 @@
     "test:functional": "true",
     "test:deprecations": "true"
   },
+  "scriptDescriptions": {
+    "test:integration": "Returns true as integration tests are not fully implemented yet",
+    "test:functional": "Returns true as functional tests are not fully implemented yet"
+  },
   "dependencies": {
     "@kubernetes/client-node": "^1.0.0",
     "@mojaloop/api-snippets": "^17.7.9",

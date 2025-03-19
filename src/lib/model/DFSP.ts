@@ -29,21 +29,6 @@ class DFSP {
     this._mcmDFSPConfigModel.dfspId = dfspId;
   }
 
-  // constructor(opts) {
-  //   this._logger = opts.logger;
-  //   this._dfspId = opts.dfspId;
-  //   this._mcmDFSPConfigModel = new DFSPConfigModel({
-  //     dfspId: opts.dfspId,
-  //     logger: opts.logger,
-  //     hubEndpoint: opts.mcmServerEndpoint,
-  //   });
-  //   this._endpointModel = new DFSPEndpointModel({
-  //     dfspId: opts.dfspId,
-  //     logger: opts.logger,
-  //     hubEndpoint: opts.mcmServerEndpoint,
-  //   });
-  // }
-
   static _convertToApiFormat(dfsp) {
     return {
       id: dfsp.dfsp_id,
