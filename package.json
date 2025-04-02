@@ -1,6 +1,6 @@
 {
   "name": "mojaloop-payment-manager-management-api-service",
-  "version": "6.4.0",
+  "version": "6.5.0",
   "private": true,
   "description": "Mojaloop Payment Manager - Management API Service",
   "main": "dist/index.js",
@@ -50,7 +50,7 @@
     "test:functional": "Returns true as functional tests are not fully implemented yet"
   },
   "dependencies": {
-    "@kubernetes/client-node": "^1.0.0",
+    "@kubernetes/client-node": "^0.16.2",
     "@mojaloop/api-snippets": "^17.7.9",
     "@mojaloop/central-services-metrics": "12.4.3",
     "@mojaloop/sdk-standard-components": "^19.0.0",
