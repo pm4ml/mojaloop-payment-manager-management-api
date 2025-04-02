@@ -90,3 +90,20 @@ junit.xml
 
 **/role-id
 **/secret-id
+
+# Test coverage
+coverage/
+
+# Test reports
+reports/
+reports/*.xml
+
+src/junit.xml
+junit.xml
+audit/results/
+.nyc_output/
+.vscode/
+
+# Test results
+test/results/
+test/results/*.xml
