@@ -120,7 +120,7 @@ const LOG_ID = {
       db,
       stateMachine,
       port: config.inboundPort,
-      controlServer
+      controlServer,
     });
     await uiApiServer.start();
   }
