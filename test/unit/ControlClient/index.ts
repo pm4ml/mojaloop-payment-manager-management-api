@@ -157,7 +157,7 @@ class Client extends ws {
         const msg = deserialise(data);
         this._logger.push({ msg }).log('Received');
         resolve(msg);
-      })
+      }),
     );
   }
 
@@ -186,12 +186,14 @@ class Client extends ws {
     } catch (err) {
       this._logger.push({ data }).log("Couldn't parse received message");
       this.send(build.ERROR.NOTIFY.JSON_PARSE_ERROR());
+      return new Error("Couldn't parse received message");
     }
     this._logger.push({ msg }).log('Handling received message');
     switch (msg.msg) {
       case MESSAGE.CONFIGURATION:
         switch (msg.verb) {
           case VERB.NOTIFY:
+            break;
           case VERB.PATCH: {
             const dup = JSON.parse(JSON.stringify(this._appConfig)); // fast-json-patch explicitly mutates
             jsonPatch.applyPatch(dup, msg.data);
@@ -211,11 +213,12 @@ class Client extends ws {
   }
 }
 
-export default {
+module.exports = {
   Client,
   build,
   MESSAGE,
   VERB,
   ERROR,
   EVENT,
+  buildPatchConfiguration,
 };
