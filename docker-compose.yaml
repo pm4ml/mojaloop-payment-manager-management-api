@@ -37,7 +37,7 @@ services:
       - REDIS_TLS_ENABLED=no
 
   vault-dev:
-    image: vault:1.2.1
+    image: hashicorp/vault:1.13.1
     restart: unless-stopped
     environment:
       VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8233

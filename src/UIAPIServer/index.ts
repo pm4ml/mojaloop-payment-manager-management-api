@@ -18,7 +18,7 @@ import assert from 'assert';
 
 import { Logger } from '@mojaloop/sdk-standard-components';
 
-import Vault from '@pm4ml/mcm-client';
+import { Vault, ControlServer } from '@pm4ml/mcm-client';
 import { MemoryCache } from '../lib/cacheDatabase';
 import { IConfig } from '../config';
 import { ConnectionStateMachine } from '@pm4ml/mcm-client';
@@ -31,6 +31,7 @@ interface UIAPIServerOptions {
   db: MemoryCache;
   stateMachine: ConnectionStateMachine;
   port: number;
+  controlServer: ControlServer;
 }
 
 class UIAPIServer {
@@ -56,6 +57,7 @@ class UIAPIServer {
         db: opts.db,
         vault: opts.vault,
         stateMachine: opts.stateMachine,
+        controlServer: opts.controlServer,
       };
       await next();
     });
