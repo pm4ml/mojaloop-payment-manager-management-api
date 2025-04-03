@@ -227,7 +227,7 @@ export const createMemoryCache = async (config: MemoryCacheOpts): Promise<Knex> 
     } catch (err) {
       config.logger.push({ err }).log('Error syncing DB');
     }
-  }
+  };
 
   if (!config.manualSync) {
     await doSyncDB();
