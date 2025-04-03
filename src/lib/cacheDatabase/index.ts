@@ -217,17 +217,12 @@ export const createMemoryCache = async (config: MemoryCacheOpts): Promise<Knex> 
   const redisCache = new Cache(config);
   await redisCache.connect();
 
-  const doSyncDB = () => {
-    try {
-      syncDB({
-        redisCache,
-        db,
-        logger: config.logger,
-      });
-    } catch (err) {
-      config.logger.push({ err }).log('Error syncing DB');
-    }
-  };
+  const doSyncDB = () =>
+    syncDB({
+      redisCache,
+      db,
+      logger: config.logger,
+    });
 
   if (!config.manualSync) {
     await doSyncDB();
