@@ -122,7 +122,7 @@ async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
     // for now...
 
     const initiatedTimestamp = data.initiatedTimestamp ? new Date(data.initiatedTimestamp).getTime() : null;
-    const completedTimestamp = data.fulfil ? new Date(data.fulfil.body.completedTimestamp).getTime() : null;
+    const completedTimestamp = data.fulfil ? new Date(data.fulfil?.body?.completedTimestamp).getTime() : null;
 
     // the cache data model for inbound transfers is lacking some properties that make it easy to extract
     // certain information...therefore we have to find it elsewhere...
@@ -145,12 +145,12 @@ async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
         recipient_id_type: data.quoteRequest?.body?.payee?.partyIdInfo?.partyIdType,
         recipient_id_sub_value: data.quoteRequest?.body?.payee?.partyIdInfo?.partySubIdOrType,
         recipient_id_value: data.quoteRequest?.body?.payee?.partyIdInfo?.partyIdentifier,
-        amount: data.quoteResponse?.body?.transferAmount.amount,
-        currency: data.quoteResponse?.body?.transferAmount.currency,
+        amount: data.quoteResponse?.body?.transferAmount?.amount,
+        currency: data.quoteResponse?.body?.transferAmount?.currency,
         direction: -1,
         batch_id: '',
         details: data.quoteRequest?.body?.note,
-        dfsp: data.quoteRequest?.body?.payer?.partyIdInfo.fspId,
+        dfsp: data.quoteRequest?.body?.payer?.partyIdInfo?.fspId,
 
         success: getInboundTransferStatus(data),
       }),
