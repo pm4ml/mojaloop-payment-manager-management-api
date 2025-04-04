@@ -58,7 +58,7 @@ services:
 
 ## ----- MCM Layer ----- ##
   connection-manager-api:
-    image: ghcr.io/pm4ml/connection-manager-api:v2.4.0
+    image: ghcr.io/pm4ml/connection-manager-api:v2.4.2
     command: npm run start:dev
     restart: unless-stopped
     env_file: ./docker/.env.mcm-api
@@ -73,7 +73,7 @@ services:
       - keycloak
 
   keycloak:
-    image: quay.io/keycloak/keycloak:22.0.1
+    image: quay.io/keycloak/keycloak:22.0.2
     command: [ 'start-dev --import-realm' ]
     restart: unless-stopped
     environment:
