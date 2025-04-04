@@ -98,14 +98,14 @@ async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
         try {
           data.quoteResponse.body = JSON.parse(data.quoteResponse.body);
         } catch (err) {
-          logger.push({ err }).log('Error parsing quoteResponse body');
+          logger.push({ err, quoteResponse: data.quoteResponse }).log('Error parsing quoteResponse body');
         }
       }
       if (data.fulfil?.body) {
         try {
           data.fulfil.body = JSON.parse(data.fulfil.body);
         } catch (err) {
-          logger.push({ err }).log('Error parsing fulfil body');
+          logger.push({ err, fulfil: data.fulfil }).log('Error parsing fulfil body');
         }
       }
     }
