@@ -94,14 +94,14 @@ async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
     }
 
     if (data.direction === 'INBOUND') {
-      if (data.quoteResponse?.body) {
+      if (data.quoteResponse?.body && typeof data.quoteResponse.body === 'string') {
         try {
           data.quoteResponse.body = JSON.parse(data.quoteResponse.body);
         } catch (err) {
           logger.push({ err, quoteResponse: data.quoteResponse }).log('Error parsing quoteResponse body');
         }
       }
-      if (data.fulfil?.body) {
+      if (data.fulfil?.body && typeof data.fulfil.body === 'string') {
         try {
           data.fulfil.body = JSON.parse(data.fulfil.body);
         } catch (err) {
