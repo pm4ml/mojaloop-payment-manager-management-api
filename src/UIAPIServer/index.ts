@@ -13,7 +13,6 @@ import bodyParser from 'koa-bodyparser';
 import { oas } from 'koa-oas3';
 import cors from '@koa/cors';
 
-
 import http from 'http';
 import path from 'path';
 import assert from 'assert';
@@ -36,7 +35,7 @@ interface UIAPIServerOptions {
 }
 
 class UIAPIServer {
-  private constructor(private server: http.Server, private logger: Logger.Logger, private port: number) {}
+  private constructor(private server: http.Server, private logger: Logger.Logger, private port: number) { }
 
   static async create(opts: UIAPIServerOptions) {
     const api = new Koa();
@@ -62,7 +61,7 @@ class UIAPIServer {
       await next();
     });
 
-    if(opts.config.enableCors) {
+    if (opts.config.enableCors) {
       api.use(cors({ credentials: true }));
     }
 

@@ -31,26 +31,7 @@ export namespace DfspClientCert {
   export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, Event> => ({
     id: 'dfspClientCert',
     initial: 'creatingDfspCsr',
-    on: {
-      RECREATE_DFSP_CLIENT_CERT: { target: 'revokingDfspCsr' },
-    },
     states: {
-      revokingDfspCsr: {
-        invoke: {
-          id: 'revokeCsr',
-          src: (ctx) =>
-            invokeRetry({
-              id: 'revokeCsr',
-              logger: opts.logger,
-              retryInterval: opts.refreshIntervalSeconds * 1000,
-              service: async () => opts.vault.revokeCSR(ctx.dfspClientCert!.csr!),
-            }),
-          onDone: {
-            actions: assign({ dfspClientCert: () => undefined }),
-            target: 'creatingDfspCsr',
-          },
-        },
-      },
       creatingDfspCsr: {
         invoke: {
           id: 'createCsr',

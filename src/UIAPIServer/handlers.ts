@@ -18,58 +18,11 @@ const getStates = async (ctx) => {
   ctx.body = ctx.state.stateMachine.getState();
 };
 
-const revokeDfspClientCSR = async (ctx) => {
-  const { dfspId } = ctx.params;
-  ctx.body = {
-    status: 'completed',
-    stateDescription: `Client certificate for DFSP ${dfspId} revoked successfully.`,
-    errorDescription: '',
-  };
-};
-
-const recreateDfspClientCSR = async (ctx) => {
-  const { dfspId } = ctx.params;
-  ctx.body = {
-    status: 'completed',
-    stateDescription: `Client certificate for DFSP ${dfspId} recreated successfully.`,
-    errorDescription: '',
-  };
-};
-
-const revokeDfspServerCSR = async (ctx) => {
-  const { dfspId } = ctx.params;
-  ctx.body = {
-    status: 'completed',
-    stateDescription: `Server certificate for DFSP ${dfspId} revoked successfully.`,
-    errorDescription: '',
-  };
-};
-
-const recreateDfspServerCSR = async (ctx) => {
-  const { dfspId } = ctx.params;
-  ctx.body = {
-    status: 'completed',
-    stateDescription: `Server certificate for DFSP ${dfspId} recreated successfully.`,
-    errorDescription: '',
-  };
-};
-
-const revokeDfspJWSCSR = async (ctx) => {
-  const { dfspId } = ctx.params;
-  ctx.body = {
-    status: 'completed',
-    stateDescription: `JWS certificate for DFSP ${dfspId} revoked successfully.`,
-    errorDescription: '',
-  };
-};
-
-const recreateDfspJWSCSR = async (ctx) => {
-  const { dfspId } = ctx.params;
-  ctx.body = {
-    status: 'completed',
-    stateDescription: `JWS certificate for DFSP ${dfspId} recreated successfully.`,
-    errorDescription: '',
-  };
+const recreateCerts = async (ctx) => {
+  console.log('Headers are ', ctx.request.headers);
+  const securityType = ctx.params.SecurityType;
+  const reason = ctx.request.body.reason;
+  ctx.body = { status: 'ok' };
 };
 
 const getDfspStatus = async (ctx) => {
@@ -257,23 +210,8 @@ export const createHandlers = () => ({
   '/states': {
     get: getStates,
   },
-  '/dfsp/ca/revoke/{dfspId}': {
-    post: revokeDfspClientCSR,
-  },
-  '/dfsp/ca/recreate/{dfspId}': {
-    post: recreateDfspClientCSR,
-  },
-  '/dfsp/servercerts/revoke/{dfspId}': {
-    post: revokeDfspServerCSR,
-  },
-  '/dfsp/servercerts/recreate/{dfspId}': {
-    post: recreateDfspServerCSR,
-  },
-  '/dfsp/jwscerts/revoke/{dfspId}': {
-    post: revokeDfspJWSCSR,
-  },
-  '/dfsp/jwscerts/recreate/{dfspId}': {
-    post: recreateDfspJWSCSR,
+  '/recreate/{SecurityType}': {
+    post: recreateCerts,
   },
   '/dfsps/{dfspId}/status': {
     get: getDfspStatus,

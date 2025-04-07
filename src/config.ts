@@ -85,7 +85,7 @@ const cfg = {
   inboundPort: env.get('INBOUND_LISTEN_PORT').default('9000').asPortNumber(),
   logIndent: env.get('LOG_INDENT').default('2').asIntPositive(),
   runMigrations: env.get('RUN_DB_MIGRATIONS').default('true').asBool(),
-  
+
   enableCors: env.get('ENABLE_CORS').default('false').asBool(),
 
   enableUiApiServer: env.get('ENABLE_UI_API_SERVER').default('true').asBool(),
