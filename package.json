@@ -39,6 +39,7 @@
     "audit:fix": "npm audit fix"
   },
   "dependencies": {
+    "@koa/cors": "^5.0.0",
     "@kubernetes/client-node": "^0.16.2",
     "@mojaloop/api-snippets": "^17.5.1",
     "@mojaloop/central-services-metrics": "12.0.8",
