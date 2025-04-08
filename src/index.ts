@@ -108,11 +108,14 @@ const LOG_ID = {
 
   let uiApiServer: UIAPIServer;
   if (config.enableUiApiServer) {
-    const db = await createMemoryCache({
-      cacheUrl: config.cacheUrl,
-      syncInterval: config.cacheSyncInterval,
-      logger,
-    });
+    let db;
+    if (!config.disableUIApiCache) {
+      db = await createMemoryCache({
+        cacheUrl: config.cacheUrl,
+        syncInterval: config.cacheSyncInterval,
+        logger,
+      });
+    }
 
     uiApiServer = await UIAPIServer.create({
       config,
