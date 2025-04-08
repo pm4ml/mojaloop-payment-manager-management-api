@@ -22,7 +22,15 @@ export namespace DfspClientCert {
     };
   }
 
-  export type Event = DoneEventObject | { type: 'DFSP_CLIENT_CERT_CONFIGURED' } | { type: 'RECREATE_DFSP_CLIENT_CERT' };
+  export type Event =
+    | DoneEventObject
+    | { type: 'DFSP_CLIENT_CERT_CONFIGURED' }
+    | { type: 'RECREATE_DFSP_CLIENT_CERT' }
+    | { type: 'CREATING_DFSP_CSR' }
+    | { type: 'UPLOADING_DFSP_CSR' }
+    | { type: 'FETCHING_DFSP_CLIENT_CERT' }
+    | { type: 'COMPLETING_DFSP_CLIENT_CERT' }
+    | { type: 'RETRYING_DFSP_CLIENT_CERT' };
 
   enum CertState {
     CERT_SIGNED = 'CERT_SIGNED',
@@ -33,6 +41,7 @@ export namespace DfspClientCert {
     initial: 'creatingDfspCsr',
     states: {
       creatingDfspCsr: {
+        entry: send('CREATING_DFSP_CSR'),
         invoke: {
           id: 'createCsr',
           src: () =>
@@ -51,6 +60,7 @@ export namespace DfspClientCert {
         },
       },
       uploadingDfspCsr: {
+        entry: send('UPLOADING_DFSP_CSR'),
         invoke: {
           id: 'uploadCsr',
           src: (ctx) =>
@@ -72,6 +82,7 @@ export namespace DfspClientCert {
         },
       },
       gettingDfspClientCert: {
+        entry: send('FETCHING_DFSP_CLIENT_CERT'),
         invoke: {
           id: 'getDfspClientCert',
           src: (ctx) =>
@@ -113,12 +124,14 @@ export namespace DfspClientCert {
         },
       },
       completed: {
+        entry: send('COMPLETING_DFSP_CLIENT_CERT'),
         always: {
           target: 'retry',
           actions: send('DFSP_CLIENT_CERT_CONFIGURED'),
         },
       },
       retry: {
+        entry: send('RETRYING_DFSP_CLIENT_CERT'),
         after: {
           [opts.refreshIntervalSeconds * 1000]: { target: 'gettingDfspClientCert' },
         },

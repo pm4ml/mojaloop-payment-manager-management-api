@@ -29,7 +29,12 @@ export namespace DfspServerCert {
     | DoneEventObject
     | { type: 'DFSP_SERVER_CERT_CONFIGURED' }
     | CreateDfspServerCertEvent
-    | DfspCA.Event;
+    | DfspCA.Event
+    | { type: 'DFSP_SERVER_CERT_IDLE' }
+    | { type: 'REQUESTING_NEW_DFSP_SERVER_CERT' }
+    | { type: 'RENEWING_MANAGED_DFSP_SERVER_CERT' }
+    | { type: 'CREATING_DFSP_SERVER_CERT' }
+    | { type: 'UPLOADING_DFSP_SERVER_CERT_TO_HUB' };
 
   export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, Event> => ({
     id: 'dfspServerCert',
@@ -41,12 +46,14 @@ export namespace DfspServerCert {
     states: {
       idle: {},
       requestedNewDfspServerCert: {
+        entry: send('REQUESTING_NEW_DFSP_SERVER_CERT'),
         always: [
           { target: 'renewingManagedDfspServerCert', cond: 'managedByCertManager' },
           { target: 'creatingDfspServerCert' },
         ],
       },
       renewingManagedDfspServerCert: {
+        entry: send('RENEWING_MANAGED_DFSP_SERVER_CERT'),
         invoke: {
           id: 'renewManagedDfspServerCert',
           src: () =>
@@ -63,6 +70,7 @@ export namespace DfspServerCert {
         },
       },
       creatingDfspServerCert: {
+        entry: send('CREATING_DFSP_SERVER_CERT'),
         invoke: {
           id: 'createDFSPServerCert',
           src: (ctx, event) =>
@@ -100,6 +108,7 @@ export namespace DfspServerCert {
         },
       },
       uploadingDfspServerCertToHub: {
+        entry: send('UPLOADING_DFSP_SERVER_CERT_TO_HUB'),
         invoke: {
           id: 'dfspServerCertUpload',
           src: (ctx) =>

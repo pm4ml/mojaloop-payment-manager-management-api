@@ -23,7 +23,17 @@ export namespace HubCert {
     hubClientCerts?: HubClientCert[];
   };
 
-  export type Event = DoneEventObject | { type: 'HUB_CLIENT_CERT_SIGNED' };
+  export type Event =
+    | DoneEventObject
+    | { type: 'HUB_CLIENT_CERT_SIGNED' }
+    | { type: 'HUB_CLIENT_CERT_IDLE' }
+    | { type: 'RESETTING_HUB_CLIENT_CERTS' }
+    | { type: 'FETCHING_HUB_CSR' }
+    | { type: 'UPDATING_HUB_CSR' }
+    | { type: 'SIGNING_HUB_CSR' }
+    | { type: 'UPLOADING_HUB_CERT' }
+    | { type: 'COMPLETING_HUB_CLIENT_CERT' }
+    | { type: 'RETRYING_HUB_CLIENT_CERT' };
 
   export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, Event> => ({
     id: 'hubClientCert',
@@ -32,14 +42,16 @@ export namespace HubCert {
       DFSP_CA_PROPAGATED: { target: '.resettingHubClientCerts', internal: false },
     },
     states: {
-      idle: {},
+      idle: { entry: send('HUB_CLIENT_CERT_IDLE') },
       resettingHubClientCerts: {
+        entry: send('RESETTING_HUB_CLIENT_CERTS'),
         always: {
           actions: assign({ hubClientCerts: [] }) as any,
           target: 'fetchingHubCSR',
         },
       },
       fetchingHubCSR: {
+        entry: send('FETCHING_HUB_CSR'),
         invoke: {
           id: 'getUnprocessedHubCSRs',
           src: () =>
@@ -61,21 +73,24 @@ export namespace HubCert {
         },
       },
       updatingCSR: {
-        entry: assign({
-          hubClientCerts: (ctx, event: AnyEventObject) =>
-            event.data.map((remoteCsr) => ({
-              id: remoteCsr.id,
-              csr: remoteCsr.csr,
-              ...(ctx.hubClientCerts?.some(
-                (processedCsr) =>
-                  processedCsr.csr === remoteCsr.csr &&
-                  remoteCsr.certificate &&
-                  opts.vault.certIsValid(remoteCsr.certificate)
-              ) && {
-                cert: remoteCsr.certificate,
-              }),
-            })),
-        }),
+        entry: [
+          send('UPDATING_HUB_CSR'),
+          assign({
+            hubClientCerts: (ctx, event: AnyEventObject) =>
+              event.data.map((remoteCsr) => ({
+                id: remoteCsr.id,
+                csr: remoteCsr.csr,
+                ...(ctx.hubClientCerts?.some(
+                  (processedCsr) =>
+                    processedCsr.csr === remoteCsr.csr &&
+                    remoteCsr.certificate &&
+                    opts.vault.certIsValid(remoteCsr.certificate)
+                ) && {
+                  cert: remoteCsr.certificate,
+                }),
+              })),
+          }),
+        ],
         always: [
           {
             target: 'signingHubCSR',
@@ -85,6 +100,7 @@ export namespace HubCert {
         ],
       },
       signingHubCSR: {
+        entry: send('SIGNING_HUB_CSR'),
         invoke: {
           id: 'signHubCSRs',
           src: (ctx) =>
@@ -105,6 +121,7 @@ export namespace HubCert {
         },
       },
       uploadingHubCert: {
+        entry: send('UPLOADING_HUB_CERT'),
         invoke: {
           id: 'uploadHubCert',
           src: (ctx) =>
@@ -128,12 +145,14 @@ export namespace HubCert {
         },
       },
       completed: {
+        entry: send('COMPLETING_HUB_CLIENT_CERT'),
         always: {
           target: 'retry',
           actions: send('HUB_CLIENT_CERT_SIGNED'),
         },
       },
       retry: {
+        entry: send('RETRYING_HUB_CLIENT_CERT'),
         after: {
           [opts.refreshIntervalSeconds * 1000]: { target: 'fetchingHubCSR' },
         },

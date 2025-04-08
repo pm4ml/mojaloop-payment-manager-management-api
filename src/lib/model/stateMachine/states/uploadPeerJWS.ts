@@ -8,7 +8,7 @@
  *       Vijay Kumar Guthi <vijaya.guthi@infitx.com>                   *
  ************************************************************************* */
 
-import { AnyEventObject, assign, DoneEventObject, MachineConfig } from 'xstate';
+import { AnyEventObject, assign, DoneEventObject, MachineConfig, send } from 'xstate';
 import { MachineOpts } from './MachineOpts';
 import { invokeRetry } from './invokeRetry';
 import { PeerJWS } from './peerJWS';
@@ -23,7 +23,12 @@ export namespace UploadPeerJWS {
 
   type UpdateAction = { type: 'UPLOAD_PEER_JWS'; peerJWS: JWS[] };
 
-  export type Event = UpdateAction | DoneEventObject;
+  export type Event =
+    | UpdateAction
+    | DoneEventObject
+    | { type: 'UPLOAD_PEER_JWS_IDLE' }
+    | { type: 'COMPARING_PEER_JWS' }
+    | { type: 'UPLOADING_PEER_JWS' };
 
   export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, Event> => ({
     id: 'uploadPeerJWS',
@@ -32,8 +37,11 @@ export namespace UploadPeerJWS {
       UPLOAD_PEER_JWS: { target: '.comparePeerJWS', internal: false },
     },
     states: {
-      idle: {},
+      idle: {
+        entry: send('UPLOAD_PEER_JWS_IDLE'),
+      },
       comparePeerJWS: {
+        entry: send('COMPARING_PEER_JWS'),
         invoke: {
           src: async (context, event: AnyEventObject) => {
             const peerJWS = event.data;
@@ -68,6 +76,7 @@ export namespace UploadPeerJWS {
         },
       },
       uploadingPeerJWS: {
+        entry: send('UPLOADING_PEER_JWS'),
         invoke: {
           id: 'uploadingPeerJWS',
           src: (_ctx, event: AnyEventObject) =>

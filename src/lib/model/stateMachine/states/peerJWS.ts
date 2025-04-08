@@ -24,7 +24,14 @@ export namespace PeerJWS {
     peerJWS?: JWS[];
   };
 
-  export type Event = DoneEventObject | { type: 'PEER_JWS_CONFIGURED' };
+  export type Event =
+    | DoneEventObject
+    | { type: 'PEER_JWS_CONFIGURED' }
+    | { type: 'FETCHING_PEER_JWS' }
+    | { type: 'COMPARING_PEER_JWS' }
+    | { type: 'NOTIFYING_PEER_JWS' }
+    | { type: 'COMPLETING_PEER_JWS' }
+    | { type: 'RETRYING_PEER_JWS' };
 
   export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, Event> => ({
     id: 'getPeerJWS',
@@ -34,6 +41,7 @@ export namespace PeerJWS {
     },
     states: {
       fetchingPeerJWS: {
+        entry: send('FETCHING_PEER_JWS'),
         invoke: {
           id: 'getPeerDFSPJWSCertificates',
           src: () =>
@@ -47,6 +55,7 @@ export namespace PeerJWS {
         },
       },
       comparePeerJWS: {
+        entry: send('COMPARING_PEER_JWS'),
         invoke: {
           src: async (context, event: AnyEventObject) => {
             const peerJWS = event.data;
@@ -89,6 +98,7 @@ export namespace PeerJWS {
         },
       },
       notifyPeerJWS: {
+        entry: send('NOTIFYING_PEER_JWS'),
         invoke: {
           id: 'notifyPeerJWS',
           src: (ctx: TContext) =>
@@ -104,12 +114,14 @@ export namespace PeerJWS {
         },
       },
       completed: {
+        entry: send('COMPLETING_PEER_JWS'),
         always: {
           target: 'retry',
           actions: send('PEER_JWS_CONFIGURED'),
         },
       },
       retry: {
+        entry: send('RETRYING_PEER_JWS'),
         after: {
           [opts.refreshIntervalSeconds * 1000]: { target: 'fetchingPeerJWS' },
         },

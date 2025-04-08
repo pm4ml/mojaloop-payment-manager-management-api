@@ -21,7 +21,12 @@ export namespace DfspJWS {
     };
   };
 
-  export type Event = DoneEventObject | { type: 'CREATE_JWS' | 'DFSP_JWS_PROPAGATED' };
+  export type Event =
+    | DoneEventObject
+    | { type: 'CREATE_JWS' | 'DFSP_JWS_PROPAGATED' }
+    | { type: 'CREATING_DFSP_JWS' }
+    | { type: 'UPLOADING_DFSP_JWS_TO_HUB' }
+    | { type: 'DFSP_JWS_IDLE' };
 
   export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, Event> => ({
     id: 'createJWS',
@@ -32,6 +37,7 @@ export namespace DfspJWS {
     states: {
       idle: {},
       creating: {
+        entry: send('CREATING_DFSP_JWS'),
         invoke: {
           id: 'dfspJWSCreate',
           src: () =>
@@ -54,6 +60,7 @@ export namespace DfspJWS {
         },
       },
       uploadingToHub: {
+        entry: send('UPLOADING_DFSP_JWS_TO_HUB'),
         invoke: {
           id: 'dfspJWSUpload',
           src: (ctx) =>
