@@ -148,11 +148,7 @@ class ConnectionStateMachine {
   }
 
   public getState() {
-    console.log('================================================');
-    console.log(this.service.state.value);
-    console.log(this.service.machine.config.states);
-    console.log('================================================');
-    return this.service.state.value;
+    return this.service.state.context.progressMonitor;
   }
   public getContext() {
     return this.context;

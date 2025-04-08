@@ -13,68 +13,128 @@ import { invokeRetry } from '../../../../lib/model/stateMachine/states/invokeRet
 import { MachineOpts } from './MachineOpts';
 
 export namespace ProgressMonitor {
+  export interface ProgressMonitorEntry {
+    value: boolean; // The current value (true/false)
+    lastUpdated: Date | null; // Timestamp of last update, null if never updated
+  }
+
   export interface Context {
-    progressMonitor?: {
-      PEER_JWS: boolean;
-      DFSP_JWS: boolean;
-      DFSP_CA: boolean;
-      DFSP_SERVER_CERT: boolean;
-      DFSP_CLIENT_CERT: boolean;
-      HUB_CA: boolean;
-      HUB_CERT: boolean;
-      ENDPOINT_CONFIG: boolean;
+    progressMonitor: {
+      PEER_JWS: ProgressMonitorEntry;
+      DFSP_JWS: ProgressMonitorEntry;
+      DFSP_CA: ProgressMonitorEntry;
+      DFSP_SERVER_CERT: ProgressMonitorEntry;
+      DFSP_CLIENT_CERT: ProgressMonitorEntry;
+      HUB_CA: ProgressMonitorEntry;
+      HUB_CERT: ProgressMonitorEntry;
+      ENDPOINT_CONFIG: ProgressMonitorEntry;
     };
   }
 
-  export type Event = DoneEventObject;
+  export type Event =
+    | DoneEventObject
+    | { type: 'NEW_HUB_CA_FETCHED' }
+    | { type: 'DFSP_CA_PROPAGATED' }
+    | { type: 'DFSP_CLIENT_CERT_CONFIGURED' }
+    | { type: 'DFSP_SERVER_CERT_CONFIGURED' }
+    | { type: 'HUB_CLIENT_CERT_SIGNED' }
+    | { type: 'PEER_JWS_CONFIGURED' }
+    | { type: 'DFSP_JWS_PROPAGATED' }
+    | { type: 'ENDPOINT_CONFIG_PROPAGATED' };
 
-  export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, any> => ({
+  export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, Event> => ({
     id: 'progressMonitor',
-    initial: 'idle',
+    initial: 'init',
+    context: {
+      progressMonitor: {
+        PEER_JWS: { value: false, lastUpdated: null },
+        DFSP_JWS: { value: false, lastUpdated: null },
+        DFSP_CA: { value: false, lastUpdated: null },
+        DFSP_SERVER_CERT: { value: false, lastUpdated: null },
+        DFSP_CLIENT_CERT: { value: false, lastUpdated: null },
+        HUB_CA: { value: false, lastUpdated: null },
+        HUB_CERT: { value: false, lastUpdated: null },
+        ENDPOINT_CONFIG: { value: false, lastUpdated: null },
+      },
+    },
     on: {
       NEW_HUB_CA_FETCHED: {
-        actions: assign<Context>({ progressMonitor: (ctx) => ({ ...ctx.progressMonitor!, HUB_CA: true }) }) as any,
+        actions: assign({
+          progressMonitor: (ctx) => ({
+            ...ctx.progressMonitor,
+            HUB_CA: { value: true, lastUpdated: new Date() },
+          }),
+        }),
         target: '.handlingProgressChange',
         internal: false,
       },
       DFSP_CA_PROPAGATED: {
-        actions: assign<Context>({ progressMonitor: (ctx) => ({ ...ctx.progressMonitor!, DFSP_CA: true }) }) as any,
+        actions: assign({
+          progressMonitor: (ctx) => ({
+            ...ctx.progressMonitor,
+            DFSP_CA: { value: true, lastUpdated: new Date() },
+          }),
+        }),
         target: '.handlingProgressChange',
         internal: false,
       },
       DFSP_CLIENT_CERT_CONFIGURED: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({ ...ctx.progressMonitor!, DFSP_CLIENT_CERT: true }),
-        }) as any,
+        actions: assign({
+          progressMonitor: (ctx) => ({
+            ...ctx.progressMonitor,
+            DFSP_CLIENT_CERT: { value: true, lastUpdated: new Date() },
+          }),
+        }),
         target: '.handlingProgressChange',
         internal: false,
       },
       DFSP_SERVER_CERT_CONFIGURED: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({ ...ctx.progressMonitor!, DFSP_SERVER_CERT: true }),
-        }) as any,
+        actions: assign({
+          progressMonitor: (ctx) => ({
+            ...ctx.progressMonitor,
+            DFSP_SERVER_CERT: { value: true, lastUpdated: new Date() },
+          }),
+        }),
         target: '.handlingProgressChange',
         internal: false,
       },
       HUB_CLIENT_CERT_SIGNED: {
-        actions: assign<Context>({ progressMonitor: (ctx) => ({ ...ctx.progressMonitor!, HUB_CERT: true }) }) as any,
+        actions: assign({
+          progressMonitor: (ctx) => ({
+            ...ctx.progressMonitor,
+            HUB_CERT: { value: true, lastUpdated: new Date() },
+          }),
+        }),
         target: '.handlingProgressChange',
         internal: false,
       },
       PEER_JWS_CONFIGURED: {
-        actions: assign<Context>({ progressMonitor: (ctx) => ({ ...ctx.progressMonitor!, PEER_JWS: true }) }) as any,
+        actions: assign({
+          progressMonitor: (ctx) => ({
+            ...ctx.progressMonitor,
+            PEER_JWS: { value: true, lastUpdated: new Date() },
+          }),
+        }),
         target: '.handlingProgressChange',
         internal: false,
       },
       DFSP_JWS_PROPAGATED: {
-        actions: assign<Context>({ progressMonitor: (ctx) => ({ ...ctx.progressMonitor!, DFSP_JWS: true }) }) as any,
+        actions: assign({
+          progressMonitor: (ctx) => ({
+            ...ctx.progressMonitor,
+            DFSP_JWS: { value: true, lastUpdated: new Date() },
+          }),
+        }),
         target: '.handlingProgressChange',
         internal: false,
       },
       ENDPOINT_CONFIG_PROPAGATED: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({ ...ctx.progressMonitor!, ENDPOINT_CONFIG: true }),
-        }) as any,
+        actions: assign({
+          progressMonitor: (ctx) => ({
+            ...ctx.progressMonitor,
+            ENDPOINT_CONFIG: { value: true, lastUpdated: new Date() },
+          }),
+        }),
         target: '.handlingProgressChange',
         internal: false,
       },
@@ -82,18 +142,6 @@ export namespace ProgressMonitor {
     states: {
       init: {
         always: {
-          actions: assign({
-            progressMonitor: () => ({
-              PEER_JWS: false,
-              DFSP_JWS: false,
-              DFSP_CA: false,
-              DFSP_SERVER_CERT: false,
-              DFSP_CLIENT_CERT: false,
-              HUB_CA: false,
-              HUB_CERT: false,
-              ENDPOINT_CONFIG: false,
-            }),
-          }) as any,
           target: 'idle',
         },
       },
@@ -119,8 +167,7 @@ export namespace ProgressMonitor {
     },
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   export const createGuards = <TContext extends Context>() => ({
-    completedStates: (ctx) => Object.values(ctx.progressMonitor).every((s) => s),
+    completedStates: (ctx) => Object.values(ctx.progressMonitor).every((entry) => entry.value),
   });
 }
