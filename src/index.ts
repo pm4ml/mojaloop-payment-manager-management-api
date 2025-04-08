@@ -108,7 +108,7 @@ const LOG_ID = {
 
   let uiApiServer: UIAPIServer;
   if (config.enableUiApiServer) {
-    let db
+    let db;
     if (config.disableUIApiCache) {
       db = await createMemoryCache({
         cacheUrl: config.cacheUrl,
