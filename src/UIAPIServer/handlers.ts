@@ -16,21 +16,21 @@ const healthCheck = async (ctx) => {
 
 const getStates = async (ctx) => {
   const states = ctx.state.stateMachine.getState();
-  // const formattedStatesResponse = Object.entries(states).reduce((acc, [key, value]) => {
-  //   const { value: status, lastUpdated } = value as { value: string; lastUpdated: string };
-  //
-  //   acc[key] = {
-  //     status,
-  //     stateDescription: `${status.charAt(0).toUpperCase() + status.slice(1)} (Last Updated: ${new Date(
-  //       lastUpdated
-  //     ).toISOString()})`,
-  //     errorDescription: '',
-  //   };
-  //
-  //   return acc;
-  // }, {});
+  const formattedStatesResponse = Object.entries(states).reduce((acc, [key, value]) => {
+    const { status, stateDescription, lastUpdated, error } = value as {
+      status: string;
+      stateDescription: string;
+      lastUpdated: string;
+      error: string;
+    };
+    acc[key] = {
+      status: status,
+      stateDescription: `${stateDescription} (Last Updated: ${new Date(lastUpdated).toISOString()})`,
+      errorDescription: error ? `${error}` : ``,
+    };
 
-  const formattedStatesResponse = states;
+    return acc;
+  }, {});
 
   ctx.body = formattedStatesResponse;
 };

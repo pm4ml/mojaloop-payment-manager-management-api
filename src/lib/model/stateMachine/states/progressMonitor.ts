@@ -20,11 +20,11 @@ export namespace ProgressMonitor {
     IN_ERROR = 'inError',
   }
   export interface ProgressMonitorEntry {
-    value: ProgressState;
+    status: ProgressState;
     lastUpdated: Date | null;
     retries?: number;
     error?: string;
-    description?: string;
+    stateDescription?: string;
   }
 
   export enum MachineName {
@@ -113,7 +113,7 @@ export namespace ProgressMonitor {
             return {
               ...ctx.progressMonitor!,
               [(event as FailureErrorMessageEvent).machine]: {
-                value: ProgressState.IN_ERROR,
+                status: ProgressState.IN_ERROR,
                 lastUpdated: new Date(),
                 retries: (event as FailureErrorMessageEvent).retries,
                 error: (event as FailureErrorMessageEvent).error,
@@ -133,7 +133,7 @@ export namespace ProgressMonitor {
             return {
               ...ctx.progressMonitor!,
               [mapping.machine]: {
-                value: mapping.state,
+                status: mapping.state,
                 lastUpdated: new Date(),
                 stateDescription: event.type,
               },
@@ -149,25 +149,41 @@ export namespace ProgressMonitor {
         always: {
           actions: assign({
             progressMonitor: () => ({
-              PEER_JWS: { value: ProgressState.PENDING, lastUpdated: null, description: `Service not initialized` },
-              DFSP_JWS: { value: ProgressState.PENDING, lastUpdated: null, description: `Service not initialized` },
-              DFSP_CA: { value: ProgressState.PENDING, lastUpdated: null, description: `Service not initialized` },
+              PEER_JWS: {
+                status: ProgressState.PENDING,
+                lastUpdated: new Date(),
+                stateDescription: `Service not initialized`,
+              },
+              DFSP_JWS: {
+                status: ProgressState.PENDING,
+                lastUpdated: new Date(),
+                stateDescription: `Service not initialized`,
+              },
+              DFSP_CA: {
+                status: ProgressState.PENDING,
+                lastUpdated: new Date(),
+                stateDescription: `Service not initialized`,
+              },
               DFSP_SERVER_CERT: {
-                value: ProgressState.PENDING,
-                lastUpdated: null,
-                description: `Service not initialized`,
+                status: ProgressState.PENDING,
+                lastUpdated: new Date(),
+                stateDescription: `Service not initialized`,
               },
               DFSP_CLIENT_CERT: {
-                value: ProgressState.PENDING,
-                lastUpdated: null,
-                description: `Service not initialized`,
+                status: ProgressState.PENDING,
+                lastUpdated: new Date(),
+                stateDescription: `Service not initialized`,
               },
-              HUB_CA: { value: ProgressState.PENDING, lastUpdated: null, description: `Service not initialized` },
-              HUB_CERT: { value: ProgressState.PENDING, lastUpdated: null, description: `Service not initialized` },
+              HUB_CA: { status: ProgressState.PENDING, lastUpdated: null, stateDescription: `Service not initialized` },
+              HUB_CERT: {
+                status: ProgressState.PENDING,
+                lastUpdated: new Date(),
+                stateDescription: `Service not initialized`,
+              },
               ENDPOINT_CONFIG: {
-                value: ProgressState.PENDING,
-                lastUpdated: null,
-                description: `Service not initialized`,
+                status: ProgressState.PENDING,
+                lastUpdated: new Date(),
+                stateDescription: `Service not initialized`,
               },
             }),
           }) as any,
@@ -200,6 +216,6 @@ export namespace ProgressMonitor {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   export const createGuards = <TContext extends Context>() => ({
-    completedStates: (ctx) => Object.values(ctx.progressMonitor).every((entry) => entry.value),
+    completedStates: (ctx) => Object.values(ctx.progressMonitor).every((entry) => entry.status),
   });
 }
