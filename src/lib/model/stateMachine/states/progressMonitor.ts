@@ -58,8 +58,8 @@ export namespace ProgressMonitor {
 
   const eventToProgressMap: { [key: string]: { machine: MachineName; state: ProgressState } } = {
     // HUB_CA events
-    FETCHING_HUB_CA: { machine: MachineName.HUB_CA, state: ProgressState.COMPLETED },
-    HUB_CA_CHECKING_NEW: { machine: MachineName.HUB_CA, state: ProgressState.COMPLETED },
+    FETCHING_HUB_CA: { machine: MachineName.HUB_CA, state: ProgressState.IN_PROGRESS },
+    HUB_CA_CHECKING_NEW: { machine: MachineName.HUB_CA, state: ProgressState.IN_PROGRESS },
     NEW_HUB_CA_FETCHED: { machine: MachineName.HUB_CA, state: ProgressState.COMPLETED },
     // DFSP_CA events
     FETCHING_PREBUILT_CA: { machine: MachineName.DFSP_CA, state: ProgressState.IN_PROGRESS },
@@ -97,7 +97,6 @@ export namespace ProgressMonitor {
     // DFSP_JWS events
     CREATING_DFSP_JWS: { machine: MachineName.DFSP_JWS, state: ProgressState.IN_PROGRESS },
     UPLOADING_DFSP_JWS_TO_HUB: { machine: MachineName.DFSP_JWS, state: ProgressState.IN_PROGRESS },
-    DFSP_JWS_IDLE: { machine: MachineName.DFSP_JWS, state: ProgressState.IN_PROGRESS },
     DFSP_JWS_PROPAGATED: { machine: MachineName.DFSP_JWS, state: ProgressState.COMPLETED },
     // ENDPOINT_CONFIG events
     ENDPOINT_CONFIG_PROPAGATED: { machine: MachineName.ENDPOINT_CONFIG, state: ProgressState.COMPLETED },
@@ -118,6 +117,7 @@ export namespace ProgressMonitor {
                 lastUpdated: new Date(),
                 retries: (event as FailureErrorMessageEvent).retries,
                 error: (event as FailureErrorMessageEvent).error,
+                stateDescription: (event as FailureErrorMessageEvent).state,
               },
             };
           },
@@ -135,6 +135,7 @@ export namespace ProgressMonitor {
               [mapping.machine]: {
                 value: mapping.state,
                 lastUpdated: new Date(),
+                stateDescription: event.type,
               },
             };
           },

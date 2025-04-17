@@ -25,8 +25,7 @@ export namespace DfspJWS {
     | DoneEventObject
     | { type: 'CREATE_JWS' | 'DFSP_JWS_PROPAGATED' }
     | { type: 'CREATING_DFSP_JWS' }
-    | { type: 'UPLOADING_DFSP_JWS_TO_HUB' }
-    | { type: 'DFSP_JWS_IDLE' };
+    | { type: 'UPLOADING_DFSP_JWS_TO_HUB' };
 
   export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, Event> => ({
     id: 'createJWS',
