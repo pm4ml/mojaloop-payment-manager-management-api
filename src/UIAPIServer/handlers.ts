@@ -15,7 +15,22 @@ const healthCheck = async (ctx) => {
 };
 
 const getStates = async (ctx) => {
-  ctx.body = ctx.state.stateMachine.getState();
+  const states = ctx.state.stateMachine.getState();
+  const formattedStatesResponse = Object.entries(states).reduce((acc, [key, value]) => {
+    const { value: status, lastUpdated } = value as { value: string; lastUpdated: string };
+
+    acc[key] = {
+      status,
+      stateDescription: `${status.charAt(0).toUpperCase() + status.slice(1)} (Last Updated: ${new Date(
+        lastUpdated
+      ).toISOString()})`,
+      errorDescription: '',
+    };
+
+    return acc;
+  }, {});
+
+  ctx.body = formattedStatesResponse;
 };
 
 const recreateCerts = async (ctx) => {
