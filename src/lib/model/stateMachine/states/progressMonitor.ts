@@ -52,9 +52,9 @@ export namespace ProgressMonitor {
     };
   }
 
-  export type Event =
-    | DoneEventObject
-    | { type: 'FAILED'; machine: string; state: string; error: string; retries: number };
+  type FailureErrorMessageEvent = { type: 'FAILED'; machine: string; state: string; error: string; retries: number };
+
+  export type Event = DoneEventObject | FailureErrorMessageEvent;
 
   const eventToProgressMap: { [key: string]: { machine: MachineName; state: ProgressState } } = {
     // HUB_CA events
@@ -110,14 +110,14 @@ export namespace ProgressMonitor {
       FAILED: {
         actions: assign<Context>({
           progressMonitor: (ctx, event) => {
-            if (!event.machine) return ctx.progressMonitor;
+            if (!(event as FailureErrorMessageEvent).machine) return ctx.progressMonitor;
             return {
               ...ctx.progressMonitor!,
-              [event.machine]: {
+              [(event as FailureErrorMessageEvent).machine]: {
                 value: ProgressState.IN_ERROR,
                 lastUpdated: new Date(),
-                retries: event.retries,
-                error: event.error,
+                retries: (event as FailureErrorMessageEvent).retries,
+                error: (event as FailureErrorMessageEvent).error,
               },
             };
           },
@@ -129,10 +129,6 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx, event) => {
             const mapping = eventToProgressMap[event.type];
-            console.log('===================================');
-            console.log('Helllo asdadasladja');
-            console.log('event.type is ', event.type);
-            console.log('===================================');
             if (!mapping) return ctx.progressMonitor!;
             return {
               ...ctx.progressMonitor!,
