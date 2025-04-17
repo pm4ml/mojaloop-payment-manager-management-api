@@ -11,6 +11,7 @@
 import { assign, createMachine } from 'xstate';
 import SDKStandardComponents from '@mojaloop/sdk-standard-components';
 import Logger = SDKStandardComponents.Logger.Logger;
+import { sendParent } from 'xstate/lib/actions';
 // import { StateMachine } from 'xstate/lib/types';
 
 type AsyncFunc = (ctx?: any) => Promise<any>;
@@ -22,6 +23,8 @@ interface InvokeRetryOpts {
   maxRetries?: number;
   retryInterval?: number;
   logger: Logger;
+  machine: string;
+  state: string;
 }
 
 // interface IContext {
@@ -68,7 +71,17 @@ export const invokeRetry = (opts: InvokeRetryOpts) =>
           data: (context, event) => event.data,
         },
         failure: {
-          entry: assign({ retries: (ctx) => ctx.retries + 1 }),
+          entry: [
+            assign({ retries: (ctx) => ctx.retries + 1 }),
+            // @ts-ignore
+            sendParent((context) => ({
+              type: 'FAILED',
+              machine: opts.machine,
+              state: opts.state,
+              error: context.error,
+              retries: context.retries,
+            })),
+          ],
           always: { target: 'error', cond: 'maxRetriesReached' },
           after: {
             [opts.retryInterval ?? DEFAULT_RETRY_INTERVAL]: 'run',

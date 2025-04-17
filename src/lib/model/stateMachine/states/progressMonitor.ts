@@ -27,6 +27,18 @@ export namespace ProgressMonitor {
     description?: string;
   }
 
+  export enum MachineName {
+    DFSP_SERVER_CERT = 'DFSP_SERVER_CERT',
+    PEER_JWS = 'PEER_JWS',
+    DFSP_JWS = 'DFSP_JWS',
+    DFSP_CA = 'DFSP_CA',
+    DFSP_CLIENT_CERT = 'DFSP_CLIENT_CERT',
+    HUB_CA = 'HUB_CA',
+    HUB_CERT = 'HUB_CERT',
+    ENDPOINT_CONFIG = 'ENDPOINT_CONFIG',
+    UPLOAD_PEER_JWS = 'UPLOAD_PEER_JWS',
+  }
+
   export interface Context {
     progressMonitor?: {
       PEER_JWS: ProgressMonitorEntry;
@@ -40,471 +52,74 @@ export namespace ProgressMonitor {
     };
   }
 
-  export type Event = DoneEventObject;
+  export type Event =
+    | DoneEventObject
+    | { type: 'FAILED'; machine: string; state: string; error: string; retries: number };
+
+  const eventToProgressMap: { [key: string]: { machine: MachineName; state: ProgressState } } = {
+    // HUB_CA events
+    FETCHING_HUB_CA: { machine: MachineName.HUB_CA, state: ProgressState.COMPLETED },
+    HUB_CA_CHECKING_NEW: { machine: MachineName.HUB_CA, state: ProgressState.COMPLETED },
+    NEW_HUB_CA_FETCHED: { machine: MachineName.HUB_CA, state: ProgressState.COMPLETED },
+    // DFSP_CA events
+    FETCHING_PREBUILT_CA: { machine: MachineName.DFSP_CA, state: ProgressState.IN_PROGRESS },
+    CREATING_INT_CA: { machine: MachineName.DFSP_CA, state: ProgressState.IN_PROGRESS },
+    CREATING_EXT_CA: { machine: MachineName.DFSP_CA, state: ProgressState.IN_PROGRESS },
+    UPLOADING_TO_HUB: { machine: MachineName.DFSP_CA, state: ProgressState.IN_PROGRESS },
+    DFSP_CA_PROPAGATED: { machine: MachineName.DFSP_CA, state: ProgressState.COMPLETED },
+    // DFSP_CLIENT_CERT events
+    DFSP_CLIENT_CERT_CONFIGURED: { machine: MachineName.DFSP_CLIENT_CERT, state: ProgressState.COMPLETED },
+    // DFSP_SERVER_CERT events
+    DFSP_SERVER_CERT_CONFIGURED: { machine: MachineName.DFSP_SERVER_CERT, state: ProgressState.COMPLETED },
+    // HUB_CERT events
+    HUB_CLIENT_CERT_SIGNED: { machine: MachineName.HUB_CERT, state: ProgressState.COMPLETED },
+    // PEER_JWS events
+    PEER_JWS_CONFIGURED: { machine: MachineName.PEER_JWS, state: ProgressState.COMPLETED },
+    // DFSP_JWS events
+    DFSP_JWS_PROPAGATED: { machine: MachineName.DFSP_JWS, state: ProgressState.COMPLETED },
+    // ENDPOINT_CONFIG events
+    ENDPOINT_CONFIG_PROPAGATED: { machine: MachineName.ENDPOINT_CONFIG, state: ProgressState.COMPLETED },
+  };
 
   export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, any> => ({
     id: 'progressMonitor',
     initial: 'init',
     on: {
-      // HubCA events
-      FETCHING_HUB_CA: {
+      FAILED: {
         actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            HUB_CA: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date(), description: `Fetching Hub CA` },
-          }),
+          progressMonitor: (ctx, event) => {
+            if (!event.machine) return ctx.progressMonitor;
+            return {
+              ...ctx.progressMonitor!,
+              [event.machine]: {
+                value: ProgressState.IN_ERROR,
+                lastUpdated: new Date(),
+                retries: event.retries,
+                error: event.error,
+              },
+            };
+          },
         }) as any,
         target: '.handlingProgressChange',
         internal: false,
       },
-      HUB_CA_CHECKING_NEW: {
+      '*': {
         actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            HUB_CA: {
-              value: ProgressState.IN_PROGRESS,
-              lastUpdated: new Date(),
-              description: `Checking for new Hub CA`,
-            },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      HUB_CA_RETRYING: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            HUB_CA: {
-              value: ProgressState.IN_PROGRESS,
-              lastUpdated: new Date(),
-              description: 'Retrying for New Hub CA',
-            },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      NEW_HUB_CA_FETCHED: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            HUB_CA: { value: ProgressState.COMPLETED, lastUpdated: new Date(), description: 'New Hub CA fetched' },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      // DfspCA events
-      FETCHING_PREBUILT_CA: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            DFSP_CA: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date(), description: `Fetching prebuilt CA` },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      CREATE_INT_CA: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            DFSP_CA: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date(), description: `Creating Internal CA` },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      CREATE_EXT_CA: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            DFSP_CA: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date(), description: `Creating External CA` },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      UPLOADING_TO_HUB: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            DFSP_CA: {
-              value: ProgressState.IN_PROGRESS,
-              lastUpdated: new Date(),
-              description: `Uploading DFSP CA to hub`,
-            },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      DFSP_CA_PROPAGATED: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            DFSP_CA: {
-              value: ProgressState.COMPLETED,
-              lastUpdated: new Date(),
-              description: `DFSP CA propagated to Hub`,
-            },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      // DfspClientCert events
-      CREATING_DFSP_CSR: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            DFSP_CLIENT_CERT: {
-              value: ProgressState.IN_PROGRESS,
-              lastUpdated: new Date(),
-              description: `Creating DFSP CSR`,
-            },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      UPLOADING_DFSP_CSR: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            DFSP_CLIENT_CERT: {
-              value: ProgressState.IN_PROGRESS,
-              lastUpdated: new Date(),
-              description: `Uploading dfsp csr`,
-            },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      FETCHING_DFSP_CLIENT_CERT: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            DFSP_CLIENT_CERT: {
-              value: ProgressState.IN_PROGRESS,
-              lastUpdated: new Date(),
-              description: `Fetching dfsp client certificates`,
-            },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      COMPLETING_DFSP_CLIENT_CERT: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            DFSP_CLIENT_CERT: {
-              value: ProgressState.IN_PROGRESS,
-              lastUpdated: new Date(),
-              description: `Configuring dfsp client certificates`,
-            },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      DFSP_CLIENT_CERT_CONFIGURED: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            DFSP_CLIENT_CERT: {
-              value: ProgressState.COMPLETED,
-              lastUpdated: new Date(),
-              description: `DFSP client certificates configured`,
-            },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      // dfspServerCert Events
-      DFSP_SERVER_CERT_CREATION_FAILED: {
-        actions: assign<Context>({
-          progressMonitor: (ctx, event) => ({
-            ...ctx.progressMonitor!,
-            DFSP_SERVER_CERT: {
-              value: ProgressState.IN_ERROR,
-              lastUpdated: new Date(),
-              retries: event.retries,
-              error: event.error,
-              description: `Error creating dfsp server certificates`,
-            },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      REQUESTING_NEW_DFSP_SERVER_CERT: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            DFSP_SERVER_CERT: {
-              value: ProgressState.IN_PROGRESS,
-              lastUpdated: new Date(),
-              description: `Requesting for new DFSP server certificates`,
-            },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      RENEWING_MANAGED_DFSP_SERVER_CERT: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            DFSP_SERVER_CERT: {
-              value: ProgressState.IN_PROGRESS,
-              lastUpdated: new Date(),
-              description: `Renewing dfsp server certificates`,
-            },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      CREATING_DFSP_SERVER_CERT: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            DFSP_SERVER_CERT: {
-              value: ProgressState.IN_PROGRESS,
-              lastUpdated: new Date(),
-              description: `Creating dfsp server certificates`,
-            },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-
-      UPLOADING_DFSP_SERVER_CERT_TO_HUB: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            DFSP_SERVER_CERT: {
-              value: ProgressState.IN_PROGRESS,
-              lastUpdated: new Date(),
-              description: `Uploading dfsp server certificates to hub`,
-            },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      DFSP_SERVER_CERT_CONFIGURED: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            DFSP_SERVER_CERT: {
-              value: ProgressState.COMPLETED,
-              lastUpdated: new Date(),
-              description: `Dfsp server certificates configured`,
-            },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      // hubClientCert events
-      RESETTING_HUB_CLIENT_CERTS: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            HUB_CERT: {
-              value: ProgressState.IN_PROGRESS,
-              lastUpdated: new Date(),
-              description: `Resetting hub client certificates`,
-            },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      FETCHING_HUB_CSR: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            HUB_CERT: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date(), description: `Fetching hub csr` },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      UPDATING_HUB_CSR: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            HUB_CERT: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date(), description: `Updating hub CSR` },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      SIGNING_HUB_CSR: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            HUB_CERT: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date(), description: `Signing Hub CSR` },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      UPLOADING_HUB_CERT: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            HUB_CERT: {
-              value: ProgressState.IN_PROGRESS,
-              lastUpdated: new Date(),
-              description: `Uploading Hub certificates`,
-            },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      COMPLETING_HUB_CLIENT_CERT: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            HUB_CERT: {
-              value: ProgressState.IN_PROGRESS,
-              lastUpdated: new Date(),
-              description: `Completing the hub client certificates`,
-            },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      HUB_CLIENT_CERT_SIGNED: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            HUB_CERT: {
-              value: ProgressState.COMPLETED,
-              lastUpdated: new Date(),
-              description: `Hub client certificates signed`,
-            },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      // peerJws events
-      FETCHING_PEER_JWS: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            PEER_JWS: {
-              value: ProgressState.IN_PROGRESS,
-              lastUpdated: new Date(),
-              description: `Fetchign JWS of peers`,
-            },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      COMPARING_PEER_JWS: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            PEER_JWS: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date(), description: `Comparing Peer JWS` },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      NOTIFYING_PEER_JWS: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            PEER_JWS: {
-              value: ProgressState.IN_PROGRESS,
-              lastUpdated: new Date(),
-              description: `Notifying the peer JWS`,
-            },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      COMPLETING_PEER_JWS: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            PEER_JWS: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date(), description: `Completing Peer JWS` },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      PEER_JWS_CONFIGURED: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            PEER_JWS: { value: ProgressState.COMPLETED, lastUpdated: new Date(), description: `Peer JWS configured` },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      // dfspJWS events
-      CREATING_DFSP_JWS: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            DFSP_JWS: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date(), description: `Creating DFSP JWS` },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      UPLOADING_DFSP_JWS_TO_HUB: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            DFSP_JWS: {
-              value: ProgressState.IN_PROGRESS,
-              lastUpdated: new Date(),
-              description: `Uploading DFSP JWS to Hub`,
-            },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      DFSP_JWS_PROPAGATED: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            DFSP_JWS: { value: ProgressState.COMPLETED, lastUpdated: new Date(), description: `DFSP JWS propagated` },
-          }),
-        }) as any,
-        target: '.handlingProgressChange',
-        internal: false,
-      },
-      // endpointConfig events
-      ENDPOINT_CONFIG_PROPAGATED: {
-        actions: assign<Context>({
-          progressMonitor: (ctx) => ({
-            ...ctx.progressMonitor!,
-            ENDPOINT_CONFIG: {
-              value: ProgressState.COMPLETED,
-              lastUpdated: new Date(),
-              description: `Endpoint config propagated`,
-            },
-          }),
+          progressMonitor: (ctx, event) => {
+            const mapping = eventToProgressMap[event.type];
+            console.log('===================================');
+            console.log('Helllo asdadasladja');
+            console.log('event.type is ', event.type);
+            console.log('===================================');
+            if (!mapping) return ctx.progressMonitor!;
+            return {
+              ...ctx.progressMonitor!,
+              [mapping.machine]: {
+                value: mapping.state,
+                lastUpdated: new Date(),
+              },
+            };
+          },
         }) as any,
         target: '.handlingProgressChange',
         internal: false,
@@ -552,6 +167,8 @@ export namespace ProgressMonitor {
               id: 'notifyCompleted',
               logger: opts.logger,
               retryInterval: opts.refreshIntervalSeconds * 1000,
+              machine: 'progressMonitor',
+              state: 'notifyCompleted',
               service: async () => {
                 // TODO: notify onboard completed
               },
