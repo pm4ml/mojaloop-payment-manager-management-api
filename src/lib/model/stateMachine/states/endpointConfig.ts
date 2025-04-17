@@ -53,6 +53,8 @@ export namespace EndpointConfig {
                   id: 'uploadIPWhitelist',
                   logger: opts.logger,
                   retryInterval: opts.refreshIntervalSeconds * 1000,
+                  machine: 'ENDPOINT_CONFIG',
+                  state: 'propagatingEndpointConfig',
                   service: async () =>
                     opts.dfspEndpointModel.create({
                       direction: 'EGRESS',
@@ -77,6 +79,8 @@ export namespace EndpointConfig {
                   id: 'uploadCallbackURL',
                   logger: opts.logger,
                   retryInterval: opts.refreshIntervalSeconds * 1000,
+                  machine: 'ENDPOINT_CONFIG',
+                  state: 'uploadingCallbackURL',
                   service: async () =>
                     opts.dfspEndpointModel.create({
                       direction: 'INGRESS',

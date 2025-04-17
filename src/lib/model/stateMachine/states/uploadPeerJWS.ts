@@ -84,6 +84,8 @@ export namespace UploadPeerJWS {
               id: 'uploadingPeerJWS',
               logger: opts.logger,
               retryInterval: opts.refreshIntervalSeconds * 1000,
+              machine: 'uploadPeerJWS',
+              state: 'uploadingPeerJWS',
               service: async () => {
                 const changesToUpload = event.data.changes.map(({ dfspId, publicKey, createdAt }) => {
                   return {

@@ -30,8 +30,7 @@ export namespace PeerJWS {
     | { type: 'FETCHING_PEER_JWS' }
     | { type: 'COMPARING_PEER_JWS' }
     | { type: 'NOTIFYING_PEER_JWS' }
-    | { type: 'COMPLETING_PEER_JWS' }
-    | { type: 'RETRYING_PEER_JWS' };
+    | { type: 'COMPLETING_PEER_JWS' };
 
   export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, Event> => ({
     id: 'getPeerJWS',
@@ -49,6 +48,8 @@ export namespace PeerJWS {
               id: 'getPeerDFSPJWSCertificates',
               logger: opts.logger,
               retryInterval: opts.refreshIntervalSeconds * 1000,
+              machine: 'PEER_JWS',
+              state: 'fetchingPeerJWS',
               service: async () => opts.dfspCertificateModel.getAllJWSCertificates(),
             }),
           onDone: 'comparePeerJWS',
@@ -106,6 +107,8 @@ export namespace PeerJWS {
               id: 'notifyPeerJWS',
               logger: opts.logger,
               retryInterval: opts.refreshIntervalSeconds * 1000,
+              machine: 'PEER_JWS',
+              state: 'notifyPeerJWS',
               service: async () => opts.ControlServer.notifyPeerJWS(ctx.peerJWS),
             }),
           onDone: {
@@ -121,7 +124,6 @@ export namespace PeerJWS {
         },
       },
       retry: {
-        entry: send('RETRYING_PEER_JWS'),
         after: {
           [opts.refreshIntervalSeconds * 1000]: { target: 'fetchingPeerJWS' },
         },

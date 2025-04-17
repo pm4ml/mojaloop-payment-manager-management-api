@@ -61,6 +61,8 @@ export namespace DfspServerCert {
               id: 'renewManagedDfspServerCert',
               logger: opts.logger,
               retryInterval: opts.refreshIntervalSeconds * 1000,
+              machine: 'DFSP_SERVER_CERT',
+              state: 'renewingManagedDfspServerCert',
               service: async () => opts.certManager!.renewServerCert(),
             }),
           onDone: {
@@ -78,6 +80,8 @@ export namespace DfspServerCert {
               id: 'createDFSPServerCert',
               logger: opts.logger,
               retryInterval: opts.refreshIntervalSeconds * 1000,
+              machine: 'DFSP_SERVER_CERT',
+              state: 'creatingDfspServerCert',
               service: async () =>
                 opts.vault.createDFSPServerCert(
                   (event as CreateDfspServerCertEvent).csr || opts.config.dfspServerCsrParameters
@@ -116,6 +120,8 @@ export namespace DfspServerCert {
               id: 'dfspServerCertUpload',
               logger: opts.logger,
               retryInterval: opts.refreshIntervalSeconds * 1000,
+              machine: 'DFSP_SERVER_CERT',
+              state: 'uploadingDfspServerCertToHub',
               service: async () => {
                 const { privateKey, ...body } = ctx.dfspServerCert!;
                 return opts.dfspCertificateModel.uploadServerCertificates(body);

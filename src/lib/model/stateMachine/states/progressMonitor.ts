@@ -68,14 +68,36 @@ export namespace ProgressMonitor {
     UPLOADING_TO_HUB: { machine: MachineName.DFSP_CA, state: ProgressState.IN_PROGRESS },
     DFSP_CA_PROPAGATED: { machine: MachineName.DFSP_CA, state: ProgressState.COMPLETED },
     // DFSP_CLIENT_CERT events
+    RECREATE_DFSP_CLIENT_CERT: { machine: MachineName.DFSP_CLIENT_CERT, state: ProgressState.IN_PROGRESS },
+    CREATING_DFSP_CSR: { machine: MachineName.DFSP_CLIENT_CERT, state: ProgressState.IN_PROGRESS },
+    UPLOADING_DFSP_CSR: { machine: MachineName.DFSP_CLIENT_CERT, state: ProgressState.IN_PROGRESS },
+    FETCHING_DFSP_CLIENT_CERT: { machine: MachineName.DFSP_CLIENT_CERT, state: ProgressState.IN_PROGRESS },
+    COMPLETING_DFSP_CLIENT_CERT: { machine: MachineName.DFSP_CLIENT_CERT, state: ProgressState.IN_PROGRESS },
     DFSP_CLIENT_CERT_CONFIGURED: { machine: MachineName.DFSP_CLIENT_CERT, state: ProgressState.COMPLETED },
     // DFSP_SERVER_CERT events
+    REQUESTING_NEW_DFSP_SERVER_CERT: { machine: MachineName.DFSP_SERVER_CERT, state: ProgressState.IN_PROGRESS },
+    RENEWING_MANAGED_DFSP_SERVER_CERT: { machine: MachineName.DFSP_SERVER_CERT, state: ProgressState.IN_PROGRESS },
+    CREATING_DFSP_SERVER_CERT: { machine: MachineName.DFSP_SERVER_CERT, state: ProgressState.IN_PROGRESS },
+    UPLOADING_DFSP_SERVER_CERT_TO_HUB: { machine: MachineName.DFSP_SERVER_CERT, state: ProgressState.IN_PROGRESS },
     DFSP_SERVER_CERT_CONFIGURED: { machine: MachineName.DFSP_SERVER_CERT, state: ProgressState.COMPLETED },
     // HUB_CERT events
+    RESETTING_HUB_CLIENT_CERTS: { machine: MachineName.HUB_CERT, state: ProgressState.IN_PROGRESS },
+    FETCHING_HUB_CSR: { machine: MachineName.HUB_CERT, state: ProgressState.IN_PROGRESS },
+    UPDATING_HUB_CSR: { machine: MachineName.HUB_CERT, state: ProgressState.IN_PROGRESS },
+    SIGNING_HUB_CSR: { machine: MachineName.HUB_CERT, state: ProgressState.IN_PROGRESS },
+    UPLOADING_HUB_CERT: { machine: MachineName.HUB_CERT, state: ProgressState.IN_PROGRESS },
+    COMPLETING_HUB_CLIENT_CERT: { machine: MachineName.HUB_CERT, state: ProgressState.IN_PROGRESS },
     HUB_CLIENT_CERT_SIGNED: { machine: MachineName.HUB_CERT, state: ProgressState.COMPLETED },
     // PEER_JWS events
+    FETCHING_PEER_JWS: { machine: MachineName.PEER_JWS, state: ProgressState.IN_PROGRESS },
+    COMPARING_PEER_JWS: { machine: MachineName.PEER_JWS, state: ProgressState.IN_PROGRESS },
+    NOTIFYING_PEER_JWS: { machine: MachineName.PEER_JWS, state: ProgressState.IN_PROGRESS },
+    COMPLETING_PEER_JWS: { machine: MachineName.PEER_JWS, state: ProgressState.IN_PROGRESS },
     PEER_JWS_CONFIGURED: { machine: MachineName.PEER_JWS, state: ProgressState.COMPLETED },
     // DFSP_JWS events
+    CREATING_DFSP_JWS: { machine: MachineName.DFSP_JWS, state: ProgressState.IN_PROGRESS },
+    UPLOADING_DFSP_JWS_TO_HUB: { machine: MachineName.DFSP_JWS, state: ProgressState.IN_PROGRESS },
+    DFSP_JWS_IDLE: { machine: MachineName.DFSP_JWS, state: ProgressState.IN_PROGRESS },
     DFSP_JWS_PROPAGATED: { machine: MachineName.DFSP_JWS, state: ProgressState.COMPLETED },
     // ENDPOINT_CONFIG events
     ENDPOINT_CONFIG_PROPAGATED: { machine: MachineName.ENDPOINT_CONFIG, state: ProgressState.COMPLETED },

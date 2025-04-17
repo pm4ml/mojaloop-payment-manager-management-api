@@ -26,14 +26,12 @@ export namespace HubCert {
   export type Event =
     | DoneEventObject
     | { type: 'HUB_CLIENT_CERT_SIGNED' }
-    | { type: 'HUB_CLIENT_CERT_IDLE' }
     | { type: 'RESETTING_HUB_CLIENT_CERTS' }
     | { type: 'FETCHING_HUB_CSR' }
     | { type: 'UPDATING_HUB_CSR' }
     | { type: 'SIGNING_HUB_CSR' }
     | { type: 'UPLOADING_HUB_CERT' }
-    | { type: 'COMPLETING_HUB_CLIENT_CERT' }
-    | { type: 'RETRYING_HUB_CLIENT_CERT' };
+    | { type: 'COMPLETING_HUB_CLIENT_CERT' };
 
   export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, Event> => ({
     id: 'hubClientCert',
@@ -42,7 +40,7 @@ export namespace HubCert {
       DFSP_CA_PROPAGATED: { target: '.resettingHubClientCerts', internal: false },
     },
     states: {
-      idle: { entry: send('HUB_CLIENT_CERT_IDLE') },
+      idle: {},
       resettingHubClientCerts: {
         entry: send('RESETTING_HUB_CLIENT_CERTS'),
         always: {
@@ -59,6 +57,8 @@ export namespace HubCert {
               id: 'getUnprocessedHubCSRs',
               logger: opts.logger,
               retryInterval: opts.refreshIntervalSeconds * 1000,
+              machine: 'HUB_CLIENT_CERT',
+              state: 'fetchingHubCSR',
               service: async () => opts.hubCertificateModel.getClientCerts(),
             }),
           onDone: [
@@ -108,6 +108,8 @@ export namespace HubCert {
               id: 'signHubCSRs',
               logger: opts.logger,
               retryInterval: opts.refreshIntervalSeconds * 1000,
+              machine: 'HUB_CLIENT_CERT',
+              state: 'signingHubCSR',
               service: () =>
                 Promise.all(
                   ctx.hubClientCerts!.map(async (hubCert) => {
@@ -129,6 +131,8 @@ export namespace HubCert {
               id: 'uploadHubCert',
               logger: opts.logger,
               retryInterval: opts.refreshIntervalSeconds * 1000,
+              machine: 'HUB_CLIENT_CERT',
+              state: 'uploadingHubCert',
               service: () =>
                 Promise.all(
                   ctx.hubClientCerts!.map((cert) =>
@@ -152,7 +156,6 @@ export namespace HubCert {
         },
       },
       retry: {
-        entry: send('RETRYING_HUB_CLIENT_CERT'),
         after: {
           [opts.refreshIntervalSeconds * 1000]: { target: 'fetchingHubCSR' },
         },
