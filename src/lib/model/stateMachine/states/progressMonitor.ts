@@ -22,6 +22,9 @@ export namespace ProgressMonitor {
   export interface ProgressMonitorEntry {
     value: ProgressState;
     lastUpdated: Date | null;
+    retries?: number;
+    error?: string;
+    description?: string;
   }
 
   export interface Context {
@@ -48,7 +51,7 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            HUB_CA: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            HUB_CA: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date(), description: `Fetching Hub CA` },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -58,7 +61,11 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            HUB_CA: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            HUB_CA: {
+              value: ProgressState.IN_PROGRESS,
+              lastUpdated: new Date(),
+              description: `Checking for new Hub CA`,
+            },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -68,7 +75,11 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            HUB_CA: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            HUB_CA: {
+              value: ProgressState.IN_PROGRESS,
+              lastUpdated: new Date(),
+              description: 'Retrying for New Hub CA',
+            },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -78,7 +89,7 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            HUB_CA: { value: ProgressState.COMPLETED, lastUpdated: new Date() },
+            HUB_CA: { value: ProgressState.COMPLETED, lastUpdated: new Date(), description: 'New Hub CA fetched' },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -89,7 +100,7 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            DFSP_CA: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            DFSP_CA: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date(), description: `Fetching prebuilt CA` },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -99,7 +110,7 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            DFSP_CA: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            DFSP_CA: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date(), description: `Creating Internal CA` },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -109,7 +120,7 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            DFSP_CA: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            DFSP_CA: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date(), description: `Creating External CA` },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -119,7 +130,11 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            DFSP_CA: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            DFSP_CA: {
+              value: ProgressState.IN_PROGRESS,
+              lastUpdated: new Date(),
+              description: `Uploading DFSP CA to hub`,
+            },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -129,7 +144,11 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            DFSP_CA: { value: ProgressState.COMPLETED, lastUpdated: new Date() },
+            DFSP_CA: {
+              value: ProgressState.COMPLETED,
+              lastUpdated: new Date(),
+              description: `DFSP CA propagated to Hub`,
+            },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -140,7 +159,11 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            DFSP_CLIENT_CERT: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            DFSP_CLIENT_CERT: {
+              value: ProgressState.IN_PROGRESS,
+              lastUpdated: new Date(),
+              description: `Creating DFSP CSR`,
+            },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -150,7 +173,11 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            DFSP_CLIENT_CERT: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            DFSP_CLIENT_CERT: {
+              value: ProgressState.IN_PROGRESS,
+              lastUpdated: new Date(),
+              description: `Uploading dfsp csr`,
+            },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -160,7 +187,11 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            DFSP_CLIENT_CERT: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            DFSP_CLIENT_CERT: {
+              value: ProgressState.IN_PROGRESS,
+              lastUpdated: new Date(),
+              description: `Fetching dfsp client certificates`,
+            },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -170,7 +201,11 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            DFSP_CLIENT_CERT: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            DFSP_CLIENT_CERT: {
+              value: ProgressState.IN_PROGRESS,
+              lastUpdated: new Date(),
+              description: `Configuring dfsp client certificates`,
+            },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -180,18 +215,42 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            DFSP_CLIENT_CERT: { value: ProgressState.COMPLETED, lastUpdated: new Date() },
+            DFSP_CLIENT_CERT: {
+              value: ProgressState.COMPLETED,
+              lastUpdated: new Date(),
+              description: `DFSP client certificates configured`,
+            },
           }),
         }) as any,
         target: '.handlingProgressChange',
         internal: false,
       },
       // dfspServerCert Events
+      DFSP_SERVER_CERT_CREATION_FAILED: {
+        actions: assign<Context>({
+          progressMonitor: (ctx, event) => ({
+            ...ctx.progressMonitor!,
+            DFSP_SERVER_CERT: {
+              value: ProgressState.IN_ERROR,
+              lastUpdated: new Date(),
+              retries: event.retries,
+              error: event.error,
+              description: `Error creating dfsp server certificates`,
+            },
+          }),
+        }) as any,
+        target: '.handlingProgressChange',
+        internal: false,
+      },
       REQUESTING_NEW_DFSP_SERVER_CERT: {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            DFSP_SERVER_CERT: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            DFSP_SERVER_CERT: {
+              value: ProgressState.IN_PROGRESS,
+              lastUpdated: new Date(),
+              description: `Requesting for new DFSP server certificates`,
+            },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -201,17 +260,40 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            DFSP_SERVER_CERT: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            DFSP_SERVER_CERT: {
+              value: ProgressState.IN_PROGRESS,
+              lastUpdated: new Date(),
+              description: `Renewing dfsp server certificates`,
+            },
           }),
         }) as any,
         target: '.handlingProgressChange',
         internal: false,
       },
+      CREATING_DFSP_SERVER_CERT: {
+        actions: assign<Context>({
+          progressMonitor: (ctx) => ({
+            ...ctx.progressMonitor!,
+            DFSP_SERVER_CERT: {
+              value: ProgressState.IN_PROGRESS,
+              lastUpdated: new Date(),
+              description: `Creating dfsp server certificates`,
+            },
+          }),
+        }) as any,
+        target: '.handlingProgressChange',
+        internal: false,
+      },
+
       UPLOADING_DFSP_SERVER_CERT_TO_HUB: {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            DFSP_SERVER_CERT: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            DFSP_SERVER_CERT: {
+              value: ProgressState.IN_PROGRESS,
+              lastUpdated: new Date(),
+              description: `Uploading dfsp server certificates to hub`,
+            },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -221,7 +303,11 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            DFSP_SERVER_CERT: { value: ProgressState.COMPLETED, lastUpdated: new Date() },
+            DFSP_SERVER_CERT: {
+              value: ProgressState.COMPLETED,
+              lastUpdated: new Date(),
+              description: `Dfsp server certificates configured`,
+            },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -232,7 +318,11 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            HUB_CERT: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            HUB_CERT: {
+              value: ProgressState.IN_PROGRESS,
+              lastUpdated: new Date(),
+              description: `Resetting hub client certificates`,
+            },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -242,7 +332,7 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            HUB_CERT: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            HUB_CERT: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date(), description: `Fetching hub csr` },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -252,7 +342,7 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            HUB_CERT: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            HUB_CERT: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date(), description: `Updating hub CSR` },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -262,7 +352,7 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            HUB_CERT: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            HUB_CERT: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date(), description: `Signing Hub CSR` },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -272,7 +362,11 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            HUB_CERT: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            HUB_CERT: {
+              value: ProgressState.IN_PROGRESS,
+              lastUpdated: new Date(),
+              description: `Uploading Hub certificates`,
+            },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -282,7 +376,11 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            HUB_CERT: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            HUB_CERT: {
+              value: ProgressState.IN_PROGRESS,
+              lastUpdated: new Date(),
+              description: `Completing the hub client certificates`,
+            },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -292,7 +390,11 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            HUB_CERT: { value: ProgressState.COMPLETED, lastUpdated: new Date() },
+            HUB_CERT: {
+              value: ProgressState.COMPLETED,
+              lastUpdated: new Date(),
+              description: `Hub client certificates signed`,
+            },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -303,7 +405,11 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            PEER_JWS: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            PEER_JWS: {
+              value: ProgressState.IN_PROGRESS,
+              lastUpdated: new Date(),
+              description: `Fetchign JWS of peers`,
+            },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -313,7 +419,7 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            PEER_JWS: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            PEER_JWS: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date(), description: `Comparing Peer JWS` },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -323,7 +429,11 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            PEER_JWS: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            PEER_JWS: {
+              value: ProgressState.IN_PROGRESS,
+              lastUpdated: new Date(),
+              description: `Notifying the peer JWS`,
+            },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -333,7 +443,7 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            PEER_JWS: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            PEER_JWS: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date(), description: `Completing Peer JWS` },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -343,7 +453,7 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            PEER_JWS: { value: ProgressState.COMPLETED, lastUpdated: new Date() },
+            PEER_JWS: { value: ProgressState.COMPLETED, lastUpdated: new Date(), description: `Peer JWS configured` },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -354,7 +464,7 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            DFSP_JWS: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            DFSP_JWS: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date(), description: `Creating DFSP JWS` },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -364,7 +474,11 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            DFSP_JWS: { value: ProgressState.IN_PROGRESS, lastUpdated: new Date() },
+            DFSP_JWS: {
+              value: ProgressState.IN_PROGRESS,
+              lastUpdated: new Date(),
+              description: `Uploading DFSP JWS to Hub`,
+            },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -374,7 +488,7 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            DFSP_JWS: { value: ProgressState.COMPLETED, lastUpdated: new Date() },
+            DFSP_JWS: { value: ProgressState.COMPLETED, lastUpdated: new Date(), description: `DFSP JWS propagated` },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -385,7 +499,11 @@ export namespace ProgressMonitor {
         actions: assign<Context>({
           progressMonitor: (ctx) => ({
             ...ctx.progressMonitor!,
-            ENDPOINT_CONFIG: { value: ProgressState.COMPLETED, lastUpdated: new Date() },
+            ENDPOINT_CONFIG: {
+              value: ProgressState.COMPLETED,
+              lastUpdated: new Date(),
+              description: `Endpoint config propagated`,
+            },
           }),
         }) as any,
         target: '.handlingProgressChange',
@@ -397,14 +515,26 @@ export namespace ProgressMonitor {
         always: {
           actions: assign({
             progressMonitor: () => ({
-              PEER_JWS: { value: ProgressState.PENDING, lastUpdated: null },
-              DFSP_JWS: { value: ProgressState.PENDING, lastUpdated: null },
-              DFSP_CA: { value: ProgressState.PENDING, lastUpdated: null },
-              DFSP_SERVER_CERT: { value: ProgressState.PENDING, lastUpdated: null },
-              DFSP_CLIENT_CERT: { value: ProgressState.PENDING, lastUpdated: null },
-              HUB_CA: { value: ProgressState.PENDING, lastUpdated: null },
-              HUB_CERT: { value: ProgressState.PENDING, lastUpdated: null },
-              ENDPOINT_CONFIG: { value: ProgressState.PENDING, lastUpdated: null },
+              PEER_JWS: { value: ProgressState.PENDING, lastUpdated: null, description: `Service not initialized` },
+              DFSP_JWS: { value: ProgressState.PENDING, lastUpdated: null, description: `Service not initialized` },
+              DFSP_CA: { value: ProgressState.PENDING, lastUpdated: null, description: `Service not initialized` },
+              DFSP_SERVER_CERT: {
+                value: ProgressState.PENDING,
+                lastUpdated: null,
+                description: `Service not initialized`,
+              },
+              DFSP_CLIENT_CERT: {
+                value: ProgressState.PENDING,
+                lastUpdated: null,
+                description: `Service not initialized`,
+              },
+              HUB_CA: { value: ProgressState.PENDING, lastUpdated: null, description: `Service not initialized` },
+              HUB_CERT: { value: ProgressState.PENDING, lastUpdated: null, description: `Service not initialized` },
+              ENDPOINT_CONFIG: {
+                value: ProgressState.PENDING,
+                lastUpdated: null,
+                description: `Service not initialized`,
+              },
             }),
           }) as any,
           target: 'idle',
