@@ -36,9 +36,13 @@ const getStates = async (ctx) => {
 };
 
 const recreateCerts = async (ctx) => {
-  console.log('Headers are ', ctx.request.headers);
   const securityType = ctx.params.SecurityType;
-  const reason = ctx.request.body.reason;
+  if (securityType === 'outboundTLS') {
+    console.log('Sending this', securityType);
+    ctx.state.stateMachine.sendEvent('RECREATE_CLIENT_CERT');
+  }
+  if (securityType === 'JWS') ctx.state.stateMachine.sendEvent('RECREATE_JWS');
+  // const reason = ctx.request.body.reason;
   ctx.body = { status: 'ok' };
 };
 

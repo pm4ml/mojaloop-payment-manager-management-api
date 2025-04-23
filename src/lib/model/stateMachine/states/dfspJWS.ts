@@ -11,6 +11,7 @@
 import { assign, send, MachineConfig, DoneEventObject } from 'xstate';
 import { MachineOpts } from './MachineOpts';
 import { invokeRetry } from './invokeRetry';
+import { stop } from 'xstate/lib/actions';
 
 export namespace DfspJWS {
   export type Context = {
@@ -23,6 +24,7 @@ export namespace DfspJWS {
 
   export type Event =
     | DoneEventObject
+    | { type: 'RECREATE_JWS' }
     | { type: 'CREATE_JWS' | 'DFSP_JWS_PROPAGATED' }
     | { type: 'CREATING_DFSP_JWS' }
     | { type: 'UPLOADING_DFSP_JWS_TO_HUB' };
@@ -31,6 +33,22 @@ export namespace DfspJWS {
     id: 'createJWS',
     initial: 'creating',
     on: {
+      RECREATE_JWS: {
+        // target: '.creating',
+        internal: false,
+        actions: [
+          stop('creating'),
+          stop('uploadingToHub'),
+          assign({
+            dfspJWS: (ctx): any => ({
+              ...ctx.dfspJWS,
+              publicKey: undefined,
+              privateKey: undefined,
+              createdAt: undefined,
+            }),
+          }),
+        ],
+      },
       CREATE_JWS: { target: '.creating', internal: false },
     },
     states: {

@@ -11,6 +11,7 @@
 import { AnyEventObject, assign, DoneEventObject, MachineConfig, send } from 'xstate';
 import { MachineOpts } from './MachineOpts';
 import { invokeRetry } from './invokeRetry';
+import { stop } from 'xstate/lib/actions';
 
 export namespace DfspClientCert {
   export interface Context {
@@ -38,7 +39,28 @@ export namespace DfspClientCert {
   export const createState = <TContext extends Context>(opts: MachineOpts): MachineConfig<TContext, any, Event> => ({
     id: 'dfspClientCert',
     initial: 'creatingDfspCsr',
+    on: {
+      RECREATE_DFSP_CLIENT_CERT: {
+        actions: [
+          stop('createCsr'),
+          stop('uploadCsr'),
+          stop('getDfspClientCert'),
+          assign({
+            dfspClientCert: (ctx): any => ({
+              ...ctx.dfspClientCert,
+              id: undefined,
+              privateKey: undefined,
+              csr: undefined,
+              cert: undefined,
+            }),
+          }),
+        ],
+        target: 'idle',
+        internal: false,
+      },
+    },
     states: {
+      idle: {},
       creatingDfspCsr: {
         entry: send('CREATING_DFSP_CSR'),
         invoke: {
