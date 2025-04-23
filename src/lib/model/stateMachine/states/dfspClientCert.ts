@@ -54,13 +54,25 @@ export namespace DfspClientCert {
               cert: undefined,
             }),
           }),
+          send({
+            type: 'UPDATE_CONNECTOR_CONFIG',
+            config: {
+              outbound: {
+                tls: {
+                  creds: {
+                    cert: undefined,
+                    key: undefined,
+                  },
+                },
+              },
+            },
+          }),
         ],
-        target: 'idle',
+        target: '.creatingDfspCsr',
         internal: false,
       },
     },
     states: {
-      idle: {},
       creatingDfspCsr: {
         entry: send('CREATING_DFSP_CSR'),
         invoke: {

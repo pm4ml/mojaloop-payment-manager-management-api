@@ -34,7 +34,7 @@ export namespace DfspJWS {
     initial: 'creating',
     on: {
       RECREATE_JWS: {
-        // target: '.creating',
+        target: '.creating',
         internal: false,
         actions: [
           stop('creating'),
