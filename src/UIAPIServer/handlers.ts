@@ -37,12 +37,12 @@ const getStates = async (ctx) => {
 
 const recreateCerts = async (ctx) => {
   const securityType = ctx.params.SecurityType;
+  ctx.state.logger.log(`Reason for recreating is ${ctx.request.body.reason}`);
   if (securityType === 'outboundTLS') {
     ctx.state.stateMachine.sendEvent('RECREATE_DFSP_CLIENT_CERT');
   }
   if (securityType === 'JWS') ctx.state.stateMachine.sendEvent('RECREATE_JWS');
-  // const reason = ctx.request.body.reason;
-  ctx.body = { status: 'ok' };
+  ctx.body = { status: 'SUCCESS' };
 };
 
 const getDfspStatus = async (ctx) => {
