@@ -709,7 +709,7 @@ paths:
       parameters:
         - name: X-User
           in: header
-          required: true
+          required: false
           schema:
             type: string
         - name: SecurityType
