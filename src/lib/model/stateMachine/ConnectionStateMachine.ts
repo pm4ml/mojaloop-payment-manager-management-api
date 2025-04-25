@@ -120,7 +120,6 @@ class ConnectionStateMachine {
   }
 
   public sendEvent(event: Event) {
-    console.log('Sending this event', event);
     this.service.send(event);
   }
 
