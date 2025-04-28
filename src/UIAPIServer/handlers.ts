@@ -25,7 +25,8 @@ const getStates = async (ctx) => {
     };
     acc[key] = {
       status: status,
-      stateDescription: `${stateDescription} (Last Updated: ${new Date(lastUpdated).toISOString()})`,
+      stateDescription: stateDescription,
+      lastUpdated: new Date(lastUpdated).toISOString(),
       errorDescription: error ? `${error}` : ``,
     };
 
