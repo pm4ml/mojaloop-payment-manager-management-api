@@ -11,7 +11,14 @@
 import { DFSP, MonetaryZone, Transfer } from '../lib/model';
 
 const healthCheck = async (ctx) => {
-  ctx.body = { status: 'ok' };
+  const vaultHealthCheck = await ctx.state.vault.healthCheck();
+  const controlServerHealthCheck = await ctx.state.controlServer.healthCheck();
+  const status = vaultHealthCheck?.status != 'DOWN' && controlServerHealthCheck.server.running ? 'OK' : 'DOWN';
+  ctx.body = {
+    status,
+    vault: vaultHealthCheck,
+    controlServer: controlServerHealthCheck,
+  };
 };
 
 const getStates = async (ctx) => {

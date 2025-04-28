@@ -20,7 +20,7 @@ import { Logger } from '@mojaloop/sdk-standard-components';
 
 import middlewares from '../UIAPIServer/middlewares';
 import { IConfig } from '../config';
-import { ConnectionStateMachine } from '../lib/model';
+import { ConnectionStateMachine } from '@pm4ml/mcm-client';
 import { createHandlers } from './handlers';
 
 interface TestServerOptions {
@@ -30,7 +30,11 @@ interface TestServerOptions {
 }
 
 class TestServer {
-  private constructor(private server: http.Server, private logger: Logger.Logger, private port: number) {}
+  private constructor(
+    private server: http.Server,
+    private logger: Logger.Logger,
+    private port: number,
+  ) {}
 
   static async create(opts: TestServerOptions) {
     const api = new Koa();

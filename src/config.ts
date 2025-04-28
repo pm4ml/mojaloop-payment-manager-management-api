@@ -89,6 +89,7 @@ const cfg = {
   enableCors: env.get('ENABLE_CORS').default('false').asBool(),
 
   enableUiApiServer: env.get('ENABLE_UI_API_SERVER').default('true').asBool(),
+  disableUIApiCache: env.get('DISABLE_UI_API_CACHE').default('false').asBool(),
   cacheUrl: env.get('CACHE_URL').default('redis://redis:6379').asUrlString(),
   cacheSyncInterval: env.get('CACHE_SYNC_INTERVAL_SECONDS').default(30).asIntPositive(),
 

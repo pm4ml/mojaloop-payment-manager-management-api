@@ -17,19 +17,16 @@ class DFSP {
   private _mcmDFSPConfigModel: DFSPConfigModel;
   private _endpointModel: DFSPEndpointModel;
 
-  constructor(opts) {
-    this._logger = opts.logger;
-    this._dfspId = opts.dfspId;
-    this._mcmDFSPConfigModel = new DFSPConfigModel({
-      dfspId: opts.dfspId,
-      logger: opts.logger,
-      hubEndpoint: opts.mcmServerEndpoint,
-    });
-    this._endpointModel = new DFSPEndpointModel({
-      dfspId: opts.dfspId,
-      logger: opts.logger,
-      hubEndpoint: opts.mcmServerEndpoint,
-    });
+  constructor({ logger, dfspId, mcmServerEndpoint }) {
+    this._logger = logger;
+
+    this._dfspId = dfspId;
+
+    this._mcmDFSPConfigModel = new DFSPConfigModel({ dfspId, logger, hubEndpoint: mcmServerEndpoint });
+
+    this._endpointModel = new DFSPEndpointModel({ dfspId, logger, hubEndpoint: mcmServerEndpoint });
+
+    this._mcmDFSPConfigModel.dfspId = dfspId;
   }
 
   static _convertToApiFormat(dfsp) {

@@ -19,10 +19,10 @@ import assert from 'assert';
 
 import { Logger } from '@mojaloop/sdk-standard-components';
 
-import Vault from '../lib/vault';
+import { Vault, ControlServer } from '@pm4ml/mcm-client';
 import { MemoryCache } from '../lib/cacheDatabase';
 import { IConfig } from '../config';
-import { ConnectionStateMachine } from '../lib/model';
+import { ConnectionStateMachine } from '@pm4ml/mcm-client';
 import { createHandlers } from './handlers';
 import middlewares from './middlewares';
 
@@ -32,10 +32,11 @@ interface UIAPIServerOptions {
   db: MemoryCache;
   stateMachine: ConnectionStateMachine;
   port: number;
+  controlServer: ControlServer;
 }
 
 class UIAPIServer {
-  private constructor(private server: http.Server, private logger: Logger.Logger, private port: number) { }
+  private constructor(private server: http.Server, private logger: Logger.Logger, private port: number) {}
 
   static async create(opts: UIAPIServerOptions) {
     const api = new Koa();
@@ -57,6 +58,7 @@ class UIAPIServer {
         db: opts.db,
         vault: opts.vault,
         stateMachine: opts.stateMachine,
+        controlServer: opts.controlServer,
       };
       await next();
     });

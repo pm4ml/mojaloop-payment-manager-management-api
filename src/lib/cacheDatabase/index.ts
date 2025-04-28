@@ -94,11 +94,19 @@ async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
     }
 
     if (data.direction === 'INBOUND') {
-      if (data.quoteResponse?.body) {
-        data.quoteResponse.body = JSON.parse(data.quoteResponse.body);
+      if (data.quoteResponse?.body && typeof data.quoteResponse.body === 'string') {
+        try {
+          data.quoteResponse.body = JSON.parse(data.quoteResponse.body);
+        } catch (err) {
+          logger.push({ err, quoteResponse: data.quoteResponse }).warn('Error parsing quoteResponse body');
+        }
       }
-      if (data.fulfil?.body) {
-        data.fulfil.body = JSON.parse(data.fulfil.body);
+      if (data.fulfil?.body && typeof data.fulfil.body === 'string') {
+        try {
+          data.fulfil.body = JSON.parse(data.fulfil.body);
+        } catch (err) {
+          logger.push({ err, fulfil: data.fulfil }).warn('Error parsing fulfil body');
+        }
       }
     }
     return data;
@@ -114,7 +122,7 @@ async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
     // for now...
 
     const initiatedTimestamp = data.initiatedTimestamp ? new Date(data.initiatedTimestamp).getTime() : null;
-    const completedTimestamp = data.fulfil ? new Date(data.fulfil.body.completedTimestamp).getTime() : null;
+    const completedTimestamp = data.fulfil ? new Date(data.fulfil?.body?.completedTimestamp).getTime() : null;
 
     // the cache data model for inbound transfers is lacking some properties that make it easy to extract
     // certain information...therefore we have to find it elsewhere...
@@ -137,12 +145,12 @@ async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
         recipient_id_type: data.quoteRequest?.body?.payee?.partyIdInfo?.partyIdType,
         recipient_id_sub_value: data.quoteRequest?.body?.payee?.partyIdInfo?.partySubIdOrType,
         recipient_id_value: data.quoteRequest?.body?.payee?.partyIdInfo?.partyIdentifier,
-        amount: data.quoteResponse?.body?.transferAmount.amount,
-        currency: data.quoteResponse?.body?.transferAmount.currency,
+        amount: data.quoteResponse?.body?.transferAmount?.amount,
+        currency: data.quoteResponse?.body?.transferAmount?.currency,
         direction: -1,
         batch_id: '',
         details: data.quoteRequest?.body?.note,
-        dfsp: data.quoteRequest?.body?.payer?.partyIdInfo.fspId,
+        dfsp: data.quoteRequest?.body?.payer?.partyIdInfo?.fspId,
 
         success: getInboundTransferStatus(data),
       }),
