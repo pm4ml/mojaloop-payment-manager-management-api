@@ -9,16 +9,16 @@
  ************************************************************************* */
 
 import * as k8s from '@kubernetes/client-node';
-import { Logger } from '@mojaloop/sdk-standard-components';
+import Logger from '@app/lib/logger';
 
 export interface CertManagerOpts {
-  logger: Logger.Logger;
+  logger: Logger;
   serverCertSecretName: string;
   serverCertSecretNamespace: string;
 }
 
 class CertManager {
-  private logger: Logger.Logger;
+  private logger: Logger;
   private serverCertSecretName: string;
   private serverCertSecretNamespace: string;
   private kc: k8s.KubeConfig;

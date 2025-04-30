@@ -11,6 +11,7 @@
 import * as redis from 'redis';
 import assert from 'assert';
 import SDK from '@mojaloop/sdk-standard-components';
+import Logger from '@app/lib/logger';
 
 /**
  * A shared cache abstraction over a REDIS distributed key/value store
@@ -18,13 +19,13 @@ import SDK from '@mojaloop/sdk-standard-components';
 
 interface CacheOpts {
   cacheUrl: string;
-  logger: SDK.Logger.Logger;
+  logger: Logger;
 }
 
 class Cache {
   private client?: ReturnType<typeof redis.createClient>;
   private url: string;
-  private logger: SDK.Logger.Logger;
+  private logger: Logger;
 
   constructor(opts: CacheOpts) {
     this.url = opts.cacheUrl;

@@ -7,9 +7,9 @@
  *  ORIGINAL AUTHOR:                                                      *
  *       Murthy Kakarlamudi - murthy@modusbox.com                   *
  **************************************************************************/
-import SDKStandardComponents from '@mojaloop/sdk-standard-components';
+
 import { DFSPConfigModel, DFSPEndpointModel } from '@pm4ml/mcm-client';
-import Logger = SDKStandardComponents.Logger.Logger;
+import Logger from '@app/lib/logger';
 
 class DFSP {
   private _logger: Logger;

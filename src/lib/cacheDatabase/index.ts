@@ -13,7 +13,7 @@
 
 import knex, { Knex } from 'knex';
 import Cache from './cache';
-import SDK from '@mojaloop/sdk-standard-components';
+import Logger from '@app/lib/logger';
 
 const cachedFulfilledKeys: string[] = [];
 const cachedPendingKeys: string[] = [];
@@ -77,7 +77,7 @@ const getPartyNameFromQuoteRequest = (qr: any, partyType: any) => {
 interface SyncDBOpts {
   redisCache: Cache;
   db: Knex;
-  logger: SDK.Logger.Logger;
+  logger: Logger;
 }
 
 async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
@@ -89,7 +89,7 @@ async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
       try {
         data = JSON.parse(rawData);
       } catch (err) {
-        logger.push({ err }).log('Error parsing JSON cache value');
+        logger.warn('Error parsing JSON cache value: ', err);
       }
     }
 
@@ -98,14 +98,14 @@ async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
         try {
           data.quoteResponse.body = JSON.parse(data.quoteResponse.body);
         } catch (err) {
-          logger.push({ err, quoteResponse: data.quoteResponse }).warn('Error parsing quoteResponse body');
+          logger.push({ quoteResponse: data.quoteResponse }).warn('Error parsing quoteResponse body: ', err);
         }
       }
       if (data.fulfil?.body && typeof data.fulfil.body === 'string') {
         try {
           data.fulfil.body = JSON.parse(data.fulfil.body);
         } catch (err) {
-          logger.push({ err, fulfil: data.fulfil }).warn('Error parsing fulfil body');
+          logger.push({ fulfil: data.fulfil }).warn('Error parsing fulfil body: ', err);
         }
       }
     }
@@ -201,7 +201,7 @@ async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
 }
 
 interface MemoryCacheOpts {
-  logger: SDK.Logger.Logger;
+  logger: Logger;
   cacheUrl: string;
   manualSync?: boolean;
   syncInterval?: number;

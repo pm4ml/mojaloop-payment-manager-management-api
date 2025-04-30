@@ -9,8 +9,6 @@
  **************************************************************************/
 
 import process from 'node:process';
-import { hostname } from 'node:os';
-import { Logger } from '@mojaloop/sdk-standard-components';
 import {
   AuthModel,
   DFSPCertificateModel,
@@ -22,6 +20,7 @@ import {
   ControlServer,
 } from '@pm4ml/mcm-client';
 
+import Logger from '@app/lib/logger';
 import config from './config';
 import { createMemoryCache } from './lib/cacheDatabase';
 import TestServer from './TestServer';
@@ -35,16 +34,9 @@ const LOG_ID = {
 };
 
 (async () => {
-  const logger = new Logger.Logger({
-    ctx: {
-      // If we're running from a Mojaloop helm chart deployment, we'll have a SIM_NAME
-      simulator: process.env.SIM_NAME,
-      hostname: hostname(),
-    },
-    stringify: Logger.buildStringify({ space: config.logIndent }) as Logger.Stringify,
-  });
+  const logger = new Logger();
 
-  logger.push({ config: JSON.stringify(config) }).info('config');
+  logger.push({ config }).info('config');
 
   const authModel = new AuthModel({
     logger,

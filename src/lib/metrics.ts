@@ -1,7 +1,7 @@
 import { createServer, IncomingMessage, ServerResponse } from 'node:http';
 import stoppable from 'stoppable';
 import mlMetrics from '@mojaloop/central-services-metrics';
-import { Logger } from '@mojaloop/sdk-standard-components';
+import Logger from '@app/lib/logger';
 
 const METRICS_ROUTE = '/metrics';
 
@@ -17,7 +17,7 @@ type MetricsOptions = {
     prefix: string;
     defaultLabels?: Record<string, string>;
   };
-  logger: Logger.Logger;
+  logger: Logger;
 };
 
 export const createMetricsServer = ({ port, config, logger }: MetricsOptions): MetricsServer => {
@@ -52,7 +52,7 @@ export const createMetricsServer = ({ port, config, logger }: MetricsOptions): M
       new Promise((resolve) => {
         server.stop((err) => {
           if (err) {
-            logger.push({ err }).error('metrics-server failed to stop');
+            logger.warn('metrics-server failed to stop: ', err);
             resolve(false);
           } else {
             logger.log('metrics-server stopped successfully');
