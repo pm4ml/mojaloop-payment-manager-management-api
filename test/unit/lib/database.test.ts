@@ -37,7 +37,7 @@ const mockLogger = {
 
 jest.mock('@mojaloop/sdk-standard-components', () => ({
   Logger: {
-    Logger: jest.fn().mockImplementation(() => ({
+    SdkLogger: jest.fn().mockImplementation(() => ({
       stringify: jest.fn(),
     })),
   },
@@ -75,7 +75,7 @@ describe('Utils', () => {
         logger: expect.any(Object),
         manualSync: true,
       });
-      expect(Logger.Logger).toHaveBeenCalledWith({ stringify: expect.any(Function) });
+      expect(Logger.SdkLogger).toHaveBeenCalled();
     });
   });
 

@@ -1,6 +1,6 @@
 import SDK from '@mojaloop/sdk-standard-components';
 
-class Logger extends SDK.Logger.Logger {
+class Logger extends SDK.Logger.SdkLogger {
   constructor() {
     super({
       ctx: {

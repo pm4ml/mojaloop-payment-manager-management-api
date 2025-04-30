@@ -11,7 +11,7 @@ describe('MonetaryZone', () => {
   let monetaryZone;
 
   beforeEach(() => {
-    mockLogger = new SDKStandardComponents.Logger.Logger();
+    mockLogger = new SDKStandardComponents.Logger.SdkLogger();
     mockMcmServerEndpoint = 'http://mock-endpoint';
     monetaryZone = new MonetaryZone({
       logger: mockLogger,

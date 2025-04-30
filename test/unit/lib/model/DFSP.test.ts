@@ -2,7 +2,7 @@ import 'jest';
 import DFSP from '../../../../src/lib/model/DFSP';
 import { DFSPConfigModel, DFSPEndpointModel } from '@pm4ml/mcm-client';
 import SDKStandardComponents from '@mojaloop/sdk-standard-components';
-import Logger = SDKStandardComponents.Logger.Logger;
+import Logger = SDKStandardComponents.Logger.SdkLogger;
 
 describe('DFSP Class', () => {
   const logger = new Logger({ stringify: true });
