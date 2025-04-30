@@ -13,7 +13,7 @@
 
 import knex, { Knex } from 'knex';
 import Cache from './cache';
-import Logger from '@app/lib/logger';
+import Logger from '../logger';
 
 const cachedFulfilledKeys: string[] = [];
 const cachedPendingKeys: string[] = [];

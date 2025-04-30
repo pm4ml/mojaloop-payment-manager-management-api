@@ -10,7 +10,7 @@
 
 import * as redis from 'redis';
 import assert from 'assert';
-import Logger from '@app/lib/logger';
+import Logger from '../logger';
 
 /**
  * A shared cache abstraction over a REDIS distributed key/value store

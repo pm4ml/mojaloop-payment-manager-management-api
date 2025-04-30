@@ -16,7 +16,7 @@ import http from 'http';
 import path from 'path';
 import assert from 'assert';
 
-import Logger from '@app/lib/logger';
+import Logger from '../lib/logger';
 
 import middlewares from '../UIAPIServer/middlewares';
 import { IConfig } from '../config';

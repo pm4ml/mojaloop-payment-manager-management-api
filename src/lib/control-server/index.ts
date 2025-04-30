@@ -12,7 +12,7 @@
  ************************************************************************* */
 import ws from 'ws';
 import jsonPatch from 'fast-json-patch';
-import Logger from '@app/lib/logger';
+import Logger from '../logger';
 import randomPhrase from '../../lib/randomphrase';
 
 /** ************************************************************************

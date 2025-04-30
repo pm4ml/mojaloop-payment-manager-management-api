@@ -20,7 +20,7 @@ import {
   ControlServer,
 } from '@pm4ml/mcm-client';
 
-import Logger from '@app/lib/logger';
+import Logger from './lib/logger';
 import config from './config';
 import { createMemoryCache } from './lib/cacheDatabase';
 import TestServer from './TestServer';

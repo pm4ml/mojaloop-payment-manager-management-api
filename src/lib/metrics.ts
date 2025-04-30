@@ -1,7 +1,7 @@
 import { createServer, IncomingMessage, ServerResponse } from 'node:http';
 import stoppable from 'stoppable';
 import mlMetrics from '@mojaloop/central-services-metrics';
-import Logger from '@app/lib/logger';
+import Logger from '../lib/logger';
 
 const METRICS_ROUTE = '/metrics';
 

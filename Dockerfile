@@ -6,7 +6,7 @@ RUN apk add --no-cache git python3 build-base
 WORKDIR /opt/app
 
 ## Copy basic files for installing dependencies
-COPY tsconfig.json tsup.config.ts package*.json /opt/app/
+COPY tsconfig.json package*.json /opt/app/
 RUN npm ci
 COPY src /opt/app/src
 

@@ -9,7 +9,7 @@
  ************************************************************************* */
 
 import * as k8s from '@kubernetes/client-node';
-import Logger from '@app/lib/logger';
+import Logger from '../logger';
 
 export interface CertManagerOpts {
   logger: Logger;
