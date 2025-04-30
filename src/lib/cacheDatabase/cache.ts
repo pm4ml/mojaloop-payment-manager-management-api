@@ -10,7 +10,6 @@
 
 import * as redis from 'redis';
 import assert from 'assert';
-import SDK from '@mojaloop/sdk-standard-components';
 import Logger from '@app/lib/logger';
 
 /**
