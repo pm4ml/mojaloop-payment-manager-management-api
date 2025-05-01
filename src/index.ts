@@ -13,7 +13,7 @@ import {
   AuthModel,
   DFSPCertificateModel,
   DFSPEndpointModel,
-  HubCertificateModel, // with getHubJWSCertificate() method
+  HubCertificateModel,
   HubEndpointModel,
   Vault,
   ConnectionStateMachine,
