@@ -32,6 +32,9 @@ const mockLogger = {
   push: jest.fn().mockReturnThis(),
   log: jest.fn(),
   debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
 };
 
 jest.mock('@app/lib/logger', () => ({
@@ -262,7 +265,7 @@ describe('Cache', () => {
 
       expect(redis.createClient).toHaveBeenCalledWith({ url: 'redis://test-url' });
       expect(mockRedisClient.connect).toHaveBeenCalled();
-      expect(mockLogger.log).toHaveBeenCalledWith('Connected to REDIS at: redis://test-url');
+      expect(mockLogger.info).toHaveBeenCalledWith('Connected to REDIS at: redis://test-url');
     });
 
     it('should throw an error if already connected', async () => {
@@ -360,8 +363,8 @@ describe('Cache', () => {
 
       await cache.connect();
 
-      expect(mockLogger.push).toHaveBeenCalledWith({ err: expect.any(Error) });
-      expect(mockLogger.log).toHaveBeenCalledWith('Error from REDIS client getting subscriber');
+      expect(mockLogger.push).toHaveBeenCalledWith({ error: expect.any(Error) });
+      expect(mockLogger.warn).toHaveBeenCalledWith('Error from REDIS client getting subscriber');
     });
   });
 });
