@@ -8,14 +8,12 @@
  *       Yevhen Kyriukha - yevhen.kyriukha@modusbox.com                   *
  **************************************************************************/
 
-import { Logger } from '@mojaloop/sdk-standard-components';
-
+import { logger } from '@app/lib/logger';
 import { createMemoryCache } from '@app/lib/cacheDatabase';
 import transferTemplate from './data/transferTemplate.json';
 import lastError from './data/lastError.json';
 
 const createTestDb = async () => {
-  const logger = new Logger.Logger({ stringify: () => '' });
   return createMemoryCache({
     cacheUrl: 'redis://dummyhost:1234',
     logger,

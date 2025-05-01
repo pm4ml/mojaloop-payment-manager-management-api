@@ -10,7 +10,7 @@
 
 import * as redis from 'redis';
 import assert from 'assert';
-import SDK from '@mojaloop/sdk-standard-components';
+import { Logger } from '../logger';
 
 /**
  * A shared cache abstraction over a REDIS distributed key/value store
@@ -18,13 +18,13 @@ import SDK from '@mojaloop/sdk-standard-components';
 
 interface CacheOpts {
   cacheUrl: string;
-  logger: SDK.Logger.Logger;
+  logger: Logger;
 }
 
 class Cache {
   private client?: ReturnType<typeof redis.createClient>;
   private url: string;
-  private logger: SDK.Logger.Logger;
+  private logger: Logger;
 
   constructor(opts: CacheOpts) {
     this.url = opts.cacheUrl;
@@ -59,12 +59,12 @@ class Cache {
    * */
   async _getClient() {
     const client = redis.createClient({ url: this.url });
-    client.on('error', (err) => {
-      this.logger.push({ err }).log('Error from REDIS client getting subscriber');
+    client.on('error', (error) => {
+      this.logger.push({ error }).warn('Error from REDIS client getting subscriber');
     });
 
     client.on('ready', () => {
-      this.logger.log(`Connected to REDIS at: ${this.url}`);
+      this.logger.info(`Connected to REDIS at: ${this.url}`);
     });
     await client.connect();
     return client;

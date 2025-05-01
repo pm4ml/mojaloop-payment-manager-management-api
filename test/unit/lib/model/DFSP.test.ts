@@ -1,11 +1,9 @@
 import 'jest';
 import DFSP from '../../../../src/lib/model/DFSP';
 import { DFSPConfigModel, DFSPEndpointModel } from '@pm4ml/mcm-client';
-import SDKStandardComponents from '@mojaloop/sdk-standard-components';
-import Logger = SDKStandardComponents.Logger.Logger;
+import { logger } from '@app/lib/logger';
 
 describe('DFSP Class', () => {
-  const logger = new Logger({ stringify: true });
   const dfspId = 'test-dfsp';
   const mcmServerEndpoint = 'http://mock-endpoint';
 

@@ -16,7 +16,7 @@ import http from 'http';
 import path from 'path';
 import assert from 'assert';
 
-import { Logger } from '@mojaloop/sdk-standard-components';
+import { Logger, logger as globalLogger } from '../lib/logger';
 
 import middlewares from '../UIAPIServer/middlewares';
 import { IConfig } from '../config';
@@ -32,7 +32,7 @@ interface TestServerOptions {
 class TestServer {
   private constructor(
     private server: http.Server,
-    private logger: Logger.Logger,
+    private logger: Logger,
     private port: number,
   ) {}
 
@@ -71,7 +71,7 @@ class TestServer {
   async start() {
     assert(this.server);
     await new Promise<void>((resolve) => this.server.listen(this.port, resolve));
-    this.logger.log(`Serving inbound test API on port ${this.port}`);
+    this.logger.info(`Serving inbound test API on port ${this.port}`);
   }
 
   async stop() {
@@ -83,12 +83,7 @@ class TestServer {
   }
 
   static _createLogger() {
-    // Set up a logger for each running server
-    return new Logger.Logger({
-      ctx: {
-        app: 'mojaloop-payment-manager-management-api-service',
-      },
-    });
+    return globalLogger.push({});
   }
 }
 

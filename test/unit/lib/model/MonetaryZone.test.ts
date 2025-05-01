@@ -1,5 +1,5 @@
 import { MonetaryZoneModel } from '@pm4ml/mcm-client';
-import SDKStandardComponents from '@mojaloop/sdk-standard-components';
+import { logger } from '@app/lib/logger';
 import MonetaryZone from '../../../../src/lib/model/MonetaryZone';
 
 jest.mock('@pm4ml/mcm-client');
@@ -11,7 +11,7 @@ describe('MonetaryZone', () => {
   let monetaryZone;
 
   beforeEach(() => {
-    mockLogger = new SDKStandardComponents.Logger.Logger();
+    mockLogger = logger;
     mockMcmServerEndpoint = 'http://mock-endpoint';
     monetaryZone = new MonetaryZone({
       logger: mockLogger,
