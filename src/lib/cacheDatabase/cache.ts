@@ -59,12 +59,12 @@ class Cache {
    * */
   async _getClient() {
     const client = redis.createClient({ url: this.url });
-    client.on('error', (err) => {
-      this.logger.push({ err }).log('Error from REDIS client getting subscriber');
+    client.on('error', (error) => {
+      this.logger.push({ error }).warn('Error from REDIS client getting subscriber');
     });
 
     client.on('ready', () => {
-      this.logger.log(`Connected to REDIS at: ${this.url}`);
+      this.logger.info(`Connected to REDIS at: ${this.url}`);
     });
     await client.connect();
     return client;

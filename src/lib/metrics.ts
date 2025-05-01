@@ -43,7 +43,7 @@ export const createMetricsServer = ({ port, config, logger }: MetricsOptions): M
     start: async () => {
       return new Promise((resolve) => {
         server.listen(port, () => {
-          logger.log(`metrics-server is listening on port ${port}...`);
+          logger.info(`metrics-server is listening on port ${port}...`);
           resolve(true);
         });
       });

@@ -71,7 +71,7 @@ class TestServer {
   async start() {
     assert(this.server);
     await new Promise<void>((resolve) => this.server.listen(this.port, resolve));
-    this.logger.log(`Serving inbound test API on port ${this.port}`);
+    this.logger.info(`Serving inbound test API on port ${this.port}`);
   }
 
   async stop() {
