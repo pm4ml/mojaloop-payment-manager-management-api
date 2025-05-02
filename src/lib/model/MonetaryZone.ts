@@ -9,8 +9,7 @@
  **************************************************************************/
 
 import { MonetaryZoneModel } from '@pm4ml/mcm-client';
-import SDKStandardComponents from '@mojaloop/sdk-standard-components';
-import Logger = SDKStandardComponents.Logger.Logger;
+import { Logger } from '../logger';
 
 class MonetaryZone {
   private _requests: MonetaryZoneModel;

@@ -1,6 +1,6 @@
 {
   "name": "mojaloop-payment-manager-management-api-service",
-  "version": "6.5.0",
+  "version": "6.5.1",
   "private": true,
   "description": "Mojaloop Payment Manager - Management API Service",
   "main": "dist/index.js",
@@ -54,9 +54,9 @@
     "@kubernetes/client-node": "^0.16.2",
     "@mojaloop/api-snippets": "^17.7.9",
     "@mojaloop/central-services-metrics": "12.4.3",
-    "@mojaloop/sdk-standard-components": "^19.0.0",
-    "@pm4ml/mcm-client": "3.4.0",
-    "@xstate/inspect": "^0.8.0",
+    "@mojaloop/sdk-standard-components": "19.14.0",
+    "@pm4ml/mcm-client": "3.5.4",
+    "@xstate/inspect": "0.7.0",
     "ajv": "^8.17.1",
     "async-injection": "^2.0.1",
     "better-sqlite3": "^11.8.1",
@@ -83,7 +83,7 @@
     "uuid": "^11.0.5",
     "web-streams-polyfill": "^4.1.0",
     "ws": "^8.18.0",
-    "xstate": "^4.38.3"
+    "xstate": "4.35.4"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",
@@ -138,4 +138,3 @@
     }
   }
 }
-

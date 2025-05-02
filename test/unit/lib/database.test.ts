@@ -10,10 +10,9 @@
 
 jest.mock('redis');
 
-import { addTransferToCache, createTestDb } from './utils';
 import * as redis from 'redis';
 import 'jest';
-import SDK, { Logger } from '@mojaloop/sdk-standard-components';
+
 import * as CacheDatabase from '../../../src/lib/cacheDatabase';
 import Cache from '../../../src/lib/cacheDatabase/cache';
 
@@ -33,14 +32,13 @@ const mockLogger = {
   push: jest.fn().mockReturnThis(),
   log: jest.fn(),
   debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
 };
 
-jest.mock('@mojaloop/sdk-standard-components', () => ({
-  Logger: {
-    Logger: jest.fn().mockImplementation(() => ({
-      stringify: jest.fn(),
-    })),
-  },
+jest.mock('@app/lib/logger', () => ({
+  logger: mockLogger,
 }));
 
 jest.mock('../../../src/lib/cacheDatabase', () => ({
@@ -60,6 +58,9 @@ jest.mock('../../../src/lib/cacheDatabase', () => ({
   })),
 }));
 
+import { logger } from '@app/lib/logger';
+import { addTransferToCache, createTestDb } from './utils';
+
 describe('Utils', () => {
   let db;
 
@@ -75,7 +76,6 @@ describe('Utils', () => {
         logger: expect.any(Object),
         manualSync: true,
       });
-      expect(Logger.Logger).toHaveBeenCalledWith({ stringify: expect.any(Function) });
     });
   });
 
@@ -246,7 +246,7 @@ describe('Cache', () => {
     (redis.createClient as jest.Mock).mockReturnValue(mockRedisClient);
     cache = new Cache({
       cacheUrl: 'redis://test-url',
-      logger: mockLogger as unknown as SDK.Logger.Logger,
+      logger,
     });
   });
 
@@ -265,7 +265,7 @@ describe('Cache', () => {
 
       expect(redis.createClient).toHaveBeenCalledWith({ url: 'redis://test-url' });
       expect(mockRedisClient.connect).toHaveBeenCalled();
-      expect(mockLogger.log).toHaveBeenCalledWith('Connected to REDIS at: redis://test-url');
+      expect(mockLogger.info).toHaveBeenCalledWith('Connected to REDIS at: redis://test-url');
     });
 
     it('should throw an error if already connected', async () => {
@@ -363,8 +363,8 @@ describe('Cache', () => {
 
       await cache.connect();
 
-      expect(mockLogger.push).toHaveBeenCalledWith({ err: expect.any(Error) });
-      expect(mockLogger.log).toHaveBeenCalledWith('Error from REDIS client getting subscriber');
+      expect(mockLogger.push).toHaveBeenCalledWith({ error: expect.any(Error) });
+      expect(mockLogger.warn).toHaveBeenCalledWith('Error from REDIS client getting subscriber');
     });
   });
 });

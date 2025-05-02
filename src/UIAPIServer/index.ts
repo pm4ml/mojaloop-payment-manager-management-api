@@ -17,7 +17,7 @@ import http from 'http';
 import path from 'path';
 import assert from 'assert';
 
-import { Logger } from '@mojaloop/sdk-standard-components';
+import { Logger, logger as globalLogger } from '../lib/logger';
 
 import { Vault, ControlServer } from '@pm4ml/mcm-client';
 import { MemoryCache } from '../lib/cacheDatabase';
@@ -38,7 +38,7 @@ interface UIAPIServerOptions {
 class UIAPIServer {
   private constructor(
     private server: http.Server,
-    private logger: Logger.Logger,
+    private logger: Logger,
     private port: number,
   ) {}
 
@@ -98,12 +98,7 @@ class UIAPIServer {
   }
 
   static _createLogger() {
-    // Set up a logger for each running server
-    return new Logger.Logger({
-      ctx: {
-        app: 'mojaloop-payment-manager-management-api-service',
-      },
-    });
+    return globalLogger.push({});
   }
 }
 

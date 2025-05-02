@@ -12,10 +12,8 @@
  ************************************************************************* */
 import ws from 'ws';
 import jsonPatch from 'fast-json-patch';
-import SDKStandardComponents from '@mojaloop/sdk-standard-components';
 import randomPhrase from '../../lib/randomphrase';
-
-import Logger = SDKStandardComponents.Logger.Logger;
+import { Logger } from '../logger';
 
 /** ************************************************************************
  * The message protocol messages, verbs, and errors
@@ -138,7 +136,6 @@ class Client extends ws {
     }));
   }
 }
-
 
 
 module.exports = {

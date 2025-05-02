@@ -1,13 +1,7 @@
 import SDK from '@mojaloop/sdk-standard-components';
 
-class Logger extends SDK.Logger.Logger {
-  constructor() {
-    super({
-      ctx: {
-        app: 'mojaloop-payment-manager-management-api-service',
-      },
-    });
-  }
-}
+// export type Logger = SDK.Logger.Logger;
+// export const logger = new SDK.Logger.Logger();
 
-export default Logger;
+export type Logger = SDK.Logger.SdkLogger;
+export const logger = new SDK.Logger.SdkLogger();

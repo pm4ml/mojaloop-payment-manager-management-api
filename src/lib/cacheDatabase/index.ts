@@ -12,8 +12,8 @@
  **************************************************************************/
 
 import knex, { Knex } from 'knex';
+import { Logger } from '../logger';
 import Cache from './cache';
-import SDK from '@mojaloop/sdk-standard-components';
 
 const cachedFulfilledKeys: string[] = [];
 const cachedPendingKeys: string[] = [];
@@ -77,7 +77,7 @@ const getPartyNameFromQuoteRequest = (qr: any, partyType: any) => {
 interface SyncDBOpts {
   redisCache: Cache;
   db: Knex;
-  logger: SDK.Logger.Logger;
+  logger: Logger;
 }
 
 async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
@@ -201,7 +201,7 @@ async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
 }
 
 interface MemoryCacheOpts {
-  logger: SDK.Logger.Logger;
+  logger: Logger;
   cacheUrl: string;
   manualSync?: boolean;
   syncInterval?: number;
