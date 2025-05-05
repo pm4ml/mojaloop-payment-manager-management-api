@@ -55,7 +55,7 @@
     "@mojaloop/api-snippets": "^17.7.9",
     "@mojaloop/central-services-metrics": "12.4.3",
     "@mojaloop/sdk-standard-components": "19.14.0",
-    "@pm4ml/mcm-client": "3.5.5-snapshot.1",
+    "@pm4ml/mcm-client": "3.6.1",
     "@xstate/inspect": "0.7.0",
     "ajv": "^8.17.1",
     "async-injection": "^2.0.1",
