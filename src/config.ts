@@ -86,6 +86,8 @@ const cfg = {
   logIndent: env.get('LOG_INDENT').default('2').asIntPositive(),
   runMigrations: env.get('RUN_DB_MIGRATIONS').default('true').asBool(),
 
+  enableCors: env.get('ENABLE_CORS').default('false').asBool(),
+
   enableUiApiServer: env.get('ENABLE_UI_API_SERVER').default('true').asBool(),
   disableUIApiCache: env.get('DISABLE_UI_API_CACHE').default('false').asBool(),
   cacheUrl: env.get('CACHE_URL').default('redis://redis:6379').asUrlString(),

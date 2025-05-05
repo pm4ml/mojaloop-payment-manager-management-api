@@ -21,6 +21,38 @@ const healthCheck = async (ctx) => {
   };
 };
 
+const getStates = async (ctx) => {
+  const states = ctx.state.stateMachine.getState();
+  const formattedStatesResponse = Object.entries(states).reduce((acc, [key, value]) => {
+    const { status, stateDescription, lastUpdated, error } = value as {
+      status: string;
+      stateDescription: string;
+      lastUpdated: string;
+      error: string;
+    };
+    acc[key] = {
+      status: status,
+      stateDescription: stateDescription,
+      lastUpdated: new Date(lastUpdated).toISOString(),
+      errorDescription: error ? `${error}` : ``,
+    };
+
+    return acc;
+  }, {});
+
+  ctx.body = formattedStatesResponse;
+};
+
+const recreateCerts = async (ctx) => {
+  const securityType = ctx.params.SecurityType;
+  ctx.state.logger.log(`Reason for recreating is ${ctx.request.body.reason}`);
+  if (securityType === 'outboundTLS') {
+    ctx.state.stateMachine.sendEvent('RECREATE_DFSP_CLIENT_CERT');
+  }
+  if (securityType === 'JWS') ctx.state.stateMachine.sendEvent('RECREATE_JWS');
+  ctx.body = { status: 'SUCCESS' };
+};
+
 const getDfspStatus = async (ctx) => {
   const dfspId = ctx.params.dfspId;
   const { mcmServerEndpoint } = ctx.state.conf;
@@ -202,6 +234,12 @@ const generateDfspServerCerts = async (ctx) => {
 export const createHandlers = () => ({
   '/health': {
     get: healthCheck,
+  },
+  '/states': {
+    get: getStates,
+  },
+  '/recreate/{SecurityType}': {
+    post: recreateCerts,
   },
   '/dfsps/{dfspId}/status': {
     get: getDfspStatus,

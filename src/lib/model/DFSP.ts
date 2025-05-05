@@ -39,6 +39,10 @@ class DFSP {
     return this._mcmDFSPConfigModel.findStatus();
   }
 
+  async uploadDfspStatesStatus() {
+    return this._mcmDFSPConfigModel.uploadDfspStatesStatus();
+  }
+
   /**
    *
    */

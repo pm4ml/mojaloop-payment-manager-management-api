@@ -606,7 +606,6 @@ paths:
                 $ref: "#/components/schemas/CAInfo"
       x-swagger-router-controller: DfspCA
   /hub/ca:
-
     get:
       tags:
       - DFSP-hub-ca-configuration
@@ -701,6 +700,148 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DfspStatus'
+  /recreate/{SecurityType}:
+    post:
+      tags:
+        - recreate
+      summary: recreate client certificates / keys
+      operationId: recreate
+      parameters:
+        - name: X-User
+          in: header
+          required: false
+          schema:
+            type: string
+        - name: SecurityType
+          in: path
+          required: true
+          description: The security type to be revoked
+          schema:
+            type: string
+            enum:
+              - outboundTLS
+              - JWS
+      requestBody:
+        description: Participant information to be created.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: "string"
+                    enum:
+                      - "SUCCESS"
+                      - "FAILED"
+        "401":
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: "string"
+                    example: "Unauthorized"
+        "404":
+          description: security type is not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: "string"
+                    example: "Security Type Not Found"
+        "500":
+          description: internal error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: "string"
+                    example: "Internal Server Error"
+  /states:
+    get:
+      tags:
+      - "States"
+      summary: Retrieve status of all states
+      description: Retrieves status of all states.
+      responses:
+        '200':
+          description: Successfully retrieved the status of all states.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  fetchingHubCA:
+                    allOf:
+                      - $ref: "#/components/schemas/State"
+                      - description: Status of the `fetchingHubCA` state.
+                  creatingDFSPCA:
+                    allOf:
+                      - $ref: "#/components/schemas/State"
+                      - description: Status of the `creatingDFSPCA` state.
+                  creatingDfspClientCert:
+                    allOf:
+                      - $ref: "#/components/schemas/State"
+                      - description: Status of the `creatingDfspClientCert` state.
+                  creatingDfspServerCert:
+                    allOf:
+                      - $ref: "#/components/schemas/State"
+                      - description: Status of the `creatingDfspServerCert` state.
+                  creatingHubClientCert:
+                    allOf:
+                      - $ref: "#/components/schemas/State"
+                      - description: Status of the `creatingHubClientCert` state.
+                  pullingPeerJWS:
+                    allOf:
+                      - $ref: "#/components/schemas/State"
+                      - description: Status of the `pullingPeerJWS` state.
+                  uploadingPeerJWS:
+                    allOf:
+                      - $ref: "#/components/schemas/State"
+                      - description: Status of the `uploadingPeerJWS` state.
+                  creatingJWS:
+                    allOf:
+                      - $ref: "#/components/schemas/State"
+                      - description: Status of the `creatingJWS` state.
+                  endpointConfig:
+                    allOf:
+                      - $ref: "#/components/schemas/State"
+                      - description: Status of the `endpointConfig` state.
+                  connectorConfig:
+                    allOf:
+                      - $ref: "#/components/schemas/State"
+                      - description: Status of the `connectorConfig` state.
+                  progressMonitor:
+                    allOf:
+                      - $ref: "#/components/schemas/State"
+                      - description: Status of the `progressMonitor` state.
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: Detailed error message.
 components:
   schemas:
     Statuses:
@@ -1973,3 +2114,25 @@ components:
       example:
         monetaryZoneId: "EUR"
         name: "Euro"
+    State:
+      title: State
+      type: object
+      properties:
+        status:
+          type: string
+          description: Indicates the current status of the state.
+          enum:
+            - pending
+            - inProgress
+            - completed
+            - inError
+        stateDescription:
+          type: string
+          description: Describes the current state.
+        errorDescription:
+          type: string
+          description: Provides details in case of an error.
+        lastUpdated:
+          type: string
+          format: date-time
+          description: The date and time when the state was last updated.
