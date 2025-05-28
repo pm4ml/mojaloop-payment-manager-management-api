@@ -50,6 +50,7 @@
     "test:functional": "Returns true as functional tests are not fully implemented yet"
   },
   "dependencies": {
+    "@koa/cors": "^5.0.0",
     "@kubernetes/client-node": "^0.16.2",
     "@mojaloop/api-snippets": "^17.7.9",
     "@mojaloop/central-services-metrics": "12.4.3",
