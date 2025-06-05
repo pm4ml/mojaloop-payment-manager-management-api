@@ -842,6 +842,51 @@ paths:
                   error:
                     type: string
                     description: Detailed error message.
+  /reonboard:
+    post:
+      tags:
+        - reonboard
+      summary: onboard the dfsp
+      operationId: reonboard
+      parameters:
+        - name: X-User
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                      - "SUCCESS"
+                      - "FAILED"
+        "401":
+          description: unauthorised
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Unauthorized"
+        "500":
+          description: internal error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Internal Server Error"
 components:
   schemas:
     Statuses:
