@@ -854,6 +854,16 @@ paths:
           required: false
           schema:
             type: string
+      requestBody:
+        description: Participant information to be created.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  type: string
       responses:
         "200":
           description: successful operation

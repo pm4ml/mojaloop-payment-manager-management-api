@@ -43,6 +43,11 @@ const getStates = async (ctx) => {
   ctx.body = formattedStatesResponse;
 };
 
+const reonboard = async (ctx) => {
+  ctx.state.logger.log(`Reason for reonboarding is ${ctx.request.body.reason}`);
+  ctx.body = { status: 'SUCCESS' };
+};
+
 const recreateCerts = async (ctx) => {
   const securityType = ctx.params.SecurityType;
   ctx.state.logger.log(`Reason for recreating is ${ctx.request.body.reason}`);
@@ -237,6 +242,9 @@ export const createHandlers = () => ({
   },
   '/states': {
     get: getStates,
+  },
+  '/reonboard': {
+    post: reonboard,
   },
   '/recreate/{SecurityType}': {
     post: recreateCerts,
