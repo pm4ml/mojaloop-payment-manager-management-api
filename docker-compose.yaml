@@ -21,6 +21,7 @@ services:
     ports:
       - "9000:9000"
       - "9050:9050"
+      - "8888:8888"
     depends_on:
       - vault-dev
       - keycloak
