@@ -44,7 +44,7 @@ const getStates = async (ctx) => {
 };
 
 const reonboard = async (ctx) => {
-  ctx.state.logger.log(`Reason for reonboarding is ${ctx.request.body.reason}`);
+  await ctx.state.stateMachine.restart();
   ctx.body = { status: 'SUCCESS' };
 };
 
@@ -52,9 +52,9 @@ const recreateCerts = async (ctx) => {
   const securityType = ctx.params.SecurityType;
   ctx.state.logger.log(`Reason for recreating is ${ctx.request.body.reason}`);
   if (securityType === 'outboundTLS') {
-    ctx.state.stateMachine.sendEvent('RECREATE_DFSP_CLIENT_CERT');
+    ctx.state.stateMachine.sendEvent('CREATE_DFSP_CLIENT_CERT');
   }
-  if (securityType === 'JWS') ctx.state.stateMachine.sendEvent('RECREATE_JWS');
+  if (securityType === 'JWS') ctx.state.stateMachine.sendEvent('CREATE_JWS');
   ctx.body = { status: 'SUCCESS' };
 };
 
