@@ -40,7 +40,11 @@ const LOG_ID = {
     safeConfig.auth = { ...safeConfig.auth, creds: { clientId: '[REDACTED]', clientSecret: '[REDACTED]' } };
   }
   if (safeConfig.vault?.auth?.appRole) {
-    safeConfig.vault.auth.appRole = { ...safeConfig.vault.auth.appRole, roleId: '[REDACTED]', roleSecretId: '[REDACTED]' };
+    safeConfig.vault.auth.appRole = {
+      ...safeConfig.vault.auth.appRole,
+      roleId: '[REDACTED]',
+      roleSecretId: '[REDACTED]',
+    };
   }
   if (safeConfig.certManager?.config) {
     // No secrets here, but redact if needed in future
