@@ -34,7 +34,18 @@ const LOG_ID = {
 };
 
 (async () => {
-  logger.push({ config: JSON.stringify(config) }).info('config:');
+  // Log config with sensitive fields removed
+  const safeConfig = { ...config };
+  if (safeConfig.auth?.creds) {
+    safeConfig.auth = { ...safeConfig.auth, creds: { clientId: '[REDACTED]', clientSecret: '[REDACTED]' } };
+  }
+  if (safeConfig.vault?.auth?.appRole) {
+    safeConfig.vault.auth.appRole = { ...safeConfig.vault.auth.appRole, roleId: '[REDACTED]', roleSecretId: '[REDACTED]' };
+  }
+  if (safeConfig.certManager?.config) {
+    // No secrets here, but redact if needed in future
+  }
+  logger.push({ config: JSON.stringify(safeConfig) }).info('config:');
 
   const authModel = new AuthModel({
     logger,
