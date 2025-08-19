@@ -157,6 +157,14 @@ export function getSanitizedConfig(): Partial<IConfig> {
     };
   }
 
+  // Redact vault k8s token
+  if (sanitized.vault?.auth?.k8s) {
+    sanitized.vault.auth.k8s = {
+      ...sanitized.vault.auth.k8s,
+      token: '[REDACTED]',
+    };
+  }
+
   // Add future redactions here if needed
 
   return sanitized;
