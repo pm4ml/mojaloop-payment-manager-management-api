@@ -134,6 +134,34 @@ const cfg = {
   },
 };
 
+export function getSanitizedConfig(): Partial<IConfig> {
+  const sanitized = { ...cfg };
+
+  // Redact auth credentials
+  if (sanitized.auth?.creds) {
+    sanitized.auth = {
+      ...sanitized.auth,
+      creds: {
+        clientId: '[REDACTED]',
+        clientSecret: '[REDACTED]',
+      },
+    };
+  }
+
+  // Redact vault appRole secrets
+  if (sanitized.vault?.auth?.appRole) {
+    sanitized.vault.auth.appRole = {
+      ...sanitized.vault.auth.appRole,
+      roleId: '[REDACTED]',
+      roleSecretId: '[REDACTED]',
+    };
+  }
+
+  // Add future redactions here if needed
+
+  return sanitized;
+}
+
 export type IConfigVault = typeof vault;
 export type IConfig = typeof cfg;
 export default cfg;

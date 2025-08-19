@@ -20,7 +20,7 @@ import {
   ControlServer,
 } from '@pm4ml/mcm-client';
 
-import config from './config';
+import config, { getSanitizedConfig } from './config';
 import { logger } from './lib/logger';
 import { createMemoryCache } from './lib/cacheDatabase';
 import TestServer from './TestServer';
@@ -35,21 +35,7 @@ const LOG_ID = {
 
 (async () => {
   // Log config with sensitive fields removed
-  const safeConfig = { ...config };
-  if (safeConfig.auth?.creds) {
-    safeConfig.auth = { ...safeConfig.auth, creds: { clientId: '[REDACTED]', clientSecret: '[REDACTED]' } };
-  }
-  if (safeConfig.vault?.auth?.appRole) {
-    safeConfig.vault.auth.appRole = {
-      ...safeConfig.vault.auth.appRole,
-      roleId: '[REDACTED]',
-      roleSecretId: '[REDACTED]',
-    };
-  }
-  if (safeConfig.certManager?.config) {
-    // No secrets here, but redact if needed in future
-  }
-  logger.push({ config: JSON.stringify(safeConfig) }).info('config:');
+  logger.push({ config: JSON.stringify(getSanitizedConfig()) }).info('config:');
 
   const authModel = new AuthModel({
     logger,
