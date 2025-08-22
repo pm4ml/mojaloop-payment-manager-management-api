@@ -135,37 +135,13 @@ const cfg = {
 };
 
 export function getSanitizedConfig(): Partial<IConfig> {
-  const sanitized = { ...cfg };
+  const sanitized = structuredClone(cfg);
 
-  // Redact auth credentials
-  if (sanitized.auth?.creds) {
-    sanitized.auth = {
-      ...sanitized.auth,
-      creds: {
-        clientId: '[REDACTED]',
-        clientSecret: '[REDACTED]',
-      },
-    };
-  }
-
-  // Redact vault appRole secrets
-  if (sanitized.vault?.auth?.appRole) {
-    sanitized.vault.auth.appRole = {
-      ...sanitized.vault.auth.appRole,
-      roleId: '[REDACTED]',
-      roleSecretId: '[REDACTED]',
-    };
-  }
-
-  // Redact vault k8s token
-  if (sanitized.vault?.auth?.k8s) {
-    sanitized.vault.auth.k8s = {
-      ...sanitized.vault.auth.k8s,
-      token: '[REDACTED]',
-    };
-  }
-
-  // Add future redactions here if needed
+  if (sanitized.auth?.creds?.clientId) sanitized.auth.creds.clientId = '[REDACTED]';
+  if (sanitized.auth?.creds?.clientSecret) sanitized.auth.creds.clientSecret = '[REDACTED]';
+  if (sanitized.vault?.auth?.appRole?.roleId) sanitized.vault.auth.appRole.roleId = '[REDACTED]';
+  if (sanitized.vault?.auth?.appRole?.roleSecretId) sanitized.vault.auth.appRole.roleSecretId = '[REDACTED]';
+  if (sanitized.vault?.auth?.k8s?.token) sanitized.vault.auth.k8s.token = '[REDACTED]';
 
   return sanitized;
 }
