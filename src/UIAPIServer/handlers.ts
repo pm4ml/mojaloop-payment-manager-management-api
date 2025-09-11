@@ -24,6 +24,10 @@ const healthCheck = async (ctx) => {
 const getStates = async (ctx) => {
   const states = ctx.state.stateMachine.getState();
   const formattedStatesResponse = Object.entries(states).reduce((acc, [key, value]) => {
+    // Disabling these states temporarily as UPLOAD_PEER_JWS is not relevant for DFSPs and HUB_CA is showing always inProgress
+    if (key === 'UPLOAD_PEER_JWS' || key === 'HUB_CA') {
+      return acc;
+    }
     const { status, stateDescription, lastUpdated, error } = value as {
       status: string;
       stateDescription: string;

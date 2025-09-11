@@ -134,6 +134,18 @@ const cfg = {
   },
 };
 
+export function getSanitizedConfig(): Partial<IConfig> {
+  const sanitized = structuredClone(cfg);
+
+  if (sanitized.auth?.creds?.clientId) sanitized.auth.creds.clientId = '[REDACTED]';
+  if (sanitized.auth?.creds?.clientSecret) sanitized.auth.creds.clientSecret = '[REDACTED]';
+  if (sanitized.vault?.auth?.appRole?.roleId) sanitized.vault.auth.appRole.roleId = '[REDACTED]';
+  if (sanitized.vault?.auth?.appRole?.roleSecretId) sanitized.vault.auth.appRole.roleSecretId = '[REDACTED]';
+  if (sanitized.vault?.auth?.k8s?.token) sanitized.vault.auth.k8s.token = '[REDACTED]';
+
+  return sanitized;
+}
+
 export type IConfigVault = typeof vault;
 export type IConfig = typeof cfg;
 export default cfg;
