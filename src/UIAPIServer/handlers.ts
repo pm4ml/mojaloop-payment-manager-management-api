@@ -47,13 +47,20 @@ const getStates = async (ctx) => {
   ctx.body = formattedStatesResponse;
 };
 
+const reonboard = async (ctx) => {
+  ctx.state.logger.info(`Reonboarded by x-user ${ctx.request.header['x-user']}`);
+  ctx.state.logger.info(`Reason for reonboarding is ${ctx.request.body.reason}`);
+  await ctx.state.stateMachine.restart();
+  ctx.body = { status: 'SUCCESS' };
+};
+
 const recreateCerts = async (ctx) => {
   const securityType = ctx.params.SecurityType;
-  ctx.state.logger.log(`Reason for recreating is ${ctx.request.body.reason}`);
+  ctx.state.logger.info(`Reason for recreating is ${ctx.request.body.reason}`);
   if (securityType === 'outboundTLS') {
-    ctx.state.stateMachine.sendEvent('RECREATE_DFSP_CLIENT_CERT');
+    ctx.state.stateMachine.sendEvent('CREATE_DFSP_CLIENT_CERT');
   }
-  if (securityType === 'JWS') ctx.state.stateMachine.sendEvent('RECREATE_JWS');
+  if (securityType === 'JWS') ctx.state.stateMachine.sendEvent('CREATE_JWS');
   ctx.body = { status: 'SUCCESS' };
 };
 
@@ -241,6 +248,9 @@ export const createHandlers = () => ({
   },
   '/states': {
     get: getStates,
+  },
+  '/reonboard': {
+    post: reonboard,
   },
   '/recreate/{SecurityType}': {
     post: recreateCerts,
