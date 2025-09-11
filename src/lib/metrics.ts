@@ -50,7 +50,7 @@ export const createMetricsServer = ({ port, config, logger }: MetricsOptions): M
     },
     stop: async () =>
       new Promise((resolve) => {
-        server.stop((err) => {
+        server.stop((err: any) => {
           if (err) {
             logger.push({ err }).error('metrics-server failed to stop');
             resolve(false);

@@ -88,7 +88,7 @@ async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
     if (typeof rawData === 'string') {
       try {
         data = JSON.parse(rawData);
-      } catch (err) {
+      } catch (err: any) {
         logger.push({ err }).log('Error parsing JSON cache value');
       }
     }
@@ -97,14 +97,14 @@ async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
       if (data.quoteResponse?.body && typeof data.quoteResponse.body === 'string') {
         try {
           data.quoteResponse.body = JSON.parse(data.quoteResponse.body);
-        } catch (err) {
+        } catch (err: any) {
           logger.push({ err, quoteResponse: data.quoteResponse }).warn('Error parsing quoteResponse body');
         }
       }
       if (data.fulfil?.body && typeof data.fulfil.body === 'string') {
         try {
           data.fulfil.body = JSON.parse(data.fulfil.body);
-        } catch (err) {
+        } catch (err: any) {
           logger.push({ err, fulfil: data.fulfil }).warn('Error parsing fulfil body');
         }
       }

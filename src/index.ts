@@ -20,7 +20,7 @@ import {
   ControlServer,
 } from '@pm4ml/mcm-client';
 
-import config from './config';
+import config, { getSanitizedConfig } from './config';
 import { logger } from './lib/logger';
 import { createMemoryCache } from './lib/cacheDatabase';
 import TestServer from './TestServer';
@@ -34,7 +34,8 @@ const LOG_ID = {
 };
 
 (async () => {
-  logger.push({ config: JSON.stringify(config) }).info('config:');
+  // Log config with sensitive fields removed
+  logger.push({ config: JSON.stringify(getSanitizedConfig()) }).info('config:');
 
   const authModel = new AuthModel({
     logger,
