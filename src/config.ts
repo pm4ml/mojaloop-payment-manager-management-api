@@ -106,6 +106,8 @@ const cfg = {
         clientId: env.get('AUTH_CLIENT_ID').required().asString(),
         clientSecret: env.get('AUTH_CLIENT_SECRET').required().asString(),
       },
+      tokenRefreshMarginSeconds: env.get('AUTH_TOKEN_REFRESH_MARGIN_SECONDS').default(30).asIntPositive(),
+      tokenRefreshEnabled: env.get('AUTH_TOKEN_REFRESH_ENABLED').default('true').asBool(),
     }),
   },
   dfspClientCsrParameters: env.get('DFSP_CLIENT_CSR_PARAMETERS').asJsonConfig(),
