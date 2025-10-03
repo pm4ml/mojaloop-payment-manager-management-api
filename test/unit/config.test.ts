@@ -29,7 +29,6 @@ jest.spyOn(require('fs'), 'existsSync').mockImplementation((...args: unknown[]) 
 import cfg, { getSanitizedConfig } from '../../src/config';
 
 describe('Config', () => {
-
   it('should export a config object', () => {
     expect(cfg).toBeDefined();
     expect(typeof cfg).toBe('object');
