@@ -94,9 +94,9 @@ jobs:
             npm test
             npm run backend:stop
       - store_test_results:
-          path: /home/circleci/project/git/
+          path: /home/circleci/project/git/test/results
       - store_artifacts:
-          path: /home/circleci/project/git/junit.xml
+          path: /home/circleci/project/git/test/results
 
   test-integration:
     executor: default-machine
