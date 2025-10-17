@@ -1,10 +1,3 @@
-/**************************************************************************
- *  (C) Copyright ModusBox Inc. 2025 - All rights reserved.               *
- *                                                                        *
- *  This file is made available under the terms of the license agreement  *
- *  specified in the corresponding source code repository.                *
- **************************************************************************/
-
 /**
  * Jest Setup File - Global Test Environment Configuration
  *
