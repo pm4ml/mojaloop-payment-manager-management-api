@@ -29,8 +29,10 @@ paths:
 components:
   schemas:
     StateContext:
+      type: object
       properties:
         dfspCA:
+          type: object
           properties:
             cert:
               type: "string"
@@ -39,6 +41,7 @@ components:
             key:
               type: "string"
         dfspClientCert:
+          type: object
           properties:
             id:
               type: "integer"
@@ -49,12 +52,14 @@ components:
             privateKey:
               type: "string"
         dfspJWS:
+          type: object
           properties:
             publicKey:
               type: "string"
             privateKey:
               type: "string"
         dfspServerCert:
+          type: object
           properties:
             rootCertificate:
               type: "string"
@@ -65,6 +70,7 @@ components:
             privateKey:
               type: "string"
         endpointConfig:
+          type: object
           properties:
             ipList:
               type: "array"
@@ -73,6 +79,7 @@ components:
             callbackURL:
               type: "string"
         hubCa:
+          type: object
           properties:
             intermediateChain:
               type: "string"
