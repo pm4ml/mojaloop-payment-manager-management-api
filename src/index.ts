@@ -21,66 +21,33 @@ import {
 } from '@pm4ml/mcm-client';
 
 import config, { getSanitizedConfig } from './config';
-import { logger } from './lib/logger';
-import { createMemoryCache } from './lib/cacheDatabase';
 import TestServer from './TestServer';
 import UIAPIServer from './UIAPIServer';
 import CertManager from './lib/model/CertManager';
 import { createMetricsServer, MetricsServer } from './lib/metrics';
+import { createMemoryCache } from './lib/cacheDatabase';
+import { logger } from './lib/logger';
 
 const LOG_ID = {
   CONTROL: { app: 'mojaloop-payment-manager-management-api-service-control-server' },
   CACHE: { component: 'cache' },
 };
 
-(async () => {
-  // Log config with sensitive fields removed
-  logger.push({ config: JSON.stringify(getSanitizedConfig()) }).info('config:');
-
-  const authModel = new AuthModel({
-    logger,
-    auth: config.auth,
-    hubIamProviderUrl: config.hubIamProviderUrl,
-  });
-
-  try {
-    await authModel.login();
-  } catch (error) {
-    // error is logged in the authModel.login() method
-  }
-
-  const vault = new Vault({
-    ...config.vault,
-    commonName: config.mojaloopConnectorFQDN,
-    logger,
-  });
-  await vault.connect();
-
+const createControlServer = async ({ vault, certManager }) => {
   const opts = {
     dfspId: config.dfspId,
     hubEndpoint: config.mcmServerEndpoint,
     logger,
   };
-  const ctx = {
+
+  const stateMachine = new ConnectionStateMachine({
+    ...config, // todo: clarify, which configs we need to pass here
+    config,
+    port: config.stateMachineDebugPort,
     dfspCertificateModel: new DFSPCertificateModel(opts),
     hubCertificateModel: new HubCertificateModel(opts),
     hubEndpointModel: new HubEndpointModel(opts),
     dfspEndpointModel: new DFSPEndpointModel(opts),
-  };
-
-  let certManager;
-  if (config.certManager.enabled) {
-    certManager = new CertManager({
-      ...config.certManager.config!,
-      logger,
-    });
-  }
-
-  const stateMachine = new ConnectionStateMachine({
-    ...config,
-    config,
-    port: config.stateMachineDebugPort,
-    ...ctx,
     logger,
     vault,
     certManager,
@@ -96,6 +63,43 @@ const LOG_ID = {
     onUploadPeerJWS: (peerJWS: any) => stateMachine.sendEvent({ type: 'UPLOAD_PEER_JWS', data: peerJWS }),
   });
   controlServer.registerInternalEvents();
+
+  return { controlServer, stateMachine };
+};
+
+(async () => {
+  // Log config with sensitive fields removed
+  logger.verbose('sanitized config: ', { config: getSanitizedConfig() });
+
+  const authModel = new AuthModel({
+    logger,
+    auth: config.auth,
+    hubIamProviderUrl: config.hubIamProviderUrl,
+  });
+
+  try {
+    await authModel.login();
+  } catch (error) {
+    logger.info('authModel.login() failed');
+    // error is logged in the authModel.login() method
+  }
+
+  const vault = new Vault({
+    ...config.vault,
+    commonName: config.mojaloopConnectorFQDN,
+    logger,
+  });
+  await vault.connect();
+
+  let certManager;
+  if (config.certManager.enabled) {
+    certManager = new CertManager({
+      ...config.certManager.config!,
+      logger,
+    });
+  }
+
+  const { controlServer, stateMachine } = await createControlServer({ vault, certManager });
 
   let uiApiServer: UIAPIServer;
   if (config.enableUiApiServer) {
