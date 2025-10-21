@@ -11,19 +11,25 @@ process.env.AUTH_ENABLED = 'true';
 process.env.AUTH_CLIENT_ID = 'test-client-id';
 process.env.AUTH_CLIENT_SECRET = 'test-client-secret';
 
-// Mock fs.readFileSync for vault role files
-jest.spyOn(require('fs'), 'readFileSync').mockImplementation((...args: unknown[]) => {
-  const path = args[0] as string;
-  if (path === '/tmp/test-role-id') return Buffer.from('role-id-value');
-  if (path === '/tmp/test-role-secret-id') return Buffer.from('role-secret-id-value');
-  return Buffer.from('');
-});
-
-// Mock fs.existsSync for vault role files
-jest.spyOn(require('fs'), 'existsSync').mockImplementation((...args: unknown[]) => {
-  const path = args[0] as string;
-  if (path === '/tmp/test-role-id' || path === '/tmp/test-role-secret-id') return true;
-  return false;
+// Mock fs module before any imports
+jest.mock('fs', () => {
+  const actualFs = jest.requireActual('fs');
+  return {
+    ...actualFs,
+    readFileSync: jest.fn((...args: unknown[]) => {
+      const path = args[0] as string;
+      if (path === '/tmp/test-role-id') return Buffer.from('role-id-value');
+      if (path === '/tmp/test-role-secret-id') return Buffer.from('role-secret-id-value');
+      // Fall back to actual implementation for other files
+      return actualFs.readFileSync(...args);
+    }),
+    existsSync: jest.fn((...args: unknown[]) => {
+      const path = args[0] as string;
+      if (path === '/tmp/test-role-id' || path === '/tmp/test-role-secret-id') return true;
+      // Fall back to actual implementation for other files
+      return actualFs.existsSync(...args);
+    }),
+  };
 });
 
 import cfg, { getSanitizedConfig } from '../../src/config';
