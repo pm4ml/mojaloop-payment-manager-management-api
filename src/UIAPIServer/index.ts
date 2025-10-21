@@ -98,7 +98,7 @@ class UIAPIServer {
   }
 
   static _createLogger() {
-    return globalLogger.push({});
+    return globalLogger.child({ server: 'UIAPIServer' });
   }
 }
 
