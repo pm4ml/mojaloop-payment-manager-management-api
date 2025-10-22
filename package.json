@@ -1,6 +1,6 @@
 {
   "name": "mojaloop-payment-manager-management-api-service",
-  "version": "6.11.1-snapshot.13",
+  "version": "6.11.1-snapshot.14",
   "private": true,
   "description": "Mojaloop Payment Manager - Management API Service",
   "main": "dist/index.js",
@@ -55,7 +55,7 @@
     "@mojaloop/api-snippets": "^17.7.9",
     "@mojaloop/central-services-metrics": "12.8.0",
     "@mojaloop/sdk-standard-components": "19.18.0",
-    "@pm4ml/mcm-client": "3.10.1-snapshot.13",
+    "@pm4ml/mcm-client": "3.10.1-snapshot.14",
     "@xstate/inspect": "0.7.0",
     "ajv": "^8.17.1",
     "async-injection": "^2.0.1",
