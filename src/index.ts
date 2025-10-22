@@ -9,63 +9,16 @@
  **************************************************************************/
 
 import process from 'node:process';
-import {
-  AuthModel,
-  DFSPCertificateModel,
-  DFSPEndpointModel,
-  HubCertificateModel,
-  HubEndpointModel,
-  Vault,
-  ConnectionStateMachine,
-  ControlServer,
-} from '@pm4ml/mcm-client';
+import { AuthModel, Vault } from '@pm4ml/mcm-client';
 
 import config, { getSanitizedConfig } from './config';
 import TestServer from './TestServer';
 import UIAPIServer from './UIAPIServer';
-import CertManager from './lib/model/CertManager';
+import { createStateMachine } from './lib/stateMachine';
+import { createControlServer } from './lib/controlServer';
 import { createMetricsServer, MetricsServer } from './lib/metrics';
 import { createMemoryCache } from './lib/cacheDatabase';
 import { logger } from './lib/logger';
-
-const LOG_ID = {
-  CONTROL: { app: 'mojaloop-payment-manager-management-api-service-control-server' },
-  CACHE: { component: 'cache' },
-};
-
-const createControlServer = async ({ vault, certManager }) => {
-  const opts = {
-    dfspId: config.dfspId,
-    hubEndpoint: config.mcmServerEndpoint,
-    logger,
-  };
-
-  const stateMachine = new ConnectionStateMachine({
-    ...config, // todo: clarify, which configs we need to pass here
-    config,
-    port: config.stateMachineDebugPort,
-    dfspCertificateModel: new DFSPCertificateModel(opts),
-    hubCertificateModel: new HubCertificateModel(opts),
-    hubEndpointModel: new HubEndpointModel(opts),
-    dfspEndpointModel: new DFSPEndpointModel(opts),
-    logger,
-    vault,
-    certManager,
-    ControlServer,
-  });
-  await stateMachine.start();
-
-  const controlServer = new ControlServer.Server({
-    port: config.control.port,
-    logger: logger.push(LOG_ID.CONTROL),
-    onRequestConfig: () => stateMachine.sendEvent({ type: 'REQUEST_CONNECTOR_CONFIG' }),
-    onRequestPeerJWS: () => stateMachine.sendEvent({ type: 'REQUEST_PEER_JWS' }),
-    onUploadPeerJWS: (peerJWS: any) => stateMachine.sendEvent({ type: 'UPLOAD_PEER_JWS', data: peerJWS }),
-  });
-  controlServer.registerInternalEvents();
-
-  return { controlServer, stateMachine };
-};
 
 (async () => {
   // Log config with sensitive fields removed
@@ -91,15 +44,10 @@ const createControlServer = async ({ vault, certManager }) => {
   });
   await vault.connect();
 
-  let certManager;
-  if (config.certManager.enabled) {
-    certManager = new CertManager({
-      ...config.certManager.config!,
-      logger,
-    });
-  }
+  const stateMachine = createStateMachine({ config, logger, vault });
+  await stateMachine.start();
 
-  const { controlServer, stateMachine } = await createControlServer({ vault, certManager });
+  const controlServer = await createControlServer({ config, logger, stateMachine });
 
   let uiApiServer: UIAPIServer;
   if (config.enableUiApiServer) {
