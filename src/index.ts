@@ -9,33 +9,20 @@
  **************************************************************************/
 
 import process from 'node:process';
-import {
-  AuthModel,
-  DFSPCertificateModel,
-  DFSPEndpointModel,
-  HubCertificateModel,
-  HubEndpointModel,
-  Vault,
-  ConnectionStateMachine,
-  ControlServer,
-} from '@pm4ml/mcm-client';
+import { AuthModel, Vault } from '@pm4ml/mcm-client';
 
 import config, { getSanitizedConfig } from './config';
-import { logger } from './lib/logger';
-import { createMemoryCache } from './lib/cacheDatabase';
 import TestServer from './TestServer';
 import UIAPIServer from './UIAPIServer';
-import CertManager from './lib/model/CertManager';
+import { createStateMachine } from './lib/stateMachine';
+import { createControlServer } from './lib/controlServer';
 import { createMetricsServer, MetricsServer } from './lib/metrics';
-
-const LOG_ID = {
-  CONTROL: { app: 'mojaloop-payment-manager-management-api-service-control-server' },
-  CACHE: { component: 'cache' },
-};
+import { createMemoryCache } from './lib/cacheDatabase';
+import { logger } from './lib/logger';
 
 (async () => {
   // Log config with sensitive fields removed
-  logger.push({ config: JSON.stringify(getSanitizedConfig()) }).info('config:');
+  logger.verbose('sanitized config: ', { config: getSanitizedConfig() });
 
   const authModel = new AuthModel({
     logger,
@@ -46,7 +33,7 @@ const LOG_ID = {
   try {
     await authModel.login();
   } catch (error) {
-    // error is logged in the authModel.login() method
+    logger.info('authModel.login() failed');
   }
 
   const vault = new Vault({
@@ -56,46 +43,10 @@ const LOG_ID = {
   });
   await vault.connect();
 
-  const opts = {
-    dfspId: config.dfspId,
-    hubEndpoint: config.mcmServerEndpoint,
-    logger,
-  };
-  const ctx = {
-    dfspCertificateModel: new DFSPCertificateModel(opts),
-    hubCertificateModel: new HubCertificateModel(opts),
-    hubEndpointModel: new HubEndpointModel(opts),
-    dfspEndpointModel: new DFSPEndpointModel(opts),
-  };
-
-  let certManager;
-  if (config.certManager.enabled) {
-    certManager = new CertManager({
-      ...config.certManager.config!,
-      logger,
-    });
-  }
-
-  const stateMachine = new ConnectionStateMachine({
-    ...config,
-    config,
-    port: config.stateMachineDebugPort,
-    ...ctx,
-    logger,
-    vault,
-    certManager,
-    ControlServer,
-  });
+  const stateMachine = createStateMachine({ config, logger, vault });
   await stateMachine.start();
 
-  const controlServer = new ControlServer.Server({
-    port: config.control.port,
-    logger: logger.push(LOG_ID.CONTROL),
-    onRequestConfig: () => stateMachine.sendEvent({ type: 'REQUEST_CONNECTOR_CONFIG' }),
-    onRequestPeerJWS: () => stateMachine.sendEvent({ type: 'REQUEST_PEER_JWS' }),
-    onUploadPeerJWS: (peerJWS: any) => stateMachine.sendEvent({ type: 'UPLOAD_PEER_JWS', data: peerJWS }),
-  });
-  controlServer.registerInternalEvents();
+  const controlServer = createControlServer({ config, logger, stateMachine });
 
   let uiApiServer: UIAPIServer;
   if (config.enableUiApiServer) {

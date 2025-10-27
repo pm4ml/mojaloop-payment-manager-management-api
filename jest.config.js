@@ -11,6 +11,9 @@ module.exports = {
   },
   testEnvironment: 'jest-environment-node',
 
+  // Setup file to configure test environment (includes File API polyfill)
+  setupFilesAfterEnv: ['<rootDir>/test/jest.setup.js'],
+
   // Configure reporters for test results
   reporters: [
     'default',

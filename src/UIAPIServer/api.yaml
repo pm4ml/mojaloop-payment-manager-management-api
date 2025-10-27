@@ -1733,6 +1733,7 @@ components:
                     type: string
                     example: 'http://modusbox.live'
     CACertificate:
+      type: object
       properties:
         cert:
           type: "string"
@@ -1998,11 +1999,13 @@ components:
       - CERTIFICATE_VALID_OCSP
       - CERTIFICATE_VALID_CRL
     URLEntry:
+      type: object
       properties:
         url:
           type: "string"
           description: "URL"
     IPEntry:
+      type: object
       properties:
         address:
           type: "string"
@@ -2027,6 +2030,7 @@ components:
           - "80"
           - "8000-8080"
     BaseEndpoint:
+      type: object
       description: Common properties to both IP and URL endpoints
       properties:
         id:
