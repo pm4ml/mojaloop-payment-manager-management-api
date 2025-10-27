@@ -27,7 +27,7 @@
 
 import { ControlServer } from '@pm4ml/mcm-client';
 
-export const createControlServer = async ({ config, logger, stateMachine }) => {
+export const createControlServer = ({ config, logger, stateMachine }) => {
   const controlServer = new ControlServer.Server({
     port: config.control.port,
     logger,

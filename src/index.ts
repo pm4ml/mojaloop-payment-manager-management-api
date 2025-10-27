@@ -34,7 +34,6 @@ import { logger } from './lib/logger';
     await authModel.login();
   } catch (error) {
     logger.info('authModel.login() failed');
-    // error is logged in the authModel.login() method
   }
 
   const vault = new Vault({
@@ -47,7 +46,7 @@ import { logger } from './lib/logger';
   const stateMachine = createStateMachine({ config, logger, vault });
   await stateMachine.start();
 
-  const controlServer = await createControlServer({ config, logger, stateMachine });
+  const controlServer = createControlServer({ config, logger, stateMachine });
 
   let uiApiServer: UIAPIServer;
   if (config.enableUiApiServer) {
