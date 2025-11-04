@@ -90,9 +90,7 @@ jobs:
       - run:
           name: Execute unit tests
           command: |
-            npm run backend:start
             npm test
-            npm run backend:stop
       - store_test_results:
           path: /home/circleci/project/git/test/results
       - store_artifacts:
