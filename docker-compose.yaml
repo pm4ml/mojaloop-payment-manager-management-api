@@ -24,7 +24,7 @@ services:
       - "9050:9050"
       - "8888:8888"
     depends_on:
-      - vault-dev
+      - vault
       - keycloak
       - redis
 
