@@ -96,7 +96,10 @@ const cfg = {
   hubIamProviderUrl: env.get('HUB_IAM_PROVIDER_URL').required().asString(), // with schema
   mcmServerEndpoint: env.get('MCM_SERVER_ENDPOINT').required().asString(),
   refreshIntervalSeconds: env.get('REFRESH_INTERVAL_SECONDS').default(60).asIntPositive(),
-  jwsRotationIntervalMs: env.get('JWS_ROTATION_INTERVAL_MS').default(24 * 60 * 60 * 1000).asIntPositive(),
+  jwsRotationIntervalMs: env
+    .get('JWS_ROTATION_INTERVAL_MS')
+    .default(24 * 60 * 60 * 1000)
+    .asIntPositive(),
   mojaloopConnectorFQDN: env.get('MOJALOOP_CONNECTOR_FQDN').default('connector.fsp.example.com').asString(),
   certManager,
   vault,
