@@ -20,7 +20,7 @@ import { Logger, logger as globalLogger } from '../lib/logger';
 
 import middlewares from '../UIAPIServer/middlewares';
 import { IConfig } from '../config';
-import { ConnectionStateMachine } from '@pm4ml/mcm-client';
+import { ConnectionStateMachine } from '@mojaloop/mcm-client';
 import { createHandlers } from './handlers';
 
 interface TestServerOptions {

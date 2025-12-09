@@ -8,7 +8,7 @@
  *       Damián García - damian.garcia@modusbox.com                       *
  **************************************************************************/
 
-import { MonetaryZoneModel } from '@pm4ml/mcm-client';
+import { MonetaryZoneModel } from '@mojaloop/mcm-client';
 import { Logger } from '../logger';
 
 class MonetaryZone {
