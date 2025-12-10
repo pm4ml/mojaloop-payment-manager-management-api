@@ -25,7 +25,7 @@
  --------------
  ******/
 
-import { ControlServer } from '@pm4ml/mcm-client';
+import { ControlServer } from '@mojaloop/mcm-client';
 
 export const createControlServer = ({ config, logger, stateMachine }) => {
   const controlServer = new ControlServer.Server({

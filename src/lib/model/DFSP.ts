@@ -8,7 +8,7 @@
  *       Murthy Kakarlamudi - murthy@modusbox.com                   *
  **************************************************************************/
 
-import { DFSPConfigModel, DFSPEndpointModel } from '@pm4ml/mcm-client';
+import { DFSPConfigModel, DFSPEndpointModel } from '@mojaloop/mcm-client';
 import { Logger } from '../logger';
 
 class DFSP {

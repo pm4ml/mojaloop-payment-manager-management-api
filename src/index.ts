@@ -9,7 +9,7 @@
  **************************************************************************/
 
 import process from 'node:process';
-import { AuthModel, Vault } from '@pm4ml/mcm-client';
+import { AuthModel, Vault } from '@mojaloop/mcm-client';
 
 import config, { getSanitizedConfig } from './config';
 import TestServer from './TestServer';

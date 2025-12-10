@@ -1,6 +1,6 @@
 import 'jest';
 import DFSP from '../../../../src/lib/model/DFSP';
-import { DFSPConfigModel, DFSPEndpointModel } from '@pm4ml/mcm-client';
+import { DFSPConfigModel, DFSPEndpointModel } from '@mojaloop/mcm-client';
 import { logger } from '@app/lib/logger';
 
 describe('DFSP Class', () => {

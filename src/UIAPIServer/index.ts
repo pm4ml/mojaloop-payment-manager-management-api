@@ -19,10 +19,10 @@ import assert from 'assert';
 
 import { Logger, logger as globalLogger } from '../lib/logger';
 
-import { Vault, ControlServer } from '@pm4ml/mcm-client';
+import { Vault, ControlServer } from '@mojaloop/mcm-client';
 import { MemoryCache } from '../lib/cacheDatabase';
 import { IConfig } from '../config';
-import { ConnectionStateMachine } from '@pm4ml/mcm-client';
+import { ConnectionStateMachine } from '@mojaloop/mcm-client';
 import { createHandlers } from './handlers';
 import middlewares from './middlewares';
 

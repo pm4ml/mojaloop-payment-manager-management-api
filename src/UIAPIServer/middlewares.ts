@@ -10,7 +10,7 @@
 
 import util from 'util';
 import Router from 'koa-router';
-import { HTTPResponseError } from '@pm4ml/mcm-client';
+import { HTTPResponseError } from '@mojaloop/mcm-client';
 import randomPhrase from '../lib/randomphrase';
 
 /**

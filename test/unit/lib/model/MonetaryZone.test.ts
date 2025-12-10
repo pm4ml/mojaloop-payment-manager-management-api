@@ -1,8 +1,8 @@
-import { MonetaryZoneModel } from '@pm4ml/mcm-client';
+import { MonetaryZoneModel } from '@mojaloop/mcm-client';
 import { logger } from '@app/lib/logger';
 import MonetaryZone from '../../../../src/lib/model/MonetaryZone';
 
-jest.mock('@pm4ml/mcm-client');
+jest.mock('@mojaloop/mcm-client');
 
 describe('MonetaryZone', () => {
   let mockLogger;

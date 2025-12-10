@@ -32,7 +32,7 @@ import {
   HubEndpointModel,
   ConnectionStateMachine,
   ControlServer,
-} from '@pm4ml/mcm-client';
+} from '@mojaloop/mcm-client';
 
 import CertManager from './model/CertManager';
 

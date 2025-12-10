@@ -44,7 +44,7 @@ The application bootstrap follows this sequence:
 - All sensitive config fields are redacted via `getSanitizedConfig()`
 
 #### State Machine Integration
-- `ConnectionStateMachine` from `@pm4ml/mcm-client` manages DFSP connection lifecycle
+- `ConnectionStateMachine` from `@mojaloop/mcm-client` manages DFSP connection lifecycle
 - Events: `REQUEST_CONNECTOR_CONFIG`, `REQUEST_PEER_JWS`, `UPLOAD_PEER_JWS`
 - Debug interface on port 8888 (when `STATE_MACHINE_INSPECT_ENABLED=true`)
 
@@ -55,7 +55,7 @@ The application bootstrap follows this sequence:
 - Optional CORS support via `ENABLE_CORS` env var
 
 #### Cache & Database (`src/lib/cacheDatabase/`)
-- **Redis** caching layer for transfer state (via `@pm4ml/mcm-client`)
+- **Redis** caching layer for transfer state (via `@mojaloop/mcm-client`)
 - **In-memory SQLite** (better-sqlite3) for transfer queries
 - Automatic sync from Redis to SQLite every `CACHE_SYNC_INTERVAL_SECONDS` (default 30s)
 - Handles both INBOUND and OUTBOUND transfer directions
