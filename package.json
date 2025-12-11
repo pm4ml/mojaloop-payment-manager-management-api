@@ -49,6 +49,9 @@
     "test:integration": "Returns true as integration tests are not fully implemented yet",
     "test:functional": "Returns true as functional tests are not fully implemented yet"
   },
+  "overrides": {
+    "node-vault": "^0.10.2"
+  },
   "dependencies": {
     "@koa/cors": "^5.0.0",
     "@kubernetes/client-node": "^0.16.2",
