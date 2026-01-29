@@ -100,6 +100,7 @@ const cfg = {
     .get('JWS_ROTATION_INTERVAL_MS')
     .default(24 * 60 * 60 * 1000)
     .asIntPositive(),
+  certExpiryThresholdDays: env.get('CERT_EXPIRY_THRESHOLD_DAYS').default(7).asFloatPositive(),
   mojaloopConnectorFQDN: env.get('MOJALOOP_CONNECTOR_FQDN').default('connector.fsp.example.com').asString(),
   certManager,
   vault,
