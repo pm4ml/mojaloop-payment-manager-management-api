@@ -37,6 +37,7 @@ import {
 import CertManager from './model/CertManager';
 
 export const createStateMachine = ({
+  // unfortunately some configs are not nested, so we need to extract them here
   config: { stateMachineDebugPort, certExpiryThresholdDays, refreshIntervalSeconds, jwsRotationIntervalMs, ...config },
   logger,
   vault,
