@@ -36,7 +36,11 @@ import {
 
 import CertManager from './model/CertManager';
 
-export const createStateMachine = ({ config, logger, vault }) => {
+export const createStateMachine = ({
+  config: { stateMachineDebugPort, certExpiryThresholdDays, refreshIntervalSeconds, jwsRotationIntervalMs, ...config },
+  logger,
+  vault,
+}) => {
   let certManager: CertManager | undefined;
 
   if (config.certManager.enabled) {
@@ -53,9 +57,11 @@ export const createStateMachine = ({ config, logger, vault }) => {
   };
 
   return new ConnectionStateMachine({
-    ...config, // todo: clarify, which configs we need to pass here
     config,
-    port: config.stateMachineDebugPort,
+    port: stateMachineDebugPort,
+    certExpiryThresholdDays,
+    refreshIntervalSeconds,
+    jwsRotationIntervalMs,
     dfspCertificateModel: new DFSPCertificateModel(opts),
     hubCertificateModel: new HubCertificateModel(opts),
     hubEndpointModel: new HubEndpointModel(opts),
