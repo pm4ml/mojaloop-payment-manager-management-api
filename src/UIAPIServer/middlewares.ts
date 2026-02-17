@@ -8,9 +8,9 @@
  *       Murthy Kakarlamudi - murthy@modusbox.com                         *
  **************************************************************************/
 
-import util from 'util';
 import Router from 'koa-router';
 import { HTTPResponseError } from '@mojaloop/mcm-client';
+import { logger } from '../lib/logger';
 import randomPhrase from '../lib/randomphrase';
 
 /**
@@ -22,7 +22,7 @@ const createErrorHandler = () => async (ctx, next) => {
     await next();
   } catch (err: any) {
     // TODO: return a 500 here if the response has not already been sent?
-    console.log(`Error caught in catchall: ${err.stack || util.inspect(err, { depth: 10 })}`);
+    logger.error(`Error caught in catchall: `, err);
   }
 };
 
@@ -37,11 +37,11 @@ const createRequestIdGenerator = () => async (ctx, next) => {
 
 /**
  * Add a log context for each request, log the receipt and handling thereof
- * @param logger
+ * @param log
  * @return {Function}
  */
-const createLogger = (logger) => async (ctx, next) => {
-  ctx.state.logger = logger.push({
+const createLogger = (log) => async (ctx, next) => {
+  ctx.state.logger = log.push({
     request: {
       id: ctx.request.id,
       path: ctx.path,
@@ -54,7 +54,7 @@ const createLogger = (logger) => async (ctx, next) => {
   try {
     await next();
   } catch (err: any) {
-    console.log(`Error caught in createLogger: ${err.stack || util.inspect(err, { depth: 10 })}`);
+    logger.warn(`Error caught in createLogger: `, err);
   }
   if (ctx.path !== '/health') {
     await ctx.state.logger.log('Request processed');
@@ -82,7 +82,7 @@ const createRouter = (handlerMap: Record<string, HandlerMethods>) => {
           ctx.state.logger = ctx.state.logger.push({ handler: handler.name });
           await Promise.resolve(handler(ctx, next));
         } catch (e: any) {
-          ctx.state.logger.log(`Error: ${e.stack || util.inspect(e)}`);
+          ctx.state.logger.warn(`error in handler(ctx, next): `, e);
           ctx.body = { errorMessage: e.message };
           ctx.status = 500;
           if (e instanceof HTTPResponseError) {
