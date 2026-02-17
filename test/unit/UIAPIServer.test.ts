@@ -25,7 +25,8 @@
  --------------
  ******/
 
-import 'dotenv/config';
+import { config as dotenv } from 'dotenv';
+dotenv({ path: '.env.example' });
 
 import { type Server } from 'node:http';
 import request from 'supertest';
