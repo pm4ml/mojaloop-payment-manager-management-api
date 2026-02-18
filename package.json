@@ -54,7 +54,7 @@
     "@kubernetes/client-node": "^0.16.2",
     "@mojaloop/api-snippets": "^17.7.9",
     "@mojaloop/central-services-metrics": "12.8.0",
-    "@mojaloop/mcm-client": "4.1.2",
+    "@mojaloop/mcm-client": "4.2.0-infitx.2",
     "@mojaloop/sdk-standard-components": "19.18.7",
     "@xstate/inspect": "0.7.0",
     "ajv": "^8.18.0",
