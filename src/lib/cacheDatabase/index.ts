@@ -11,6 +11,7 @@
  *       James Bush - james.bush@modusbox.com                             *
  **************************************************************************/
 
+import stringify from 'safe-stable-stringify';
 import knex, { Knex } from 'knex';
 import { Logger } from '../logger';
 import Cache from './cache';
@@ -81,7 +82,8 @@ interface SyncDBOpts {
 }
 
 async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
-  // logger.log('Syncing cache to in-memory DB');
+  const log = logger.child({ component: 'syncDB' });
+  log.info('syncing cache to in-memory DB...');
 
   const parseData = (rawData: any) => {
     let data;
@@ -89,7 +91,7 @@ async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
       try {
         data = JSON.parse(rawData);
       } catch (err: any) {
-        logger.push({ err }).log('Error parsing JSON cache value');
+        log.warn('Error parsing JSON cache value:', err);
       }
     }
 
@@ -98,106 +100,110 @@ async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
         try {
           data.quoteResponse.body = JSON.parse(data.quoteResponse.body);
         } catch (err: any) {
-          logger.push({ err, quoteResponse: data.quoteResponse }).warn('Error parsing quoteResponse body');
+          log.push({ err, quoteResponse: data.quoteResponse }).warn('Error parsing quoteResponse body');
         }
       }
       if (data.fulfil?.body && typeof data.fulfil.body === 'string') {
         try {
           data.fulfil.body = JSON.parse(data.fulfil.body);
         } catch (err: any) {
-          logger.push({ err, fulfil: data.fulfil }).warn('Error parsing fulfil body');
+          log.push({ err, fulfil: data.fulfil }).warn('Error parsing fulfil body');
         }
       }
     }
+
+    log.debug('parsed data:', { data });
     return data;
   };
 
   const cacheKey = async (key: string) => {
-    const rawData = await redisCache.get(key);
-    const data = parseData(rawData);
+    try {
+      const rawData = await redisCache.get(key);
+      const data = parseData(rawData);
 
-    // this is all a hack right now as we will eventually NOT use the cache as a source
-    // of truth for transfers but rather some sort of dedicated persistence service instead.
-    // Therefore we can afford to do some nasty things in order to get working features...
-    // for now...
+      // this is all a hack right now as we will eventually NOT use the cache as a source
+      // of truth for transfers but rather some sort of dedicated persistence service instead.
+      // Therefore we can afford to do some nasty things in order to get working features...
+      // for now...
 
-    const initiatedTimestamp = data.initiatedTimestamp ? new Date(data.initiatedTimestamp).getTime() : null;
-    const completedTimestamp = data.fulfil ? new Date(data.fulfil?.body?.completedTimestamp).getTime() : null;
+      const initiatedTimestamp = data.initiatedTimestamp ? new Date(data.initiatedTimestamp).getTime() : null;
+      const completedTimestamp = data.fulfil ? new Date(data.fulfil?.body?.completedTimestamp).getTime() : null;
 
-    // the cache data model for inbound transfers is lacking some properties that make it easy to extract
-    // certain information...therefore we have to find it elsewhere...
+      // the cache data model for inbound transfers is lacking some properties that make it easy to extract
+      // certain information...therefore we have to find it elsewhere...
 
-    if (!['INBOUND', 'OUTBOUND'].includes(data.direction))
-      logger.push({ data }).log('Unable to process row. No direction property found');
+      if (!['INBOUND', 'OUTBOUND'].includes(data.direction))
+        log.warn('Unable to process row. No direction property found', { data });
 
-    const row = {
-      id: data.transferId,
-      redis_key: key, // To be used instead of Transfer.cachedKeys
-      raw: JSON.stringify(data),
-      created_at: initiatedTimestamp,
-      completed_at: completedTimestamp,
-      ...(data.direction === 'INBOUND' && {
-        sender: getPartyNameFromQuoteRequest(data.quoteRequest, 'payer'),
-        sender_id_type: data.quoteRequest?.body?.payer?.partyIdInfo?.partyIdType,
-        sender_id_sub_value: data.quoteRequest?.body?.payer?.partyIdInfo?.partySubIdOrType,
-        sender_id_value: data.quoteRequest?.body?.payer?.partyIdInfo?.partyIdentifier,
-        recipient: getPartyNameFromQuoteRequest(data.quoteRequest, 'payee'),
-        recipient_id_type: data.quoteRequest?.body?.payee?.partyIdInfo?.partyIdType,
-        recipient_id_sub_value: data.quoteRequest?.body?.payee?.partyIdInfo?.partySubIdOrType,
-        recipient_id_value: data.quoteRequest?.body?.payee?.partyIdInfo?.partyIdentifier,
-        amount: data.quoteResponse?.body?.transferAmount?.amount,
-        currency: data.quoteResponse?.body?.transferAmount?.currency,
-        direction: -1,
-        batch_id: '',
-        details: data.quoteRequest?.body?.note,
-        dfsp: data.quoteRequest?.body?.payer?.partyIdInfo?.fspId,
+      const row = {
+        id: data.transferId,
+        redis_key: key, // To be used instead of Transfer.cachedKeys
+        raw: stringify(data),
+        created_at: initiatedTimestamp,
+        completed_at: completedTimestamp,
+        ...(data.direction === 'INBOUND' && {
+          sender: getPartyNameFromQuoteRequest(data.quoteRequest, 'payer'),
+          sender_id_type: data.quoteRequest?.body?.payer?.partyIdInfo?.partyIdType,
+          sender_id_sub_value: data.quoteRequest?.body?.payer?.partyIdInfo?.partySubIdOrType,
+          sender_id_value: data.quoteRequest?.body?.payer?.partyIdInfo?.partyIdentifier,
+          recipient: getPartyNameFromQuoteRequest(data.quoteRequest, 'payee'),
+          recipient_id_type: data.quoteRequest?.body?.payee?.partyIdInfo?.partyIdType,
+          recipient_id_sub_value: data.quoteRequest?.body?.payee?.partyIdInfo?.partySubIdOrType,
+          recipient_id_value: data.quoteRequest?.body?.payee?.partyIdInfo?.partyIdentifier,
+          amount: data.quoteResponse?.body?.transferAmount?.amount,
+          currency: data.quoteResponse?.body?.transferAmount?.currency,
+          direction: -1,
+          batch_id: '',
+          details: data.quoteRequest?.body?.note,
+          dfsp: data.quoteRequest?.body?.payer?.partyIdInfo?.fspId,
 
-        success: getInboundTransferStatus(data),
-      }),
-      ...(data.direction === 'OUTBOUND' && {
-        sender: getName(data.from),
-        sender_id_type: data.from?.idType,
-        sender_id_sub_value: data.from?.idSubType,
-        sender_id_value: data.from?.idValue,
-        recipient: getName(data.to),
-        recipient_id_type: data.to?.idType,
-        recipient_id_sub_value: data.to?.idSubType,
-        recipient_id_value: data.to?.idValue,
-        amount: data.amount,
-        currency: data.currency,
-        direction: 1,
-        batch_id: '', // TODO: Implement
-        details: data.note,
-        dfsp: data.to?.fspId,
-        success: getTransferStatus(data),
-      }),
-    };
+          success: getInboundTransferStatus(data),
+        }),
+        ...(data.direction === 'OUTBOUND' && {
+          sender: getName(data.from),
+          sender_id_type: data.from?.idType,
+          sender_id_sub_value: data.from?.idSubType,
+          sender_id_value: data.from?.idValue,
+          recipient: getName(data.to),
+          recipient_id_type: data.to?.idType,
+          recipient_id_sub_value: data.to?.idSubType,
+          recipient_id_value: data.to?.idValue,
+          amount: data.amount,
+          currency: data.currency,
+          direction: 1,
+          batch_id: '', // TODO: Implement
+          details: data.note,
+          dfsp: data.to?.fspId,
+          success: getTransferStatus(data),
+        }),
+      };
 
-    //logger.push({ data }).log('processing cache item');
+      const keyIndex = cachedPendingKeys.indexOf(row.id);
+      if (keyIndex === -1) {
+        await db('transfer').insert(row);
+        cachedPendingKeys.push(row.id);
+      } else {
+        await db('transfer').where({ id: row.id }).update(row);
+        // cachedPendingKeys.splice(keyIndex, 1);
+      }
+      log.debug('cache row stored in db:', { row });
 
-    // logger.push({ ...row, raw: ''}).log('Row processed');
+      if (row.success !== null) {
+        cachedFulfilledKeys.push(key);
+      }
 
-    const keyIndex = cachedPendingKeys.indexOf(row.id);
-    if (keyIndex === -1) {
-      await db('transfer').insert(row);
-      cachedPendingKeys.push(row.id);
-    } else {
-      await db('transfer').where({ id: row.id }).update(row);
-      // cachedPendingKeys.splice(keyIndex, 1);
+      // const sqlRaw = db('transfer').insert(row).toString();
+      // db.raw(sqlRaw.replace(/^insert/i, 'insert or ignore')).then(resolve);
+    } catch (err: any) {
+      log.error(`error in chachKey sync [key: ${key}]:`, err);
     }
-
-    if (row.success !== null) {
-      cachedFulfilledKeys.push(key);
-    }
-
-    // const sqlRaw = db('transfer').insert(row).toString();
-    // db.raw(sqlRaw.replace(/^insert/i, 'insert or ignore')).then(resolve);
   };
 
   const keys = await redisCache.keys('transferModel_*');
   const uncachedOrPendingKeys = keys.filter((x) => cachedFulfilledKeys.indexOf(x) === -1);
+
   await Promise.all(uncachedOrPendingKeys.map(cacheKey));
-  // logger.log('In-memory DB sync complete');
+  log.info('syncing cache to in-memory DB completed');
 }
 
 interface MemoryCacheOpts {
@@ -224,6 +230,7 @@ export const createMemoryCache = async (config: MemoryCacheOpts): Promise<Knex> 
 
   const redisCache = new Cache(config);
   await redisCache.connect();
+  config.logger.verbose('connected to redis cache');
 
   const doSyncDB = () =>
     syncDB({

@@ -8,6 +8,7 @@
  *       James Bush - james.bush@modusbox.com                             *
  **************************************************************************/
 
+import stringify from 'safe-stable-stringify';
 import * as redis from 'redis';
 import assert from 'assert';
 import { Logger } from '../logger';
@@ -80,7 +81,7 @@ class Cache {
     assert(this.client);
     //if we are given an object, turn it into a string
     if (typeof value !== 'string') {
-      value = JSON.stringify(value);
+      value = stringify(value);
       this.logger.debug(`in cache set: ${value}`);
     }
 

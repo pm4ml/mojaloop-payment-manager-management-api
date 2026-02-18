@@ -11,19 +11,42 @@
 import { DFSP, MonetaryZone, Transfer } from '../lib/model';
 import { statusResponseDto } from '../lib/dto';
 
+const HealthStatus = {
+  OK: 'OK',
+  DOWN: 'DOWN',
+};
+
+let failedChecks = 0; // in a row
+
 const healthCheck = async (ctx) => {
   try {
-    const vaultHealthCheck = await ctx.state.vault.healthCheck();
-    const controlServerHealthCheck = await ctx.state.controlServer.healthCheck();
-    const status = vaultHealthCheck?.status != 'DOWN' && controlServerHealthCheck.server.running ? 'OK' : 'DOWN';
+    const [vaultHealthCheck, controlServerHealthCheck] = await Promise.all([
+      ctx.state.vault.healthCheck(),
+      ctx.state.controlServer.healthCheck(),
+    ]);
+    /* prettier-ignore */
+    const status = (vaultHealthCheck?.status !== HealthStatus.DOWN && controlServerHealthCheck.server.running)
+      ? HealthStatus.OK
+      : HealthStatus.DOWN;
+
+    ctx.status = status === HealthStatus.OK ? 200 : 503;
     ctx.body = {
       status,
       vault: vaultHealthCheck,
       controlServer: controlServerHealthCheck,
     };
-  } catch (err) {
-    ctx.state.logger?.warn(`error in healthCheck: `, err);
-    throw err;
+    if (status === HealthStatus.DOWN) {
+      failedChecks += 1;
+      ctx.state.logger?.warn(`failed healthCheck [in a raw: ${failedChecks}]`);
+    } else failedChecks = 0;
+  } catch (err: unknown) {
+    failedChecks += 1;
+    ctx.state.logger?.warn(`error in healthCheck [in a raw: ${failedChecks}]: `, err);
+    ctx.status = 503;
+    ctx.body = {
+      status: HealthStatus.DOWN,
+      error: (err as Error)?.message || 'Unknown error',
+    };
   }
 };
 
