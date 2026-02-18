@@ -9,6 +9,7 @@
  **************************************************************************/
 
 import { DFSP, MonetaryZone, Transfer } from '../lib/model';
+import { statusResponseDto } from '../lib/dto';
 
 const healthCheck = async (ctx) => {
   try {
@@ -56,7 +57,7 @@ const reonboard = async (ctx) => {
   ctx.state.logger.info(`Reonboarded by x-user ${ctx.request.header['x-user']}`);
   ctx.state.logger.info(`Reason for reonboarding is ${ctx.request.body.reason}`);
   await ctx.state.stateMachine.restart();
-  ctx.body = { status: 'SUCCESS' };
+  ctx.body = statusResponseDto();
 };
 
 const recreateCerts = async (ctx) => {
@@ -66,7 +67,7 @@ const recreateCerts = async (ctx) => {
     ctx.state.stateMachine.sendEvent('CREATE_DFSP_CLIENT_CERT');
   }
   if (securityType === 'JWS') ctx.state.stateMachine.sendEvent('CREATE_JWS');
-  ctx.body = { status: 'SUCCESS' };
+  ctx.body = statusResponseDto();
 };
 
 const getDfspStatus = async (ctx) => {
@@ -221,15 +222,24 @@ const getDFSPEndpoint = async (ctx) => {
 };
 
 const createDFSPCA = async (ctx) => {
-  ctx.stateMachine.sendEvent({ type: 'CREATE_INT_CA', subject: ctx.request.body });
+  ctx.state.stateMachine.sendEvent({
+    type: 'CREATE_INT_CA',
+    subject: ctx.request.body,
+  });
+  ctx.body = statusResponseDto();
 };
 
 const setDFSPCA = async (ctx) => {
-  ctx.stateMachine.sendEvent({ type: 'CREATE_EXT_CA', ...ctx.request.body });
+  ctx.state.stateMachine.sendEvent({
+    type: 'CREATE_EXT_CA',
+    ...ctx.request.body,
+  });
+  ctx.body = statusResponseDto();
 };
 
 const createJWSCertificates = async (ctx) => {
-  ctx.stateMachine.sendEvent('CREATE_JWS');
+  ctx.state.stateMachine.sendEvent('CREATE_JWS');
+  ctx.body = statusResponseDto();
 };
 
 const getMonetaryZones = async (ctx) => {
@@ -244,7 +254,11 @@ const getMonetaryZones = async (ctx) => {
 };
 
 const generateDfspServerCerts = async (ctx) => {
-  ctx.stateMachine.sendEvent({ type: 'CREATE_DFSP_SERVER_CERT', csr: ctx.state.conf.dfspServerCsrParameters });
+  ctx.state.stateMachine.sendEvent({
+    type: 'CREATE_DFSP_SERVER_CERT',
+    csr: ctx.state.conf.dfspServerCsrParameters,
+  });
+  ctx.body = statusResponseDto();
 };
 
 export const createHandlers = () => ({

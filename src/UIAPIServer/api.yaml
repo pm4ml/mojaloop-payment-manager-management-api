@@ -497,7 +497,6 @@ paths:
                 $ref: "#/components/schemas/DFSPJWSCert"
       x-swagger-router-controller: DfspJWS
   /dfsp/jwscerts:
-
     get:
       tags:
       - DFSP-jws-certs-configuration

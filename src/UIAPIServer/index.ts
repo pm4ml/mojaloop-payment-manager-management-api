@@ -17,16 +17,14 @@ import http from 'http';
 import path from 'path';
 import assert from 'assert';
 
+import { ConnectionStateMachine, ControlServer, Vault } from '@mojaloop/mcm-client';
 import { Logger, logger as globalLogger } from '../lib/logger';
-
-import { Vault, ControlServer } from '@mojaloop/mcm-client';
 import { MemoryCache } from '../lib/cacheDatabase';
 import { IConfig } from '../config';
-import { ConnectionStateMachine } from '@mojaloop/mcm-client';
 import { createHandlers } from './handlers';
 import middlewares from './middlewares';
 
-interface UIAPIServerOptions {
+export interface UIAPIServerOptions {
   config: IConfig;
   vault: Vault;
   db: MemoryCache;
@@ -44,17 +42,8 @@ class UIAPIServer {
 
   static async create(opts: UIAPIServerOptions) {
     const api = new Koa();
-    const logger = this._createLogger();
-    let validator;
-    try {
-      validator = await oas({
-        file: path.join(__dirname, 'api.yaml'),
-        endpoint: '/openapi.json',
-        uiEndpoint: '/',
-      });
-    } catch (e) {
-      throw new Error('Error loading API spec. Please validate it with https://editor.swagger.io/');
-    }
+    const logger = UIAPIServer._createLogger();
+    const validator = await UIAPIServer._createValidator(logger);
 
     api.use(async (ctx, next) => {
       ctx.state = {
@@ -85,7 +74,7 @@ class UIAPIServer {
   async start() {
     assert(this.server);
     await new Promise<void>((resolve) => this.server.listen(this.port, resolve));
-    this.logger.log(`Serving inbound API on port ${this.port}`);
+    this.logger.info(`Serving inbound API on port ${this.port}`);
   }
 
   async stop() {
@@ -94,11 +83,25 @@ class UIAPIServer {
     }
     await new Promise((resolve) => this.server.close(resolve));
     // todo: add DB disconnect (knex and redis)
-    this.logger.log('inbound shut down complete');
+    this.logger.info('inbound shut down complete');
   }
 
   static _createLogger() {
     return globalLogger.child({ server: 'UIAPIServer' });
+  }
+
+  static async _createValidator(logger: Logger) {
+    try {
+      return await oas({
+        file: path.join(__dirname, 'api.yaml'),
+        endpoint: '/openapi.json',
+        uiEndpoint: '/',
+      });
+    } catch (e) {
+      const errMessage = 'Error loading API spec. Please validate it with https://editor.swagger.io/ ';
+      logger.error(errMessage, e);
+      throw new Error(errMessage);
+    }
   }
 }
 
