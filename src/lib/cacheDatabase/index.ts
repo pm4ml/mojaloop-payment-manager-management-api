@@ -75,6 +75,7 @@ const getPartyNameFromQuoteRequest = (qr: any, partyType: any) => {
   }
 };
 
+// rename to deps
 interface SyncDBOpts {
   redisCache: Cache;
   db: Knex;
@@ -82,7 +83,7 @@ interface SyncDBOpts {
 }
 
 async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
-  const log = logger.child({ component: 'syncDB' });
+  const log = logger.child({ function: syncDB.name });
   log.info('syncing cache to in-memory DB...');
 
   const parseData = (rawData: any) => {
@@ -199,11 +200,12 @@ async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
     }
   };
 
-  const keys = await redisCache.keys('transferModel_*');
+  const PATTERN = 'transferModel_*';
+  const keys = await redisCache.keys(PATTERN);
   const uncachedOrPendingKeys = keys.filter((x) => cachedFulfilledKeys.indexOf(x) === -1);
 
   await Promise.all(uncachedOrPendingKeys.map(cacheKey));
-  log.info('syncing cache to in-memory DB completed');
+  log.info('syncing cache to in-memory DB completed', { PATTERN, keysCount: keys.length });
 }
 
 interface MemoryCacheOpts {
@@ -214,6 +216,8 @@ interface MemoryCacheOpts {
 }
 
 export const createMemoryCache = async (config: MemoryCacheOpts): Promise<Knex> => {
+  const log = config.logger.child({ function: createMemoryCache.name });
+
   const knexConfig = {
     client: 'better-sqlite3',
     connection: {
@@ -230,21 +234,19 @@ export const createMemoryCache = async (config: MemoryCacheOpts): Promise<Knex> 
 
   const redisCache = new Cache(config);
   await redisCache.connect();
-  config.logger.verbose('connected to redis cache');
+  log.verbose('connected to redis cache');
 
   const doSyncDB = () =>
     syncDB({
       redisCache,
       db,
-      logger: config.logger,
+      logger: log,
     });
 
   if (!config.manualSync) {
     // Don't block startup on initial sync -- transfer endpoints return empty results
     // until the first sync completes (~30s). The interval timer handles retries.
-    doSyncDB().catch((err) =>
-      config.logger.push({ err }).warn('Initial cache sync failed, will retry on next interval')
-    );
+    doSyncDB().catch((err) => log.warn('error syncing cache to in-memory DB, will retry on next interval: ', err));
     const interval = setInterval(doSyncDB, (config.syncInterval || 60) * 1e3);
     (db as any).stopSync = () => clearInterval(interval);
   } else {
