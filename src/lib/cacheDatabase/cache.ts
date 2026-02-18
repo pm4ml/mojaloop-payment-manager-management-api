@@ -13,6 +13,8 @@ import * as redis from 'redis';
 import assert from 'assert';
 import { Logger } from '../logger';
 
+const SCAN_COUNT = 500; // todo: make configurable, figure out the right value?
+
 /**
  * A shared cache abstraction over a REDIS distributed key/value store
  */
@@ -115,8 +117,25 @@ class Cache {
    */
   async keys(pattern: string) {
     assert(this.client);
-    return this.client.keys(pattern);
+    // Use SCAN instead of KEYS to avoid blocking the entire Redis server.
+    // - KEYS is O(N) and single-threaded
+    // - SCAN is O(N), cursor-based and yields between batches
+    const keys: string[] = [];
+    for await (const key of this.client.scanIterator({ MATCH: pattern, COUNT: SCAN_COUNT })) {
+      keys.push(key);
+    }
+    return keys;
   }
+
+  /**
+   * Gets keys from the cache based on the pattern (using sync KEYS)
+   *
+   * @param pattern {string} - keys pattern
+   */
+  // async keysSync(pattern: string) {
+  //   assert(this.client);
+  //   return this.client.keys(pattern);
+  // }
 }
 
 export default Cache;

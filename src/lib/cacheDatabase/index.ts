@@ -240,7 +240,11 @@ export const createMemoryCache = async (config: MemoryCacheOpts): Promise<Knex> 
     });
 
   if (!config.manualSync) {
-    await doSyncDB();
+    // Don't block startup on initial sync -- transfer endpoints return empty results
+    // until the first sync completes (~30s). The interval timer handles retries.
+    doSyncDB().catch((err) =>
+      config.logger.push({ err }).warn('Initial cache sync failed, will retry on next interval')
+    );
     const interval = setInterval(doSyncDB, (config.syncInterval || 60) * 1e3);
     (db as any).stopSync = () => clearInterval(interval);
   } else {

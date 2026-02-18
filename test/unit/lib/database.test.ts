@@ -17,15 +17,25 @@ import * as CacheDatabase from '../../../src/lib/cacheDatabase';
 import Cache from '../../../src/lib/cacheDatabase/cache';
 
 jest.mock('redis', () => ({
-  createClient: jest.fn(() => ({
-    connect: jest.fn(),
-    quit: jest.fn(),
-    set: jest.fn(),
-    get: jest.fn(),
-    del: jest.fn(),
-    keys: jest.fn(),
-    on: jest.fn(),
-  })),
+  createClient: jest.fn(() => {
+    const client: Record<string, jest.Mock | Function> = {
+      connect: jest.fn(),
+      quit: jest.fn(),
+      set: jest.fn(),
+      get: jest.fn(),
+      del: jest.fn(),
+      keys: jest.fn(),
+      on: jest.fn(),
+    };
+    // scanIterator delegates to the mockable keys() so tests can control results
+    client.scanIterator = (opts: { MATCH?: string } = {}) => ({
+      async *[Symbol.asyncIterator]() {
+        const keys = await (client.keys as jest.Mock)(opts.MATCH || '*');
+        if (keys) for (const key of keys) yield key;
+      },
+    });
+    return client;
+  }),
 }));
 
 const mockLogger = {
@@ -38,7 +48,7 @@ const mockLogger = {
 };
 
 jest.mock('@app/lib/logger', () => ({
-  logger: mockLogger,
+  logger: mockLogger, // (?) why do we need to mock logger?
 }));
 
 jest.mock('../../../src/lib/cacheDatabase', () => ({
