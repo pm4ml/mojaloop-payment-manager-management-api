@@ -10,7 +10,7 @@
 
 import { DFSP, MonetaryZone, Transfer } from '../lib/model';
 import { statusResponseDto } from '../lib/dto';
-import { HealthStatus, RedisHealthStatus, TRedisHealthStatusValue } from "../constants";
+import { HealthStatus, RedisHealthStatus, TRedisHealthStatusValue } from '../constants';
 
 let failedChecks = 0; // in a row
 

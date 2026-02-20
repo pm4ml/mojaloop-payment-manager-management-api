@@ -43,7 +43,8 @@
     "audit:fix": "npm audit fix",
     "test:integration": "true",
     "test:functional": "true",
-    "test:deprecations": "true"
+    "test:deprecations": "true",
+    "prepare": "husky || true"
   },
   "scriptDescriptions": {
     "test:integration": "Returns true as integration tests are not fully implemented yet",
