@@ -33,47 +33,45 @@ import request from 'supertest';
 
 import UIAPIServer, { UIAPIServerOptions } from '@app/UIAPIServer';
 import config from '@app/config';
-import { logger } from '@app/lib/logger';
+import { HealthStatus, RedisHealthStatus } from '@app/constants';
 import { statusResponseDto } from '@app/lib/dto';
+
 import { payloads } from './fixtures';
+import * as mocks from './mocks';
 
 jest.setTimeout(10_000);
 
-const createMockOpts = ({
-  // todo: add all mock impl.
-  vault = {},
-  db = {} as any,
-  stateMachine = { sendEvent: jest.fn() },
-  controlServer = {},
+const createMockDeps = ({
+  vault = mocks.mockVaultFactory(),
+  cache = mocks.mockCacheFactory(),
+  stateMachine = mocks.mockStateMachineFactory(),
+  controlServer = mocks.mockControlServerFactory(),
   port = 12345,
 }: Partial<UIAPIServerOptions> = {}): UIAPIServerOptions => ({
   config,
   port,
   vault,
-  db,
+  cache,
   stateMachine,
   controlServer,
 });
 
 describe('UIAPIServer Tests -->', () => {
   let uiApiServer: UIAPIServer;
-  let opts: UIAPIServerOptions;
+  let deps: UIAPIServerOptions;
 
   let server: Server;
 
-  beforeAll(async () => {
-    logger.info('before uiAPIServer');
-    opts = createMockOpts();
-    uiApiServer = await UIAPIServer.create(opts);
+  beforeEach(async () => {
+    deps = createMockDeps();
+    uiApiServer = await UIAPIServer.create(deps);
     await uiApiServer.start();
     /* eslint-disable-next-line */
     server = uiApiServer['server']; // http.createServer(api.callback())
-    logger.info('uiAPIServer started');
   });
 
-  afterAll(async () => {
+  afterEach(async () => {
     await uiApiServer?.stop();
-    logger.info('uiAPIServer stopped');
   });
 
   it('should create http server', async () => {
@@ -83,18 +81,19 @@ describe('UIAPIServer Tests -->', () => {
 
   it('should emit correct stateMachine events per route', async () => {
     expect.hasAssertions();
-    const { stateMachine } = opts;
+    const { stateMachine } = deps;
 
-    type RouteEventTuple = [METHOD: string, path: string, body: object | null, eventName: string];
-
+    type RouteEventTuple = [
+      METHOD: string, path: string, body: object | null, statusCode: number, eventName: string
+    ];
     const ROUTES_EVENTS: RouteEventTuple[] = [
-      ['POST', '/dfsp/ca', payloads.createDFSPCA(), 'CREATE_INT_CA'],
-      ['PUT', '/dfsp/ca', payloads.setDFSPCA(), 'CREATE_EXT_CA'],
-      ['POST', '/dfsp/jwscerts', null, 'CREATE_JWS'],
-      ['POST', '/dfsp/servercerts', null, 'CREATE_DFSP_SERVER_CERT'],
+      ['POST', '/dfsp/ca', payloads.createDFSPCA(), 200, 'CREATE_INT_CA'],
+      ['PUT', '/dfsp/ca', payloads.setDFSPCA(), 200, 'CREATE_EXT_CA'],
+      ['POST', '/dfsp/jwscerts', null, 200, 'CREATE_JWS'],
+      ['POST', '/dfsp/servercerts', null, 200, 'CREATE_DFSP_SERVER_CERT'],
     ];
 
-    for (const [METHOD, path, body, EVENT_NAME] of ROUTES_EVENTS) {
+    for (const [METHOD, path, body, statusCode, EVENT_NAME] of ROUTES_EVENTS) {
       stateMachine.sendEvent = jest.fn();
 
       const res = await request(server)
@@ -102,7 +101,7 @@ describe('UIAPIServer Tests -->', () => {
         .type('json')
         .send(body || {});
 
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(statusCode);
       expect(res.body).toEqual(statusResponseDto());
       expect(stateMachine.sendEvent).toHaveBeenCalledTimes(1);
 
@@ -111,4 +110,57 @@ describe('UIAPIServer Tests -->', () => {
       expect(eventType).toBe(EVENT_NAME);
     }
   });
+
+  describe('UIAPIServer healthChecks -->', () => {
+    describe('Redis healthChecks Tests', () => {
+      it('should include redis: OK when ping succeeds', async () => {
+        const res = await request(server).get('/health');
+        expect(res.status).toBe(200);
+        expect(res.body.status).toBe(HealthStatus.OK);
+        expect(res.body.redis).toBe(RedisHealthStatus.OK);
+      });
+
+      it('should include redis: DOWN when ping fails, and overall status is DOWN', async () => {
+        deps.cache = mocks.mockCacheFactory({ pingResponse: false });
+        const res = await request(server).get('/health');
+        expect(res.status).toBe(503);
+        expect(res.body.status).toBe(HealthStatus.DOWN);
+        expect(res.body.redis).toBe(RedisHealthStatus.DOWN);
+      });
+
+      it('should include redis: N/A when cache is disabled', async () => {
+        deps.cache = undefined;
+        const res = await request(server).get('/health');
+        expect(res.status).toBe(200);
+        expect(res.body.status).toBe(HealthStatus.OK);
+        expect(res.body.redis).toBe(RedisHealthStatus.NA);
+      });
+    });
+  });
+
+  describe('UIAPIServer /transfer* guard when cache disabled -->', () => {
+    beforeEach(() => {
+      deps.cache = undefined;
+    })
+
+    it(`should return 500 for /transfers* paths`, async () => {
+      const transferPaths = [
+        '/transfers',
+        '/transferStatusSummary',
+        '/transferErrors',
+      ];
+
+      await Promise.all(transferPaths.map(async (path) => {
+        const res = await request(server).get(path);
+        expect(res.status).toBe(500);
+        expect(res.body.error).toBe('Transfer cache is not available');
+      }))
+    });
+
+    it('should not block non-transfer endpoints', async () => {
+      const res = await request(server).get('/health');
+      expect(res.status).toBe(200);
+    });
+  });
 });
+

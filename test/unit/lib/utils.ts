@@ -9,11 +9,11 @@
  **************************************************************************/
 
 import { logger } from '@app/lib/logger';
-import { createMemoryCache } from '@app/lib/cacheDatabase';
+import { createMemoryCache, CacheDatabase } from '@app/lib/cacheDatabase';
 import transferTemplate from './data/transferTemplate.json';
 import lastError from './data/lastError.json';
 
-const createTestDb = async () => {
+const createTestDb = async (): Promise<CacheDatabase> => {
   return createMemoryCache({
     cacheUrl: 'redis://dummyhost:1234',
     logger,
@@ -21,7 +21,7 @@ const createTestDb = async () => {
   });
 };
 
-const addTransferToCache = async (db, opts) => {
+const addTransferToCache = async (db: CacheDatabase, opts) => {
   const transfer = JSON.parse(JSON.stringify(transferTemplate));
   transfer.transferId = opts.transferId || transfer.transferId;
   transfer.amountType = opts.amountType || transfer.amountType;
@@ -39,7 +39,7 @@ const addTransferToCache = async (db, opts) => {
     transfer.fulfil.body.completedTimestamp = opts.completedTimestamp || transfer.fulfil.body.completedTimestamp;
   }
 
-  await db.redisCache().set(`transferModel_${opts.transferId}`, JSON.stringify(transfer));
+  await db.redisCache.set(`transferModel_${opts.transferId}`, JSON.stringify(transfer));
 
   return transfer;
 };

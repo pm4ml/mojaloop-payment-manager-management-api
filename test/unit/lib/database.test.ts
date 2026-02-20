@@ -25,6 +25,7 @@ jest.mock('redis', () => ({
       get: jest.fn(),
       del: jest.fn(),
       keys: jest.fn(),
+      ping: jest.fn().mockResolvedValue('PONG'),
       on: jest.fn(),
     };
     // scanIterator delegates to the mockable keys() so tests can control results
@@ -38,33 +39,36 @@ jest.mock('redis', () => ({
   }),
 }));
 
-const mockLogger = {
-  push: jest.fn().mockReturnThis(),
-  log: jest.fn(),
-  debug: jest.fn(),
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-};
-
 jest.mock('@app/lib/logger', () => ({
-  logger: mockLogger, // (?) why do we need to mock logger?
+  logger: {
+    push: jest.fn().mockReturnThis(),
+    child: jest.fn().mockReturnThis(),
+    log: jest.fn(),
+    debug: jest.fn(),
+    verbose: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  },
 }));
 
 jest.mock('../../../src/lib/cacheDatabase', () => ({
   createMemoryCache: jest.fn().mockImplementation(() => ({
-    redisCache: jest.fn().mockReturnValue({
-      set: jest.fn().mockResolvedValue(true),
+    db: {
       select: jest.fn().mockReturnThis(),
       from: jest.fn().mockResolvedValue([
         { id: 'tr1', success: 1, amount: '100' },
         { id: 'tr2', success: null, amount: '50' },
         { id: 'tr3', success: 0, amount: '70' },
       ]),
+    },
+    redisCache: {
+      set: jest.fn().mockResolvedValue(true),
       disconnect: jest.fn(),
-    }),
+      ping: jest.fn().mockResolvedValue(true),
+    },
     sync: jest.fn().mockResolvedValue(undefined),
-    destroy: jest.fn(),
+    destroy: jest.fn().mockResolvedValue(undefined),
   })),
 }));
 
@@ -97,7 +101,7 @@ describe('Utils', () => {
 
       const result = await addTransferToCache(db, opts);
 
-      expect(db.redisCache().set).toHaveBeenCalledWith('transferModel_test-transfer-id', expect.any(String));
+      expect(db.redisCache.set).toHaveBeenCalledWith('transferModel_test-transfer-id', expect.any(String));
       expect(result).toHaveProperty('transferId', 'test-transfer-id');
       expect(result).toHaveProperty('fulfil');
     });
@@ -170,8 +174,8 @@ describe('Database', () => {
   });
 
   afterEach(async () => {
-    await db.redisCache().disconnect();
-    db.destroy();
+    await db.redisCache.disconnect();
+    await db.destroy();
   });
 
   test('Should cache Redis records', async () => {
@@ -203,7 +207,7 @@ describe('Database', () => {
     });
 
     await db.sync();
-    const rows = await db.redisCache().select('id', 'success', 'amount').from('transfer');
+    const rows = await db.db.select('id', 'success', 'amount').from('transfer');
     expect(rows).toMatchObject([
       { id: 'tr1', success: 1, amount: '100' },
       { id: 'tr2', success: null, amount: '50' },
@@ -237,7 +241,7 @@ describe('Database', () => {
     });
 
     await db.sync();
-    const updatedRows = await db.redisCache().select('id', 'success', 'amount').from('transfer');
+    const updatedRows = await db.db.select('id', 'success', 'amount').from('transfer');
     // Fulfilled transfers shouldn't be refreshed in the cache
     expect(updatedRows).toMatchObject([
       { id: 'tr1', success: 1, amount: '100' },
@@ -275,7 +279,7 @@ describe('Cache', () => {
 
       expect(redis.createClient).toHaveBeenCalledWith({ url: 'redis://test-url' });
       expect(mockRedisClient.connect).toHaveBeenCalled();
-      expect(mockLogger.info).toHaveBeenCalledWith('Connected to REDIS at: redis://test-url');
+      expect(logger.info).toHaveBeenCalledWith('Connected to REDIS at: redis://test-url');
     });
 
     it('should throw an error if already connected', async () => {
@@ -299,6 +303,27 @@ describe('Cache', () => {
     });
   });
 
+  describe('ping', () => {
+    it('should return true when client is connected and responds', async () => {
+      await cache.connect();
+      const result = await cache.ping();
+      expect(result).toBe(true);
+      expect(mockRedisClient.ping).toHaveBeenCalled();
+    });
+
+    it('should return false when client is not connected', async () => {
+      const result = await cache.ping();
+      expect(result).toBe(false);
+    });
+
+    it('should return false when ping throws', async () => {
+      await cache.connect();
+      (mockRedisClient.ping as jest.Mock).mockRejectedValueOnce(new Error('connection lost'));
+      const result = await cache.ping();
+      expect(result).toBe(false);
+    });
+  });
+
   describe('set', () => {
     it('should set a string value in the cache', async () => {
       await cache.connect();
@@ -311,7 +336,7 @@ describe('Cache', () => {
       await cache.connect();
       await cache.set('testKey', { key: 'value' });
 
-      expect(mockLogger.debug).toHaveBeenCalledWith('in cache set: {"key":"value"}');
+      expect(logger.debug).toHaveBeenCalledWith('in cache set: {"key":"value"}');
       expect(mockRedisClient.set).toHaveBeenCalledWith('testKey', '{"key":"value"}');
     });
 
@@ -373,8 +398,8 @@ describe('Cache', () => {
 
       await cache.connect();
 
-      expect(mockLogger.push).toHaveBeenCalledWith({ error: expect.any(Error) });
-      expect(mockLogger.warn).toHaveBeenCalledWith('Error from REDIS client getting subscriber');
+      expect(logger.push).toHaveBeenCalledWith({ error: expect.any(Error) });
+      expect(logger.warn).toHaveBeenCalledWith('Error from REDIS client getting subscriber');
     });
   });
 });

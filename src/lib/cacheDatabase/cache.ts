@@ -11,7 +11,7 @@
 import stringify from 'safe-stable-stringify';
 import * as redis from 'redis';
 import assert from 'assert';
-import { Logger } from '../logger';
+import { Logger, logger } from '../logger';
 
 const SCAN_COUNT = 500; // todo: make configurable, figure out the right value?
 
@@ -31,7 +31,7 @@ class Cache {
 
   constructor(opts: CacheOpts) {
     this.url = opts.cacheUrl;
-    this.logger = opts.logger;
+    this.logger = (opts.logger || logger).child({ component: Cache.name });
   }
 
   /**
@@ -108,6 +108,16 @@ class Cache {
   async del(key: string) {
     assert(this.client);
     return this.client.del(key);
+  }
+
+  async ping(): Promise<boolean> {
+    if (!this.client) return false;
+    try {
+      await this.client.ping();
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   /**

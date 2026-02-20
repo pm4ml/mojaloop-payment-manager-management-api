@@ -11,13 +11,14 @@
  *       James Bush - james.bush@modusbox.com                             *
  **************************************************************************/
 
+import { setTimeout as sleep } from 'node:timers/promises';
 import stringify from 'safe-stable-stringify';
 import knex, { Knex } from 'knex';
 import { Logger } from '../logger';
 import Cache from './cache';
 
-const cachedFulfilledKeys: string[] = [];
-const cachedPendingKeys: string[] = [];
+const cachedFulfilledKeys = new Set<string>();
+const cachedPendingKeys = new Set<string>();
 
 interface UserInfo {
   displayName?: string;
@@ -82,19 +83,24 @@ interface SyncDBOpts {
   logger: Logger;
 }
 
+const BATCH_SIZE = 100;
+
 async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
   const log = logger.child({ function: syncDB.name });
   log.info('syncing cache to in-memory DB...');
 
   const parseData = (rawData: any) => {
+    if (typeof rawData !== 'string') return null;
+
     let data;
-    if (typeof rawData === 'string') {
-      try {
-        data = JSON.parse(rawData);
-      } catch (err: any) {
-        log.warn('Error parsing JSON cache value:', err);
-      }
+    try {
+      data = JSON.parse(rawData);
+    } catch (err: any) {
+      log.warn('Error parsing JSON cache value:', err);
+      return null;
     }
+
+    if (!data || typeof data !== 'object') return null;
 
     if (data.direction === 'INBOUND') {
       if (data.quoteResponse?.body && typeof data.quoteResponse.body === 'string') {
@@ -121,6 +127,7 @@ async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
     try {
       const rawData = await redisCache.get(key);
       const data = parseData(rawData);
+      if (!data) return;
 
       // this is all a hack right now as we will eventually NOT use the cache as a source
       // of truth for transfers but rather some sort of dedicated persistence service instead.
@@ -179,33 +186,42 @@ async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
         }),
       };
 
-      const keyIndex = cachedPendingKeys.indexOf(row.id);
-      if (keyIndex === -1) {
+      if (!cachedPendingKeys.has(row.id)) {
         await db('transfer').insert(row);
-        cachedPendingKeys.push(row.id);
+        cachedPendingKeys.add(row.id);
       } else {
         await db('transfer').where({ id: row.id }).update(row);
-        // cachedPendingKeys.splice(keyIndex, 1);
       }
       log.debug('cache row stored in db:', { row });
 
       if (row.success !== null) {
-        cachedFulfilledKeys.push(key);
+        cachedFulfilledKeys.add(key);
       }
 
       // const sqlRaw = db('transfer').insert(row).toString();
       // db.raw(sqlRaw.replace(/^insert/i, 'insert or ignore')).then(resolve);
     } catch (err: any) {
-      log.error(`error in chachKey sync [key: ${key}]:`, err);
+      log.error(`error in cacheKey sync [key: ${key}]:`, err);
     }
   };
 
   const PATTERN = 'transferModel_*';
   const keys = await redisCache.keys(PATTERN);
-  const uncachedOrPendingKeys = keys.filter((x) => cachedFulfilledKeys.indexOf(x) === -1);
+  const uncachedOrPendingKeys = keys.filter((x) => !cachedFulfilledKeys.has(x));
 
-  await Promise.all(uncachedOrPendingKeys.map(cacheKey));
-  log.info('syncing cache to in-memory DB completed', { PATTERN, keysCount: keys.length });
+  const startTime = Date.now();
+  for (let i = 0; i < uncachedOrPendingKeys.length; i += BATCH_SIZE) {
+    const batch = uncachedOrPendingKeys.slice(i, i + BATCH_SIZE);
+    await Promise.all(batch.map(cacheKey));
+  }
+
+  const duration = (Date.now() - startTime) / 1000;
+  log.info(`syncing cache to in-memory DB completed  [duration.s: ${duration}]`, {
+    PATTERN,
+    keysCount: keys.length,
+    BATCH_SIZE,
+    duration,
+  });
 }
 
 interface MemoryCacheOpts {
@@ -215,7 +231,14 @@ interface MemoryCacheOpts {
   syncInterval?: number;
 }
 
-export const createMemoryCache = async (config: MemoryCacheOpts): Promise<Knex> => {
+export interface CacheDatabase {
+  db: Knex;
+  destroy: () => Promise<void>;
+  sync?: () => Promise<void>;
+  redisCache: Cache;
+}
+
+export const createMemoryCache = async (config: MemoryCacheOpts): Promise<CacheDatabase> => {
   const log = config.logger.child({ function: createMemoryCache.name });
 
   const knexConfig = {
@@ -236,25 +259,57 @@ export const createMemoryCache = async (config: MemoryCacheOpts): Promise<Knex> 
   await redisCache.connect();
   log.verbose('connected to redis cache');
 
-  const doSyncDB = () =>
-    syncDB({
-      redisCache,
-      db,
-      logger: log,
-    });
+  let interval: ReturnType<typeof setInterval> | undefined;
+  let syncInProgress = false;
+  let destroyed = false;
+
+  const doSyncDB = async () => {
+    if (syncInProgress) {
+      log.info('syncDB already in progress, skipping');
+      return;
+    }
+    syncInProgress = true;
+    try {
+      await syncDB({
+        redisCache,
+        db,
+        logger: log,
+      });
+    } catch (err) {
+      log.warn('error syncing cache to in-memory DB, will retry on next interval: ', err);
+    } finally {
+      syncInProgress = false;
+    }
+  };
 
   if (!config.manualSync) {
     // Don't block startup on initial sync -- transfer endpoints return empty results
     // until the first sync completes (~30s). The interval timer handles retries.
-    doSyncDB().catch((err) => log.warn('error syncing cache to in-memory DB, will retry on next interval: ', err));
-    const interval = setInterval(doSyncDB, (config.syncInterval || 60) * 1e3);
-    (db as any).stopSync = () => clearInterval(interval);
-  } else {
-    (db as any).sync = doSyncDB;
+    doSyncDB();
+    interval = setInterval(doSyncDB, (config.syncInterval || 60) * 1e3);
   }
-  (db as any).redisCache = () => redisCache; // for testing purposes
 
-  return db;
+  return {
+    db,
+    redisCache,
+    sync: config.manualSync ? doSyncDB : undefined,
+    destroy: async () => {
+      // rename to disconnect?
+      if (destroyed) return;
+      destroyed = true;
+      if (interval) clearInterval(interval);
+      // Wait for in-progress sync to drain
+      const MAX_WAIT = 3_000;
+      const start = Date.now();
+      while (syncInProgress && Date.now() - start < MAX_WAIT) {
+        await sleep(100);
+      }
+      /* prettier-ignore */
+      await Promise.all([
+        redisCache.disconnect(),
+        db.destroy(),
+      ]);
+      log.info('cache database destroyed');
+    },
+  };
 };
-
-export type MemoryCache = Knex;
