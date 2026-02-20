@@ -121,20 +121,6 @@ class UIAPIServer {
     }
     return UIAPIServer._validatorCache;
   }
-
-  static async _createValidator(logger: Logger) {
-    try {
-      return await oas({
-        file: path.join(__dirname, 'api.yaml'),
-        endpoint: '/openapi.json',
-        uiEndpoint: '/',
-      });
-    } catch (e) {
-      const errMessage = 'Error loading API spec. Please validate it with https://editor.swagger.io/ ';
-      logger.error(errMessage, e);
-      throw new Error(errMessage);
-    }
-  }
 }
 
 export default UIAPIServer;
