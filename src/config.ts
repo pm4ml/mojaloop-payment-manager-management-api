@@ -92,8 +92,8 @@ const cfg = {
   disableUIApiCache: env.get('DISABLE_UI_API_CACHE').default('false').asBool(),
   cacheUrl: env.get('CACHE_URL').default('redis://redis:6379').asUrlString(),
   cacheSyncInterval: env.get('CACHE_SYNC_INTERVAL_SECONDS').default(30).asIntPositive(),
-  transferRetentionHours: env.get('TRANSFER_RETENTION_HOURS').default(168).asInt(),
-  pruneIntervalSeconds: env.get('TRANSFER_PRUNE_INTERVAL_SECONDS').default(300).asInt(),
+  transferRetentionHours: env.get('TRANSFER_RETENTION_HOURS').default(168).asIntPositive(), // see REDIS_CACHE_TTL env var in SDK
+  pruneIntervalSeconds: env.get('TRANSFER_PRUNE_INTERVAL_SECONDS').default(300).asIntPositive(),
 
   hubIamProviderUrl: env.get('HUB_IAM_PROVIDER_URL').required().asString(), // with schema
   mcmServerEndpoint: env.get('MCM_SERVER_ENDPOINT').required().asString(),
