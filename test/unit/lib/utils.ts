@@ -18,7 +18,9 @@ const createTestDb = async (opts?: { transferRetentionHours?: number }): Promise
     cacheUrl: 'redis://dummyhost:1234',
     logger,
     manualSync: true,
-    transferRetentionHours: opts?.transferRetentionHours,
+    ...(typeof opts?.transferRetentionHours === 'number' && {
+      transferRetentionHours: opts.transferRetentionHours
+    }),
   });
 };
 
