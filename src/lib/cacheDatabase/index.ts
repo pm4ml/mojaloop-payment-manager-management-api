@@ -349,7 +349,7 @@ export const createMemoryCache = async (config: MemoryCacheOpts): Promise<CacheD
     interval = setInterval(doSyncDB, (config.syncInterval || 60) * 1e3);
 
     if (config.transferRetentionHours && config.transferRetentionHours > 0) {
-      const pruneMs = (config.pruneIntervalSeconds || 300) * 1e3;
+      const pruneMs = (config.pruneIntervalSeconds ?? 300) * 1e3;
       pruneInterval = setInterval(doPruneDB, pruneMs);
     }
   }

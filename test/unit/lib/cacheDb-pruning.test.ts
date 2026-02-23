@@ -34,8 +34,8 @@
 
 jest.mock('redis');
 
-import { createTestDb, addTransferToCache } from './utils';
 import { CacheDatabase } from '@app/lib/cacheDatabase';
+import { createTestDb, addTransferToCache } from './utils';
 
 const hoursAgo = (h: number) => new Date(Date.now() - h * 3600_000).toISOString();
 
