@@ -37,9 +37,23 @@ class RedisClient extends redisMock.RedisClient {
     return promisify(super.get.bind(this))(...args);
   }
 
+  del(...args) {
+    return promisify(super.del.bind(this))(...args);
+  }
+
   keys(...args) {
     return promisify(super.keys.bind(this))(...args);
   }
+
+  flushdb(...args) {
+    return promisify(super.flushdb.bind(this))(...args);
+  }
+
+  async ping() {
+    return 'PONG';
+  }
+
+  async quit() {}
 
   // Async iterable that mimics redis v4 scanIterator using the instance's keys()
   scanIterator(opts: { MATCH?: string; COUNT?: number } = {}) {

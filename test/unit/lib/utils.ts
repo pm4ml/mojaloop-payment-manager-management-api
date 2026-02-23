@@ -13,11 +13,12 @@ import { createMemoryCache, CacheDatabase } from '@app/lib/cacheDatabase';
 import transferTemplate from './data/transferTemplate.json';
 import lastError from './data/lastError.json';
 
-const createTestDb = async (): Promise<CacheDatabase> => {
+const createTestDb = async (opts?: { transferRetentionHours?: number }): Promise<CacheDatabase> => {
   return createMemoryCache({
     cacheUrl: 'redis://dummyhost:1234',
     logger,
     manualSync: true,
+    transferRetentionHours: opts?.transferRetentionHours,
   });
 };
 
