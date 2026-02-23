@@ -10,20 +10,51 @@
 
 import { DFSP, MonetaryZone, Transfer } from '../lib/model';
 import { statusResponseDto } from '../lib/dto';
+import { HealthStatus, RedisHealthStatus, TRedisHealthStatusValue } from '../constants';
+
+let failedChecks = 0; // in a row
 
 const healthCheck = async (ctx) => {
   try {
-    const vaultHealthCheck = await ctx.state.vault.healthCheck();
-    const controlServerHealthCheck = await ctx.state.controlServer.healthCheck();
-    const status = vaultHealthCheck?.status != 'DOWN' && controlServerHealthCheck.server.running ? 'OK' : 'DOWN';
+    const [vaultHealthCheck, controlServerHealthCheck] = await Promise.all([
+      ctx.state.vault.healthCheck(),
+      ctx.state.controlServer.healthCheck(),
+    ]);
+
+    let redisHealth: TRedisHealthStatusValue = RedisHealthStatus.NA;
+    if (ctx.state.cache) {
+      const isOk = await ctx.state.cache.redisCache.ping();
+      redisHealth = isOk ? RedisHealthStatus.OK : RedisHealthStatus.DOWN;
+      // todo: create cache.healthCheck() method
+    }
+
+    /* prettier-ignore */
+    const status = (vaultHealthCheck?.status !== HealthStatus.DOWN
+      && controlServerHealthCheck.server.running
+      && redisHealth !== HealthStatus.DOWN
+    )
+      ? HealthStatus.OK
+      : HealthStatus.DOWN;
+
+    ctx.status = status === HealthStatus.OK ? 200 : 503;
     ctx.body = {
       status,
       vault: vaultHealthCheck,
       controlServer: controlServerHealthCheck,
+      redis: redisHealth,
     };
-  } catch (err) {
-    ctx.state.logger?.warn(`error in healthCheck: `, err);
-    throw err;
+    if (status === HealthStatus.DOWN) {
+      failedChecks += 1;
+      ctx.state.logger?.warn(`failed healthCheck [in a row: ${failedChecks}]`);
+    } else failedChecks = 0;
+  } catch (err: unknown) {
+    failedChecks += 1;
+    ctx.state.logger?.warn(`error in healthCheck [in a row: ${failedChecks}]: `, err);
+    ctx.status = 503;
+    ctx.body = {
+      status: HealthStatus.DOWN,
+      error: (err as Error)?.message || 'Unknown error',
+    };
   }
 };
 
@@ -100,7 +131,7 @@ const getTransfers = async (ctx) => {
     offset,
   } = ctx.query;
   const transfer = new Transfer({
-    db: ctx.state.db,
+    db: ctx.state.cache.db,
   });
   ctx.body = await transfer.findAll({
     id,
@@ -123,21 +154,21 @@ const getTransfers = async (ctx) => {
 
 const getTransfer = async (ctx) => {
   const transfer = new Transfer({
-    db: ctx.state.db,
+    db: ctx.state.cache.db,
   });
   ctx.body = await transfer.findOne(ctx.params.transferId);
 };
 
 const getTransferErrors = async (ctx) => {
   const transfer = new Transfer({
-    db: ctx.state.db,
+    db: ctx.state.cache.db,
   });
   ctx.body = await transfer.findErrors();
 };
 
 const getTransferDetail = async (ctx) => {
   const transfer = new Transfer({
-    db: ctx.state.db,
+    db: ctx.state.cache.db,
   });
 
   const res = await transfer.findOneDetail(ctx.params.transferId);
@@ -151,7 +182,7 @@ const getTransferDetail = async (ctx) => {
 const getTransferStatusSummary = async (ctx) => {
   const { startTimestamp, endTimestamp } = ctx.query;
   const transfer = new Transfer({
-    db: ctx.state.db,
+    db: ctx.state.cache.db,
   });
   ctx.body = await transfer.statusSummary({ startTimestamp, endTimestamp });
 };
@@ -159,7 +190,7 @@ const getTransferStatusSummary = async (ctx) => {
 const getHourlyFlow = async (ctx) => {
   const { hoursPrevious } = ctx.query;
   const transfer = new Transfer({
-    db: ctx.state.db,
+    db: ctx.state.cache.db,
   });
   ctx.body = await transfer.hourlyFlow({ hoursPrevious });
 };
@@ -167,7 +198,7 @@ const getHourlyFlow = async (ctx) => {
 const getTransfersSuccessRate = async (ctx) => {
   const { minutePrevious } = ctx.query;
   const transfer = new Transfer({
-    db: ctx.state.db,
+    db: ctx.state.cache.db,
   });
   ctx.body = await transfer.successRate({ minutePrevious });
 };
@@ -175,7 +206,7 @@ const getTransfersSuccessRate = async (ctx) => {
 const getTransfersAvgResponseTime = async (ctx) => {
   const { minutePrevious } = ctx.query;
   const transfer = new Transfer({
-    db: ctx.state.db,
+    db: ctx.state.cache.db,
   });
   ctx.body = await transfer.avgResponseTime({ minutePrevious });
 };

@@ -41,6 +41,20 @@ class RedisClient extends redisMock.RedisClient {
     return promisify(super.keys.bind(this))(...args);
   }
 
+  // Async iterable that mimics redis v4 scanIterator using the instance's keys()
+  scanIterator(opts: { MATCH?: string; COUNT?: number } = {}) {
+    const self = this;
+    const pattern = opts.MATCH || '*';
+    return {
+      async *[Symbol.asyncIterator]() {
+        const keys = await self.keys(pattern);
+        for (const key of keys) {
+          yield key;
+        }
+      },
+    };
+  }
+
   connect() {}
 }
 

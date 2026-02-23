@@ -7,7 +7,9 @@
  *  ORIGINAL AUTHOR:                                                      *
  *       Yevhen Kyriukha - yevhen.kyriukha@modusbox.com                   *
  **************************************************************************/
+
 import { Knex } from 'knex';
+import stringify from 'safe-stable-stringify';
 
 export interface TransferOpts {
   db: Knex;
@@ -63,9 +65,9 @@ class Transfer {
     return `HTTP ${err.httpStatusCode}`;
   }
 
-  _parseRawTransferRequestBodies(transferRaw) {
+  _parseRawTransferRequestBodies(transferRaw: object) {
     // operate on a copy of incoming object...we dont want side effects
-    const raw = JSON.parse(JSON.stringify(transferRaw));
+    const raw = JSON.parse(stringify(transferRaw));
 
     if (raw.getPartiesRequest && typeof raw.getPartiesRequest.body === 'string') {
       raw.getPartiesRequest.body = JSON.parse(raw.getPartiesRequest.body);
