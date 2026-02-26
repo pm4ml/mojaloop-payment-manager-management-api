@@ -17,6 +17,14 @@ import knex, { Knex } from 'knex';
 import { Logger } from '../logger';
 import Cache from './cache';
 
+const knexConfig = {
+  client: 'better-sqlite3',
+  connection: {
+    filename: ':memory:',
+  },
+  useNullAsDefault: true,
+};
+
 const cachedFulfilledKeys = new Set<string>();
 const cachedPendingKeys = new Set<string>();
 
@@ -224,33 +232,56 @@ async function syncDB({ redisCache, db, logger }: SyncDBOpts) {
   });
 }
 
+interface PruneDBOpts {
+  db: Knex;
+  logger: Logger;
+  transferRetentionHours: number;
+}
+
+async function pruneDB({ db, logger, transferRetentionHours }: PruneDBOpts) {
+  if (transferRetentionHours <= 0) return;
+
+  const log = logger.child({ function: pruneDB.name });
+  const cutoffMs = Date.now() - transferRetentionHours * 3600_000;
+
+  const staleRows: Array<{ id: string; redis_key: string }> = await db('transfer')
+    .select('id', 'redis_key')
+    .where('created_at', '<', cutoffMs);
+
+  if (staleRows.length === 0) return;
+
+  const staleIds = staleRows.map((r) => r.id);
+  await db('transfer').whereIn('id', staleIds).del();
+
+  for (const row of staleRows) {
+    cachedFulfilledKeys.delete(row.redis_key);
+    cachedPendingKeys.delete(row.id);
+  }
+
+  log.info(`pruned transfers older than ${transferRetentionHours}h  [count: ${staleRows.length}]`);
+}
+
 interface MemoryCacheOpts {
   logger: Logger;
   cacheUrl: string;
   manualSync?: boolean;
   syncInterval?: number;
+  transferRetentionHours?: number;
+  pruneIntervalSeconds?: number;
 }
 
 export interface CacheDatabase {
   db: Knex;
   destroy: () => Promise<void>;
   sync?: () => Promise<void>;
+  prune?: () => Promise<void>;
   redisCache: Cache;
 }
 
 export const createMemoryCache = async (config: MemoryCacheOpts): Promise<CacheDatabase> => {
   const log = config.logger.child({ function: createMemoryCache.name });
 
-  const knexConfig = {
-    client: 'better-sqlite3',
-    connection: {
-      filename: ':memory:',
-    },
-    useNullAsDefault: true,
-  };
-
   const db = knex(knexConfig);
-
   Object.defineProperty(db, 'createTransaction', async () => new Promise((resolve) => db.transaction(resolve)));
 
   await db.migrate.latest({ directory: `${__dirname}/migrations` });
@@ -260,12 +291,18 @@ export const createMemoryCache = async (config: MemoryCacheOpts): Promise<CacheD
   log.verbose('connected to redis cache');
 
   let interval: ReturnType<typeof setInterval> | undefined;
+  let pruneInterval: ReturnType<typeof setInterval> | undefined;
   let syncInProgress = false;
+  let pruneInProgress = false;
   let destroyed = false;
 
   const doSyncDB = async () => {
     if (syncInProgress) {
       log.info('syncDB already in progress, skipping');
+      return;
+    }
+    if (pruneInProgress) {
+      log.info('pruneDB in progress, deferring sync');
       return;
     }
     syncInProgress = true;
@@ -282,26 +319,54 @@ export const createMemoryCache = async (config: MemoryCacheOpts): Promise<CacheD
     }
   };
 
+  const doPruneDB = async () => {
+    if (pruneInProgress) {
+      log.info('pruneDB already in progress, skipping');
+      return;
+    }
+    if (syncInProgress) {
+      log.info('syncDB in progress, deferring prune');
+      return;
+    }
+    pruneInProgress = true;
+    try {
+      await pruneDB({
+        db,
+        logger: log,
+        transferRetentionHours: config.transferRetentionHours || 0,
+      });
+    } catch (err) {
+      log.warn('error pruning old transfers: ', err);
+    } finally {
+      pruneInProgress = false;
+    }
+  };
+
   if (!config.manualSync) {
     // Don't block startup on initial sync -- transfer endpoints return empty results
     // until the first sync completes (~30s). The interval timer handles retries.
     doSyncDB();
     interval = setInterval(doSyncDB, (config.syncInterval || 60) * 1e3);
+
+    if (config.transferRetentionHours && config.transferRetentionHours > 0) {
+      const pruneMs = (config.pruneIntervalSeconds ?? 300) * 1e3;
+      pruneInterval = setInterval(doPruneDB, pruneMs);
+    }
   }
 
   return {
     db,
     redisCache,
     sync: config.manualSync ? doSyncDB : undefined,
+    prune: config.manualSync ? doPruneDB : undefined,
     destroy: async () => {
-      // rename to disconnect?
       if (destroyed) return;
       destroyed = true;
       if (interval) clearInterval(interval);
-      // Wait for in-progress sync to drain
+      if (pruneInterval) clearInterval(pruneInterval);
       const MAX_WAIT = 3_000;
       const start = Date.now();
-      while (syncInProgress && Date.now() - start < MAX_WAIT) {
+      while ((syncInProgress || pruneInProgress) && Date.now() - start < MAX_WAIT) {
         await sleep(100);
       }
       /* prettier-ignore */

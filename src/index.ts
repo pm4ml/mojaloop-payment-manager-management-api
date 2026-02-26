@@ -57,8 +57,11 @@ const start = async () => {
   if (config.enableUiApiServer) {
     if (!config.disableUIApiCache) {
       cache = await createMemoryCache({
+        // todo: move all cache configs to a separate field in global config
         cacheUrl: config.cacheUrl,
         syncInterval: config.cacheSyncInterval,
+        transferRetentionHours: config.transferRetentionHours,
+        pruneIntervalSeconds: config.pruneIntervalSeconds,
         logger,
       });
     }
