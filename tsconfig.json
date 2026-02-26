@@ -3,8 +3,7 @@
     "src",
     "src/**/*.json",
     "src/types/*.d.ts",
-    "src/**/*", 
-    "test/**/*"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",

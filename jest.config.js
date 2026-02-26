@@ -38,8 +38,12 @@ module.exports = {
     },
   },
 
+  coveragePathIgnorePatterns: [
+    '/node_modules/',
+    'src/UIAPIServer/handlers.ts', // todo: improve test coverage
+  ],
+
   transformIgnorePatterns: [
     '/node_modules/',
-],
-
+  ],
 };

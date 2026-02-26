@@ -8,34 +8,42 @@
  *       Murthy Kakarlamudi - murthy@modusbox.com                         *
  **************************************************************************/
 
-import Koa from 'koa';
+import Koa, { type Middleware } from 'koa';
+import cors from '@koa/cors';
 import bodyParser from 'koa-bodyparser';
 import { oas } from 'koa-oas3';
-import cors from '@koa/cors';
 
 import http from 'http';
 import path from 'path';
 import assert from 'assert';
 
+import { ConnectionStateMachine, ControlServer, Vault } from '@mojaloop/mcm-client';
 import { Logger, logger as globalLogger } from '../lib/logger';
-
-import { Vault, ControlServer } from '@mojaloop/mcm-client';
-import { MemoryCache } from '../lib/cacheDatabase';
+import { CacheDatabase } from '../lib/cacheDatabase';
 import { IConfig } from '../config';
-import { ConnectionStateMachine } from '@mojaloop/mcm-client';
 import { createHandlers } from './handlers';
 import middlewares from './middlewares';
 
-interface UIAPIServerOptions {
+// todo: add typing
+const openApiConfig = Object.freeze({
+  file: path.join(__dirname, 'api.yaml'),
+  endpoint: '/openapi.json',
+  uiEndpoint: '/',
+});
+
+// todo: rename to UIAPIServerDeps
+export interface UIAPIServerOptions {
   config: IConfig;
   vault: Vault;
-  db: MemoryCache;
+  cache?: CacheDatabase;
   stateMachine: ConnectionStateMachine;
-  port: number;
   controlServer: ControlServer;
+  port: number;
 }
 
 class UIAPIServer {
+  private static _validatorCache: Middleware;
+
   private constructor(
     private server: http.Server,
     private logger: Logger,
@@ -44,26 +52,27 @@ class UIAPIServer {
 
   static async create(opts: UIAPIServerOptions) {
     const api = new Koa();
-    const logger = this._createLogger();
-    let validator;
-    try {
-      validator = await oas({
-        file: path.join(__dirname, 'api.yaml'),
-        endpoint: '/openapi.json',
-        uiEndpoint: '/',
-      });
-    } catch (e) {
-      throw new Error('Error loading API spec. Please validate it with https://editor.swagger.io/');
-    }
+    const logger = UIAPIServer._createLogger();
+    const validator = await UIAPIServer._createValidator(logger);
 
     api.use(async (ctx, next) => {
       ctx.state = {
-        conf: opts.config,
-        db: opts.db,
+        conf: opts.config, // todo: rename conf to config
+        cache: opts.cache,
         vault: opts.vault,
         stateMachine: opts.stateMachine,
         controlServer: opts.controlServer,
       };
+      await next();
+    });
+
+    // guard: return error for transfer endpoints when cache is unavailable
+    api.use(async (ctx, next) => {
+      if (ctx.path.startsWith('/transfer') && !ctx.state.cache) {
+        ctx.status = 500; // or 503?
+        ctx.body = { error: 'Transfer cache is not available' }; // move error message to constants
+        return;
+      }
       await next();
     });
 
@@ -85,7 +94,7 @@ class UIAPIServer {
   async start() {
     assert(this.server);
     await new Promise<void>((resolve) => this.server.listen(this.port, resolve));
-    this.logger.log(`Serving inbound API on port ${this.port}`);
+    this.logger.info(`Serving inbound API on port ${this.port}`);
   }
 
   async stop() {
@@ -93,12 +102,24 @@ class UIAPIServer {
       return;
     }
     await new Promise((resolve) => this.server.close(resolve));
-    // todo: add DB disconnect (knex and redis)
-    this.logger.log('inbound shut down complete');
+    this.logger.info('inbound shut down complete');
   }
 
-  static _createLogger() {
-    return globalLogger.child({ server: 'UIAPIServer' });
+  private static _createLogger() {
+    return globalLogger.child({ server: UIAPIServer.name });
+  }
+
+  private static async _createValidator(logger: Logger): Promise<Middleware> {
+    if (!UIAPIServer._validatorCache) {
+      try {
+        UIAPIServer._validatorCache = await oas(openApiConfig);
+      } catch (e) {
+        const errMessage = 'Error loading API spec. Please validate it with https://editor.swagger.io/ ';
+        logger.error(errMessage, e);
+        throw new Error(errMessage);
+      }
+    }
+    return UIAPIServer._validatorCache;
   }
 }
 

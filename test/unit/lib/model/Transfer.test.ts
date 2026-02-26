@@ -21,13 +21,13 @@ describe('Transfer', () => {
 
   beforeEach(async () => {
     db = await createTestDb();
-    transfer = new Transfer({ db });
+    transfer = new Transfer({ db: db.db });
     MockDate.set('2000-11-22');
   });
 
   afterEach(async () => {
-    await db.redisCache().disconnect();
-    db.destroy();
+    await db.redisCache.disconnect();
+    await db.destroy();
     MockDate.reset();
   });
 
@@ -745,6 +745,43 @@ describe('Transfer', () => {
 
       expect(result).toBe('John');
     });
+  });
+
+  test('/findOneDetail should return null for non-existent transfer', async () => {
+    await db.sync();
+    const result = await transfer.findOneDetail('non-existent-id');
+    expect(result).toBeNull();
+  });
+
+  test('/transfers by id partial match', async () => {
+    const now = Date.now();
+    const createTimestamp = (secondsAdd) => new Date(now + (secondsAdd || 0) * 1e3).toISOString();
+    const knownId = 'known-transfer-abc';
+
+    await addTransferToCache(db, {
+      currency: 'USD',
+      amount: '100',
+      transferId: knownId,
+      currentState: 'succeeded',
+      initiatedTimestamp: createTimestamp(0),
+      completedTimestamp: createTimestamp(10),
+    });
+    await db.sync();
+
+    const result = await transfer.findAll({ id: 'known-transfer' });
+    expect(result.length).toBe(1);
+    expect(result[0].id).toBe(knownId);
+  });
+
+  test('/transfers by status PENDING', async () => {
+    const now = Date.now();
+    await populateByMinutes(now, 2);
+    await db.sync();
+
+    const result = await transfer.findAll({ status: 'PENDING' });
+    // Each minute has 2 pending transfers (payeeResolved), 2 currencies × 2 minutes = 8
+    expect(result.length).toBe(8);
+    result.forEach((item) => expect(item.status).toBe('PENDING'));
   });
 
   describe('_convertToTransferParty', () => {

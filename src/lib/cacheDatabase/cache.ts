@@ -8,9 +8,12 @@
  *       James Bush - james.bush@modusbox.com                             *
  **************************************************************************/
 
+import stringify from 'safe-stable-stringify';
 import * as redis from 'redis';
 import assert from 'assert';
-import { Logger } from '../logger';
+import { Logger, logger } from '../logger';
+
+const SCAN_COUNT = 500; // todo: make configurable, figure out the right value?
 
 /**
  * A shared cache abstraction over a REDIS distributed key/value store
@@ -28,7 +31,7 @@ class Cache {
 
   constructor(opts: CacheOpts) {
     this.url = opts.cacheUrl;
-    this.logger = opts.logger;
+    this.logger = (opts.logger || logger).child({ component: Cache.name });
   }
 
   /**
@@ -80,7 +83,7 @@ class Cache {
     assert(this.client);
     //if we are given an object, turn it into a string
     if (typeof value !== 'string') {
-      value = JSON.stringify(value);
+      value = stringify(value);
       this.logger.debug(`in cache set: ${value}`);
     }
 
@@ -107,6 +110,16 @@ class Cache {
     return this.client.del(key);
   }
 
+  async ping(): Promise<boolean> {
+    if (!this.client) return false;
+    try {
+      await this.client.ping();
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   /**
    * Gets keys from the cache based on the pattern
    *
@@ -114,8 +127,25 @@ class Cache {
    */
   async keys(pattern: string) {
     assert(this.client);
-    return this.client.keys(pattern);
+    // Use SCAN instead of KEYS to avoid blocking the entire Redis server.
+    // - KEYS is O(N) and single-threaded
+    // - SCAN is O(N), cursor-based and yields between batches
+    const keys: string[] = [];
+    for await (const key of this.client.scanIterator({ MATCH: pattern, COUNT: SCAN_COUNT })) {
+      keys.push(key);
+    }
+    return keys;
   }
+
+  /**
+   * Gets keys from the cache based on the pattern (using sync KEYS)
+   *
+   * @param pattern {string} - keys pattern
+   */
+  // async keysSync(pattern: string) {
+  //   assert(this.client);
+  //   return this.client.keys(pattern);
+  // }
 }
 
 export default Cache;
