@@ -47,11 +47,11 @@ describe('Pruning SQLite Tests -->', () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const client = require('redis').createClient({});
     await client.flushdb();
+    await client.quit();
   });
 
   afterEach(async () => {
     if (cacheDb) {
-      await cacheDb.redisCache.disconnect();
       await cacheDb.destroy();
     }
   });
