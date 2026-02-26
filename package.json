@@ -1,6 +1,6 @@
 {
   "name": "mojaloop-payment-manager-management-api-service",
-  "version": "7.2.0-snapshot.0",
+  "version": "7.2.0-infitx.0",
   "private": true,
   "description": "Mojaloop Payment Manager - Management API Service",
   "main": "dist/index.js",
